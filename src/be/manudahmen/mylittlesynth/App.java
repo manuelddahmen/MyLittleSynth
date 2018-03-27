@@ -31,12 +31,18 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class App extends Application {
     private Slider slider;
     private SoundProductionSystem soundProductionSystem;
     private ToggleGroup group;
     private Player player;
     private AudioViewer audioViewer;
+    private Map<Integer, Note> noteMap;
+    private double minDuration = 1000.0;
 
     public static void main(String[] args) {
         launch(args);
@@ -68,12 +74,28 @@ public class App extends Application {
                 "do", "re", "mi", "fa", "sol", "la", "si", "do",
                 "do#", "re#", "--", "fa#", "sol#", "la#", "--", "do#"};
 
+        Canvas canvas = new Canvas();
+
+        canvas.setWidth(640);
+        canvas.setHeight(480);
+        Pane pane1 = new Pane();
+
+        pane1.getChildren().add(canvas);
+
+        audioViewer = new AudioViewer(44100, 2, canvas);
+
+        player = new Player(audioViewer);
+
+
+        noteMap = new HashMap<>();
 
         for (int i = 0; i < buttons.length; i++) {
             buttons[i] = new Button(notes[i]);
             buttons[i].setLayoutX(100 + i * 30);
             buttons[i].setLayoutY(150 + (i >= 8 ? 30 : 0));
             buttons[i].setId("Button" + i);
+            //noteMap.put(getTone(buttons[i]), new Note(minDuration, getTone(buttons[i]),
+            //        SoundProductionSystem.Waveform.SIN, new Enveloppe(minDuration)));
             buttons[i].setOnMousePressed(new EventHandler<MouseEvent>() {
                 @Override
                 public void handle(MouseEvent event) {
@@ -90,7 +112,11 @@ public class App extends Application {
             pane[i < 8 ? 0 : 1].getChildren().add(buttons[i]);
         }
 
+        for (int i = 0; i < 8 * 12; i++) {
+            noteMap.put(i, new Note(minDuration, i,
+                    SoundProductionSystem.Waveform.SIN, new Enveloppe(minDuration)));
 
+        }
         VBox vBox = new VBox();
 
         group = new ToggleGroup();
@@ -139,18 +165,7 @@ public class App extends Application {
         });
         bl.setRight(slider);
 
-        Pane pane1 = new Pane();
 
-        Canvas canvas = new Canvas();
-
-        canvas.setWidth(640);
-        canvas.setHeight(480);
-
-        pane1.getChildren().add(canvas);
-
-        audioViewer = new AudioViewer(44100, 2, canvas);
-
-        player = new Player(audioViewer);
 
         bl.setBottom(pane1);
 
@@ -254,12 +269,21 @@ public class App extends Application {
     }
 
     private void playNote(Object source) {
-        player.addNote(getTone(source), 1.0);
+        Note note = noteMap.get(getTone((Button) source));
+        assert note != null;
+        note.play();
 
     }
 
     private void stopNote(Object source) {
-        player.stopNote(getTone(source));
+        Note note = noteMap.get(getTone((Button) source));
+        assert note != null;
+        note.stop();
+
+        List<Note> notes = player.getCurrentNotes();
+        synchronized (notes) {
+            notes.remove(note);
+        }
     }
 
 }

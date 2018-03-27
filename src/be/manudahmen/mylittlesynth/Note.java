@@ -67,4 +67,13 @@ public class Note {
     public long getPositionNIncr() {
         return positionNIncr++;
     }
+
+    public void play() {
+        getTimer().init();
+        positionNIncr = 0;
+    }
+
+    public void stop() {
+
+    }
 }

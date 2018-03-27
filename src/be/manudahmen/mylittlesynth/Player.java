@@ -130,7 +130,7 @@ public class Player extends Thread {
         this.playing = playing;
     }
 
-    public void addNote(int tone, double minDuration) {
+    public Note addNote(int tone, double minDuration) {
         Note note = new Note(minDuration, tone, waveform, new Enveloppe(minDuration));
 
         Timer timer = new Timer();
@@ -143,6 +143,8 @@ public class Player extends Thread {
                 System.out.println("After added " + getCurrentNotes().size());
             }
         });
+
+        return note;
     }
 
     public void stopNote(int tone) {
