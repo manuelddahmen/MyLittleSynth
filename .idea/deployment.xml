@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData">
+  <component name="PublishConfigData" uploadOnCheckin="f7d9dc65-dd37-45c0-b54b-2365d3180e05">
     <serverData>
       <paths name="ftp.manudahmen.be">
         <serverdata>
@@ -17,5 +17,6 @@
         </serverdata>
       </paths>
     </serverData>
+    <option name="myUploadOnCheckinName" value="ftp.manudahmen.be" />
   </component>
 </project>
