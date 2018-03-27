@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="empty3-64">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/empty3-64.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
