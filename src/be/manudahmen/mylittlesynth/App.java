@@ -25,6 +25,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
@@ -86,7 +87,22 @@ public class App extends Application {
 
         player = new Player(audioViewer);
 
+        slider = new Slider();
+        slider.setMin(1);
+        slider.setMax(10);
+        slider.setValue(4);
+        slider.setMinorTickCount(1);
+        slider.setAccessibleText("Octaves");
+        slider.setOnMouseDragReleased(new EventHandler<MouseDragEvent>() {
+            @Override
+            public void handle(MouseDragEvent event) {
+                int value = (int) ((Slider) event.getSource()).getValue();
+                player.setOctave(value);
+                System.out.println(value);
 
+            }
+        });
+        //player.setOctave((int)slider.getValue());
         noteMap = new HashMap<>();
 
         for (int i = 0; i < buttons.length; i++) {
@@ -96,6 +112,21 @@ public class App extends Application {
             buttons[i].setId("Button" + i);
             //noteMap.put(getTone(buttons[i]), new Note(minDuration, getTone(buttons[i]),
             //        SoundProductionSystem.Waveform.SIN, new Enveloppe(minDuration)));
+
+
+            pane[i < 8 ? 0 : 1].getChildren().add(buttons[i]);
+        }
+
+        for (int i = 0; i < 8 * 12; i++) {
+            noteMap.put(i,
+                    new Note(minDuration, i,
+                            SoundProductionSystem.Waveform.SIN,
+                            new Enveloppe(minDuration)));
+
+        }
+
+
+        for (int i = 0; i < buttons.length; i++) {
             buttons[i].setOnMousePressed(new EventHandler<MouseEvent>() {
                 @Override
                 public void handle(MouseEvent event) {
@@ -108,15 +139,8 @@ public class App extends Application {
                     stopNote(event.getSource());
                 }
             });
-
-            pane[i < 8 ? 0 : 1].getChildren().add(buttons[i]);
         }
 
-        for (int i = 0; i < 8 * 12; i++) {
-            noteMap.put(i, new Note(minDuration, i,
-                    SoundProductionSystem.Waveform.SIN, new Enveloppe(minDuration)));
-
-        }
         VBox vBox = new VBox();
 
         group = new ToggleGroup();
@@ -150,19 +174,7 @@ public class App extends Application {
         bl.setLeft(vBox);
 
 
-        slider = new Slider();
-        slider.setMin(1);
-        slider.setMin(10);
-        slider.setValue(4);
-        slider.setMinorTickCount(1);
-        slider.setAccessibleText("Octaves");
-        slider.setOnScroll(new EventHandler<ScrollEvent>() {
-            @Override
-            public void handle(ScrollEvent event) {
-                double value = ((Slider) event.getSource()).getValue();
-                player.setOctave((int) value);
-            }
-        });
+
         bl.setRight(slider);
 
 
@@ -239,7 +251,7 @@ public class App extends Application {
             }
         }
 
-        int octave = player.getOctave();
+        int octave = (int) slider.getValue();//player.getOctave();
         String noteAnglaise = note + octave + diese;
         System.out.println(noteAnglaise);
         return soundProductionSystem.equiv(noteAnglaise);
@@ -269,14 +281,18 @@ public class App extends Application {
     }
 
     private void playNote(Object source) {
-        Note note = noteMap.get(getTone((Button) source));
+        System.out.println(getTone(source) + "  "
+                + ((Button) source).getText() + "  "
+                + (int) slider.getValue());
+        Note note = noteMap.get(getTone(source));
         assert note != null;
+        player.addNote(note);
         note.play();
 
     }
 
     private void stopNote(Object source) {
-        Note note = noteMap.get(getTone((Button) source));
+        Note note = noteMap.get(getTone(source));
         assert note != null;
         note.stop();
 

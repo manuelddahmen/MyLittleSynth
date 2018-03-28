@@ -30,7 +30,7 @@ public class Player extends Thread {
     private SoundProductionSystem soundProductionSystem;
     private Player that;
     private AudioViewer audioViewer;
-    private int octave;
+    private int octave = 4;
     private String form;
     private SoundProductionSystem.Waveform waveform = SoundProductionSystem.Waveform.SIN;
 

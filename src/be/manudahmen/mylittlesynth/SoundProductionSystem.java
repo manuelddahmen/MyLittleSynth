@@ -288,9 +288,21 @@ public class SoundProductionSystem {
                 break;
         }
 
-        tone += ((Integer.parseInt("" + noteAnglaise.charAt(1))) - 4) * 12;
 
-        tone += noteAnglaise.length() >= 3 ? (noteAnglaise.charAt(2) == '#' ? +1 : noteAnglaise.charAt(2) == 'b' ? -1 : 0) : 0;
+        String toneStr = "";
+        if (Character.isDigit(noteAnglaise.charAt(1)))
+            toneStr += "" + noteAnglaise.charAt(1);
+        if (noteAnglaise.length() > 2 &&
+                Character.isDigit(noteAnglaise.charAt(2)))
+            toneStr += "" + noteAnglaise.charAt(2);
+
+
+        tone += ((Integer.parseInt(toneStr) * 12
+                - 4))
+        ;
+
+        tone += (noteAnglaise.charAt(noteAnglaise.length() - 1) == '#') ? 0.5 : 0;
+        tone += (noteAnglaise.charAt(noteAnglaise.length() - 1) == 'b') ? 0.5 : 0;
 
         return tone;
     }
