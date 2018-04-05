@@ -23,6 +23,34 @@ import javafx.scene.paint.Color;
 import java.util.*;
 
 public class AudioViewer extends Thread {
+    private WaitForData waitForData = new WaitForData();
+
+    class WaitForData extends Thread {
+        private LinkedList<Double> doubles = null;
+
+        public WaitForData() {
+            doubles = values;
+        }
+
+        public void run() {
+            while (true) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public LinkedList<Double> getValues() {
+            return doubles;
+        }
+
+        public void addDouble(Double value) {
+            this.doubles.add(value);
+        }
+
+    }
     private final int channels;
     private final float sampleRate;
     private final Canvas canvas;
@@ -34,13 +62,15 @@ public class AudioViewer extends Thread {
     private boolean running;
 
     public AudioViewer(float sampleRate, int channels, Canvas canvas) {
+        super();
         this.sampleRate = sampleRate;
         this.channels = channels;
         this.canvas = canvas;
-        oldValues = new double[]{0.0, 0.0};
+        oldValues = new double[channels];
         running = true;
         values = new LinkedList<>();
-
+        waitForData = new WaitForData();
+        waitForData.start();
     }
 
     public void run() {
@@ -79,8 +109,8 @@ public class AudioViewer extends Thread {
         }
     }
 
-    public void sendDouble(Double values) {
-        this.values.add(values);
+    public void sendDouble(Double value) {
+        waitForData.addDouble(value);
     }
 
     public boolean isRunning() {

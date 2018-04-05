@@ -35,13 +35,14 @@ public class Player extends Thread {
     private SoundProductionSystem.Waveform waveform = SoundProductionSystem.Waveform.SIN;
 
     public Player(AudioViewer audioViewer) {
+        super();
         soundProductionSystem = new SoundProductionSystem();
         currentNotes = Collections.synchronizedList(new ArrayList<>());
         timer = new Timer();
         timer.init();
-        playing = true;
         this.audioViewer = audioViewer;
         that = this;
+        playing = true;
     }
 
     public void addNote(Note note) {
@@ -57,6 +58,7 @@ public class Player extends Thread {
     Short a = 0;
 
     public void playCurrentNotes() {
+        total = 0.0;
         getCurrentNotes().forEach(note -> {
                     if (!note.isFinish()) {
                         double noteTime = note.getTimer().getTimeElapsed();
@@ -100,8 +102,8 @@ public class Player extends Thread {
 
             playBuffer(amplitude);
         } else {
-            audioViewer.sendDouble(0.0);
-            audioViewer.sendDouble(0.0);
+            //audioViewer.sendDouble(0.0);
+            //audioViewer.sendDouble(0.0);
         }
     }
 
