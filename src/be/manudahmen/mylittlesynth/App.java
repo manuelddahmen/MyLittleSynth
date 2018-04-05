@@ -83,9 +83,6 @@ public class App extends Application {
 
         pane1.getChildren().add(canvas);
 
-        audioViewer = new AudioViewer(44100, 2, canvas);
-
-        player = new Player(audioViewer);
 
         slider = new Slider();
         slider.setMin(1);
@@ -218,14 +215,17 @@ public class App extends Application {
 
         scene.setRoot(bl);
 
-        audioViewer.start();
-        player.start();
 
+        audioViewer = new AudioViewer(44100, 2, canvas);
+
+        player = new Player(audioViewer);
         primaryStage.setTitle("Plants 2.0 synth");
         primaryStage.setScene(scene);
-        primaryStage.setFullScreen(true);
-        primaryStage.setMaximized(true);
+        //primaryStage.setFullScreen(true);
+        //primaryStage.setMaximized(true);
         primaryStage.show();
+        audioViewer.start();
+        player.start();
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

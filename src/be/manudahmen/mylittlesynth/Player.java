@@ -89,15 +89,20 @@ public class Player extends Thread {
         );
         total /= Math.sqrt(currentNotes.size() > 0 ? currentNotes.size() : 1);
 
-        audioViewer.sendDouble(new Double[]
-                    {
-                            total, total
-                    }
-            );
 
-        short amplitude = (short) total;
+        if (getCurrentNotes().size() > 0) {
 
-        playBuffer(amplitude);
+            audioViewer.sendDouble(total);
+            audioViewer.sendDouble(total);
+
+            short amplitude = (short) total;
+
+
+            playBuffer(amplitude);
+        } else {
+            audioViewer.sendDouble(0.0);
+            audioViewer.sendDouble(0.0);
+        }
     }
 
     public void playBuffer(short amplitude) {

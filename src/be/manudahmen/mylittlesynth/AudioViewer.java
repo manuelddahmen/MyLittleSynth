@@ -20,8 +20,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class AudioViewer extends Thread {
     private final int channels;
@@ -31,57 +30,56 @@ public class AudioViewer extends Thread {
     private double min = 0;
     private double max = Short.MAX_VALUE;
     private double position;
-    private List<Double[]> values;
+    private LinkedList<Double> values;
     private boolean running;
 
     public AudioViewer(float sampleRate, int channels, Canvas canvas) {
         this.sampleRate = sampleRate;
         this.channels = channels;
         this.canvas = canvas;
-        oldValues = new double[channels];
+        oldValues = new double[]{0.0, 0.0};
         running = true;
-        values = new ArrayList<>();
+        values = new LinkedList<>();
+
     }
 
     public void run() {
-        GraphicsContext context2D = canvas.getGraphicsContext2D();
-        context2D.setFill(Color.BLACK);
-        context2D.setStroke(Color.BLUE);
-        context2D.setLineWidth(2.0);
-        context2D.fill();
 
         while (isRunning()) {
-            if (values.size() > 0) {
-
-                Double[] newValues = values.get(0);
-                values.remove(0);
-
-
+            GraphicsContext context2D = canvas.getGraphicsContext2D();
+            context2D.setFill(Color.BLACK);
+            context2D.setStroke(Color.BLUE);
+            context2D.setLineWidth(2.0);
+            if (values.size() >= channels) {
                 double maxHeight = canvas.getHeight() / 2;
                 double pos0Y = maxHeight;
-
+                double[] toDraw;
                 for (int i = 0; i < channels; i++) {
-                    double[] toDraw = new double[]
+                    double first = values.removeFirst();
+                    toDraw = new double[]
                             {
                                     position,
                                     oldValues[i] / max * maxHeight + pos0Y,
                                     position + 1,
-                                    newValues[i] / max * maxHeight + pos0Y
+                                    first / max * maxHeight + pos0Y
                             };
                     context2D.strokeLine(toDraw[0], toDraw[1], toDraw[2], toDraw[3]);
+                    oldValues[i] = first;
+
                 }
+
                 position++;
 
                 if (position >= canvas.getWidth()) {
                     position = 0;
-                    oldValues = new double[channels];
-                    System.out.println("+");
+                    oldValues = new double[]{0.0, 0.0};
+                    //System.out.println("+");
                 }
             }
         }
     }
 
-    public void sendDouble(Double[] values) {
+    public void sendDouble(Double values) {
         this.values.add(values);
     }
 
