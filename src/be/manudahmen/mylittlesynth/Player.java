@@ -89,13 +89,11 @@ public class Player extends Thread {
         );
         total /= Math.sqrt(currentNotes.size() > 0 ? currentNotes.size() : 1);
 
-        if (audioViewer != null) {
-            audioViewer.sendDouble(new Double[]
+        audioViewer.sendDouble(new Double[]
                     {
                             total, total
                     }
             );
-        }
 
         short amplitude = (short) total;
 
@@ -155,7 +153,7 @@ public class Player extends Thread {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            while (!note.isFinish())
+                            //while (!note.isFinish())
                                 ;
                             getCurrentNotes().remove(note);
                             System.out.println("After removed " + getCurrentNotes().size());
@@ -184,5 +182,10 @@ public class Player extends Thread {
 
     public void setWaveform(SoundProductionSystem.Waveform waveform) {
         this.waveform = waveform;
+    }
+
+    public SoundProductionSystem.Waveform getForm() {
+        return waveform;
+
     }
 }

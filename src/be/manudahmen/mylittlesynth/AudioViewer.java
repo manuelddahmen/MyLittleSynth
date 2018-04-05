@@ -44,6 +44,11 @@ public class AudioViewer extends Thread {
     }
 
     public void run() {
+        GraphicsContext context2D = canvas.getGraphicsContext2D();
+        context2D.setFill(Color.BLACK);
+        context2D.setStroke(Color.BLUE);
+        context2D.setLineWidth(2.0);
+        context2D.fill();
 
         while (isRunning()) {
             if (values.size() > 0) {
@@ -52,7 +57,6 @@ public class AudioViewer extends Thread {
                 values.remove(0);
 
 
-                GraphicsContext graphicsContext2D = canvas.getGraphicsContext2D();
                 double maxHeight = canvas.getHeight() / 2;
                 double pos0Y = maxHeight;
 
@@ -61,22 +65,17 @@ public class AudioViewer extends Thread {
                             {
                                     position,
                                     oldValues[i] / max * maxHeight + pos0Y,
-                                    position,
+                                    position + 1,
                                     newValues[i] / max * maxHeight + pos0Y
                             };
-                    double colorRatio = Math.random();
-                    graphicsContext2D.setStroke(Color.color(colorRatio, colorRatio, colorRatio));
-                    graphicsContext2D.strokeLine(toDraw[0], toDraw[1],
-                            toDraw[2], toDraw[3]);
+                    context2D.strokeLine(toDraw[0], toDraw[1], toDraw[2], toDraw[3]);
                 }
                 position++;
 
                 if (position >= canvas.getWidth()) {
-                    position = canvas.getHeight() / 2.0;
+                    position = 0;
                     oldValues = new double[channels];
-                    GraphicsContext graphicsContext2D1 = canvas.getGraphicsContext2D();
-                    graphicsContext2D1.setFill(Color.WHITE);
-                    graphicsContext2D1.fill();
+                    System.out.println("+");
                 }
             }
         }
