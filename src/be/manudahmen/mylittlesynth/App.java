@@ -67,10 +67,11 @@ public class App extends Application {
         pane[0] = new HBox();
         pane[1] = new HBox();
 
-        BorderPane bl = new BorderPane();
+        BorderPane bp = new BorderPane();
+        BorderPane bp2 = new BorderPane();
+        bp.setTop(pane[0]);
+        bp.setCenter(pane[1]);
 
-        bl.setTop(pane[0]);
-        bl.setCenter(pane[1]);
 
         String[] notes = new String[]{
                 "do", "re", "mi", "fa", "sol", "la", "si", "do",
@@ -204,16 +205,18 @@ public class App extends Application {
         vBox.getChildren().add(radioButton);
 
 
-        bl.setLeft(vBox);
+        bp.setLeft(vBox);
 
 
-        bl.setRight(slider);
+        bp.setRight(slider);
 
 
-        bl.setBottom(pane1);
+        bp.setBottom(pane1);
 
+        bp2.setTop(bp);
+        bp2.setCenter(canvas);
 
-        scene.setRoot(bl);
+        scene.setRoot(bp2);
 
 
         audioViewer = new AudioViewer(44100, 2, canvas);

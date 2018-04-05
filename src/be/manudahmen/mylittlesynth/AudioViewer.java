@@ -74,13 +74,13 @@ public class AudioViewer extends Thread {
     }
 
     public void run() {
-
+        drawBorder(canvas.getGraphicsContext2D(), Color.RED);
         while (isRunning()) {
-            GraphicsContext context2D = canvas.getGraphicsContext2D();
-            context2D.setFill(Color.BLACK);
-            context2D.setStroke(Color.BLUE);
-            context2D.setLineWidth(2.0);
             if (values.size() >= channels) {
+                GraphicsContext context2D = canvas.getGraphicsContext2D();
+                context2D.setFill(Color.BLACK);
+                context2D.setStroke(Color.BLUE);
+                context2D.setLineWidth(2.0);
                 double maxHeight = canvas.getHeight() / 2;
                 double pos0Y = maxHeight;
                 double[] toDraw;
@@ -104,9 +104,22 @@ public class AudioViewer extends Thread {
                     position = 0;
                     oldValues = new double[]{0.0, 0.0};
                     //System.out.println("+");
+
                 }
             }
         }
+    }
+
+    private void drawBorder(GraphicsContext g, Color selectedColor) {
+        final double canvasWidth = g.getCanvas().getWidth();
+        final double canvasHeight = g.getCanvas().getHeight();
+
+        g.setStroke(selectedColor);
+        g.setLineWidth(4);
+        g.strokeRect(0, 0, canvasWidth, canvasHeight);
+
+        //sets the color back to the currently selected ColorPicker color
+
     }
 
     public void sendDouble(Double value) {
