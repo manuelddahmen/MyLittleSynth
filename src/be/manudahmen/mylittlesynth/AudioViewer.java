@@ -20,13 +20,13 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import java.util.*;
+import java.util.LinkedList;
 
 public class AudioViewer extends Thread {
     private WaitForData waitForData = new WaitForData();
 
     class WaitForData extends Thread {
-        private LinkedList<Double> doubles = null;
+        private final LinkedList<Double> doubles;
 
         public WaitForData() {
             doubles = values;
@@ -42,7 +42,7 @@ public class AudioViewer extends Thread {
             }
         }
 
-        public LinkedList<Double> getValues() {
+        public LinkedList<Double> getDoubles() {
             return doubles;
         }
 
@@ -51,6 +51,7 @@ public class AudioViewer extends Thread {
         }
 
     }
+
     private final int channels;
     private final float sampleRate;
     private final Canvas canvas;
@@ -58,11 +59,10 @@ public class AudioViewer extends Thread {
     private double min = 0;
     private double max = Short.MAX_VALUE;
     private double position;
-    private LinkedList<Double> values;
+    private final LinkedList<Double> values;
     private boolean running;
 
     public AudioViewer(float sampleRate, int channels, Canvas canvas) {
-        super();
         this.sampleRate = sampleRate;
         this.channels = channels;
         this.canvas = canvas;
@@ -74,28 +74,34 @@ public class AudioViewer extends Thread {
     }
 
     public void run() {
+        GraphicsContext context2D = canvas.getGraphicsContext2D();
         drawBorder(canvas.getGraphicsContext2D(), Color.RED);
         while (isRunning()) {
-            if (values.size() >= channels) {
-                GraphicsContext context2D = canvas.getGraphicsContext2D();
+            LinkedList<Double> doubles2 = waitForData.getDoubles();
+            if (doubles2.size() >= channels) {
+                context2D = canvas.getGraphicsContext2D();
                 context2D.setFill(Color.BLACK);
                 context2D.setStroke(Color.BLUE);
                 context2D.setLineWidth(2.0);
                 double maxHeight = canvas.getHeight() / 2;
-                double pos0Y = maxHeight;
                 double[] toDraw;
+                context2D.strokeLine(0, maxHeight, canvas.getWidth(), maxHeight);
                 for (int i = 0; i < channels; i++) {
-                    double first = values.removeFirst();
-                    toDraw = new double[]
-                            {
-                                    position,
-                                    oldValues[i] / max * maxHeight + pos0Y,
-                                    position + 1,
-                                    first / max * maxHeight + pos0Y
-                            };
-                    context2D.strokeLine(toDraw[0], toDraw[1], toDraw[2], toDraw[3]);
-                    oldValues[i] = first;
-
+                    try {
+                        double first = doubles2.removeFirst();
+                        toDraw = new double[]
+                                {
+                                        position,
+                                        (oldValues[i] / max + 1) * maxHeight,
+                                        position + 1,
+                                        (first / max + 1) * maxHeight
+                                };
+                        context2D.strokeLine(toDraw[0], toDraw[1], toDraw[2], toDraw[3]);
+                        oldValues[i] = first;
+                        System.out.println(first);
+                    } catch (Exception ex) {
+                        System.out.println("No such Element");
+                    }
                 }
 
                 position++;

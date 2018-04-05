@@ -45,6 +45,7 @@ public class App extends Application {
     private AudioViewer audioViewer;
     private Map<Integer, Note> noteMap;
     private double minDuration = 1000.0;
+    private Slider volume;
 
     public static void main(String[] args) {
         launch(args);
@@ -217,19 +218,27 @@ public class App extends Application {
         bp2.setCenter(canvas);
 
         scene.setRoot(bp2);
-
-
         audioViewer = new AudioViewer(44100, 2, canvas);
-
         player = new Player(audioViewer);
-        primaryStage.setTitle("Plants 2.0 synth");
-        primaryStage.setScene(scene);
-        //primaryStage.setFullScreen(true);
-        //primaryStage.setMaximized(true);
-        primaryStage.show();
+
+        bp2.setBottom(volume = new Slider());
+        volume.setMin(0);
+        volume.setMax(100);
+        volume.setValue(100.0);
+        volume.setAccessibleText("Volume:" + volume.getValue());
+        volume.setOnMouseDragReleased(new EventHandler<MouseDragEvent>() {
+            @Override
+            public void handle(MouseDragEvent event) {
+                player.setVolume(volume.getValue());
+            }
+        });
         audioViewer.start();
+        player.setVolume(100);
         player.start();
 
+        primaryStage.setTitle("Plants 2.0 synth");
+        primaryStage.setScene(scene);
+        primaryStage.show();
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {

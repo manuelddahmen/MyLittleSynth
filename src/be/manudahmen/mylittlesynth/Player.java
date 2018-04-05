@@ -33,6 +33,7 @@ public class Player extends Thread {
     private int octave = 4;
     private String form;
     private SoundProductionSystem.Waveform waveform = SoundProductionSystem.Waveform.SIN;
+    private double volume = 100;
 
     public Player(AudioViewer audioViewer) {
         super();
@@ -91,13 +92,12 @@ public class Player extends Thread {
         );
         total /= Math.sqrt(currentNotes.size() > 0 ? currentNotes.size() : 1);
 
-
         if (getCurrentNotes().size() > 0) {
 
             audioViewer.sendDouble(total);
             audioViewer.sendDouble(total);
 
-            short amplitude = (short) total;
+            short amplitude = (short) (total * volume / 100.0);
 
 
             playBuffer(amplitude);
@@ -194,5 +194,9 @@ public class Player extends Thread {
     public SoundProductionSystem.Waveform getForm() {
         return waveform;
 
+    }
+
+    public void setVolume(double value) {
+        this.volume = value;
     }
 }
