@@ -38,7 +38,7 @@ public class Timer {
 
         timeElapsed = (timeInter - timeElapsedSystem);
 
-        return timeElapsed / 10E9;
+        return timeElapsed / 1E9;
     }
 
 

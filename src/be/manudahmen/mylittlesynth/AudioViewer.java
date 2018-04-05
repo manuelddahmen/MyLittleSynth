@@ -33,13 +33,7 @@ public class AudioViewer extends Thread {
         }
 
         public void run() {
-            while (true) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+
         }
 
         public LinkedList<Double> getDoubles() {
@@ -79,7 +73,6 @@ public class AudioViewer extends Thread {
         while (isRunning()) {
             LinkedList<Double> doubles2 = waitForData.getDoubles();
             if (doubles2.size() >= channels) {
-                context2D = canvas.getGraphicsContext2D();
                 context2D.setFill(Color.BLACK);
                 context2D.setStroke(Color.BLUE);
                 context2D.setLineWidth(2.0);
@@ -109,7 +102,7 @@ public class AudioViewer extends Thread {
                 if (position >= canvas.getWidth()) {
                     position = 0;
                     oldValues = new double[]{0.0, 0.0};
-                    //System.out.println("+");
+                    System.out.println("+");
 
                 }
             }

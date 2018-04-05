@@ -44,7 +44,7 @@ public class App extends Application {
     private Player player;
     private AudioViewer audioViewer;
     private Map<Integer, Note> noteMap;
-    private double minDuration = 1000.0;
+    private double minDuration = 2000.0;
     private Slider volume;
 
     public static void main(String[] args) {
@@ -87,19 +87,20 @@ public class App extends Application {
 
 
         slider = new Slider();
-        slider.setMin(1);
-        slider.setMax(10);
+        slider.setMin(0);
+        slider.setMax(12);
         slider.setValue(4);
         slider.setMinorTickCount(1);
         slider.setAccessibleText("Octaves");
-        slider.setOnMouseDragReleased(new EventHandler<MouseDragEvent>() {
+        slider.setOnMouseReleased(new EventHandler<MouseEvent>() {
             @Override
-            public void handle(MouseDragEvent event) {
+            public void handle(MouseEvent event) {
                 int value = (int) ((Slider) event.getSource()).getValue();
                 player.setOctave(value);
-                System.out.println(value);
+                System.out.println("Octave: " + value);
 
             }
+
         });
         //player.setOctave((int)slider.getValue());
         noteMap = new HashMap<>();
@@ -218,23 +219,22 @@ public class App extends Application {
         bp2.setCenter(canvas);
 
         scene.setRoot(bp2);
-        audioViewer = new AudioViewer(44100, 2, canvas);
-        player = new Player(audioViewer);
 
         bp2.setBottom(volume = new Slider());
         volume.setMin(0);
         volume.setMax(100);
         volume.setValue(100.0);
         volume.setAccessibleText("Volume:" + volume.getValue());
-        volume.setOnMouseDragReleased(new EventHandler<MouseDragEvent>() {
+        volume.setOnMouseReleased(new EventHandler<MouseEvent>() {
+
             @Override
-            public void handle(MouseDragEvent event) {
+            public void handle(MouseEvent event) {
                 player.setVolume(volume.getValue());
+                System.out.println("Volume du player: " + player.getVolume());
+
             }
+
         });
-        audioViewer.start();
-        player.setVolume(100);
-        player.start();
 
         primaryStage.setTitle("Plants 2.0 synth");
         primaryStage.setScene(scene);
@@ -247,6 +247,11 @@ public class App extends Application {
                 System.exit(0);
             }
         });
+        audioViewer = new AudioViewer(44100, 2, canvas);
+        player = new Player(audioViewer);
+        audioViewer.start();
+        player.setVolume(100);
+        player.start();
 
     }
 
@@ -328,10 +333,11 @@ public class App extends Application {
     }
 
     private void playNote(Object source) {
-        System.out.println(getTone(source) + "  "
+        System.out.println("Tone:  " + getTone(source) + "  Note :"
                 + ((Button) source).getText() + "  "
-                + (int) slider.getValue());
+                + "Octave: " + (int) slider.getValue());
         Note note = noteMap.get(getTone(source));
+        assert note != null;
         note.setWaveform(player.getForm());
         assert note != null;
         Platform.runLater(new Runnable() {
@@ -348,6 +354,7 @@ public class App extends Application {
     private void stopNote(Object source) {
         Note note = noteMap.get(getTone(source));
         assert note != null;
+        System.out.println(note.getTimer().getTimeElapsed());
         note.stop();
 
         List<Note> notes = player.getCurrentNotes();

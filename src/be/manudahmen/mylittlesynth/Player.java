@@ -98,7 +98,7 @@ public class Player extends Thread {
             audioViewer.sendDouble(total);
 
             short amplitude = (short) (total * volume / 100.0);
-
+            //System.out.println(amplitude);
 
             playBuffer(amplitude);
         } else {
@@ -198,5 +198,9 @@ public class Player extends Thread {
 
     public void setVolume(double value) {
         this.volume = value;
+    }
+
+    public double getVolume() {
+        return volume;
     }
 }
