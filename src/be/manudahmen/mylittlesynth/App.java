@@ -129,32 +129,10 @@ public class App extends Application {
 
 
         for (int i = 0; i < buttons.length; i++) {
-            buttons[i].setOnMousePressed(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    playNote(event.getSource());
-                }
-            });
-            buttons[i].setOnMouseReleased(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    stopNote(event.getSource());
-                }
-            });
-            buttons[i].setOnTouchPressed(new EventHandler<TouchEvent>() {
-                @Override
-                public void handle(TouchEvent event) {
-
-                    playNote(event.getSource());
-
-                }
-            });
-            buttons[i].setOnTouchReleased(new EventHandler<TouchEvent>() {
-                @Override
-                public void handle(TouchEvent event) {
-                    stopNote(event.getSource());
-                }
-            });
+            buttons[i].setOnMousePressed(event -> playNote(event.getSource()));
+            buttons[i].setOnMouseReleased(event -> stopNote(event.getSource()));
+            buttons[i].setOnTouchPressed(event -> playNote(event.getSource()));
+            buttons[i].setOnTouchReleased(event -> stopNote(event.getSource()));
         }
 
         VBox vBox = new VBox();
@@ -165,45 +143,33 @@ public class App extends Application {
         radioButton.setText("Sine");
         radioButton.setToggleGroup(group);
         radioButton.setSelected(true);
-        radioButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String value = ((RadioButton) event.getSource()).getText();
-                player.setForm(value);
-            }
+        radioButton.setOnAction(event -> {
+            String value = ((RadioButton) event.getSource()).getText();
+            player.setForm(value);
         });
         vBox.getChildren().add(radioButton);
         radioButton = new RadioButton();
         radioButton.setText("Square");
         radioButton.setToggleGroup(group);
-        radioButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String value = ((RadioButton) event.getSource()).getText();
-                player.setForm(value);
-            }
+        radioButton.setOnAction(event -> {
+            String value = ((RadioButton) event.getSource()).getText();
+            player.setForm(value);
         });
         vBox.getChildren().add(radioButton);
         radioButton = new RadioButton();
         radioButton.setText("Triangle");
         radioButton.setToggleGroup(group);
-        radioButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String value = ((RadioButton) event.getSource()).getText();
-                player.setForm(value);
-            }
+        radioButton.setOnAction(event -> {
+            String value = ((RadioButton) event.getSource()).getText();
+            player.setForm(value);
         });
         vBox.getChildren().add(radioButton);
         radioButton = new RadioButton();
         radioButton.setText("Sawtooth");
         radioButton.setToggleGroup(group);
-        radioButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String value = ((RadioButton) event.getSource()).getText();
-                player.setForm(value);
-            }
+        radioButton.setOnAction(event -> {
+            String value = ((RadioButton) event.getSource()).getText();
+            player.setForm(value);
         });
         vBox.getChildren().add(radioButton);
 
@@ -224,23 +190,19 @@ public class App extends Application {
         titledPanes[0] = new TitledPane();
 
 
-        titledPanes[0].setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                for (int i = 0; i < buttons.length; i++) {
-                    if (event.getCode().equals(keycode[i])) {
-                        playNote(buttons[i]);
-                    }
+        titledPanes[0].setOnKeyPressed(event -> {
+            for (int i = 0; i < buttons.length; i++) {
+                if (event.getCode().equals(keycode[i])) {
+                    playNote(buttons[i]);
+                    System.out.println("playNote");
                 }
             }
         });
-        titledPanes[0].setOnKeyReleased(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                for (int i = 0; i < buttons.length; i++) {
-                    if (event.getCode().equals(keycode[i])) {
-                        stopNote(buttons[i]);
-                    }
+        titledPanes[0].setOnKeyReleased(event -> {
+            for (int i = 0; i < buttons.length; i++) {
+                if (event.getCode().equals(keycode[i])) {
+                    stopNote(buttons[i]);
+                    System.out.println("stopNote");
                 }
             }
         });
