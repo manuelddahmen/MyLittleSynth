@@ -15,6 +15,7 @@
  */
 package be.manudahmen.mylittlesynth;
 
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -22,16 +23,12 @@ import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Button;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.Slider;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.input.MouseDragEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TouchEvent;
+import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -125,6 +122,10 @@ public class App extends Application {
                             new Enveloppe(minDuration)));
 
         }
+        KeyCode[] keycode = new KeyCode[]{KeyCode.A, KeyCode.Z, KeyCode.E,
+                KeyCode.R, KeyCode.T, KeyCode.Y, KeyCode.U, KeyCode.I,
+
+                KeyCode.Q, KeyCode.S, KeyCode.D, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.J, KeyCode.K};
 
 
         for (int i = 0; i < buttons.length; i++) {
@@ -218,7 +219,46 @@ public class App extends Application {
         bp2.setTop(bp);
         bp2.setCenter(canvas);
 
-        scene.setRoot(bp2);
+        TitledPane[] titledPanes = new TitledPane[2];
+
+        titledPanes[0] = new TitledPane();
+
+
+        titledPanes[0].setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                for (int i = 0; i < buttons.length; i++) {
+                    if (event.getCode().equals(keycode[i])) {
+                        playNote(buttons[i]);
+                    }
+                }
+            }
+        });
+        titledPanes[0].setOnKeyReleased(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                for (int i = 0; i < buttons.length; i++) {
+                    if (event.getCode().equals(keycode[i])) {
+                        stopNote(buttons[i]);
+                    }
+                }
+            }
+        });
+
+
+        titledPanes[0].setContent(bp2);
+
+        titledPanes[1] = new TitledPane();
+        titledPanes[1].setContent(new NoteGrid());
+
+        Accordion accordion = new Accordion();
+
+        accordion.getPanes().addAll(titledPanes);
+
+        scene.setRoot(accordion);
+
+        accordion.setExpandedPane(titledPanes[0]);
+
 
         bp2.setBottom(volume = new Slider());
         volume.setMin(0);
@@ -238,6 +278,8 @@ public class App extends Application {
 
         primaryStage.setTitle("Plants 2.0 synth");
         primaryStage.setScene(scene);
+
+
         primaryStage.show();
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
@@ -253,8 +295,28 @@ public class App extends Application {
         player.setVolume(100);
         player.start();
 
+
+        for (int i = 0; i < buttons.length; i++) {
+            Button b = buttons[i];
+            b.getScene().getAccelerators().put(new KeyCodeCombination(keycode[i]), () -> fireButton(b));
+        }
+
     }
 
+    // fires a button from code, providing visual feedback that the button is firing.
+    private void fireButton(final Button button) {
+        button.arm();
+        PauseTransition pt = new PauseTransition(Duration.millis(300));
+        pt.setOnFinished(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                button.fire();
+
+                button.disarm();
+            }
+        });
+        pt.play();
+    }
     public int getTone(Object source) {
         String id = ((Button) source).getText();
         String note;
