@@ -295,12 +295,12 @@ public class App extends Application {
         player.setVolume(100);
         player.start();
 
-
+/*
         for (int i = 0; i < buttons.length; i++) {
             Button b = buttons[i];
             b.getScene().getAccelerators().put(new KeyCodeCombination(keycode[i]), () -> fireButton(b));
         }
-
+*/
     }
 
     // fires a button from code, providing visual feedback that the button is firing.
@@ -423,6 +423,7 @@ public class App extends Application {
         synchronized (notes) {
             notes.remove(note);
         }
+        System.out.println("Key pressed: " + notes.size());
     }
 
 }
