@@ -50,10 +50,6 @@ public class Player extends Thread {
         currentNotes.add(note);
     }
 
-    public float mixCurrentNotes() {
-        throw new UnsupportedOperationException("Note implemented yet");
-    }
-
     double total = 0;
     double facteurAmpl = 0;
     Short a = 0;
@@ -90,7 +86,7 @@ public class Player extends Thread {
                     }
                 }
         );
-        total /= Math.sqrt(currentNotes.size() > 0 ? currentNotes.size() : 1);
+        total /= currentNotes.size() > 0 ? currentNotes.size() : 1;
 
         if (getCurrentNotes().size() > 0) {
 
