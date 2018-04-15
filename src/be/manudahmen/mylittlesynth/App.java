@@ -89,14 +89,10 @@ public class App extends Application {
         slider.setValue(4);
         slider.setMinorTickCount(1);
         slider.setAccessibleText("Octaves");
-        slider.setOnMouseReleased(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                int value = (int) ((Slider) event.getSource()).getValue();
-                player.setOctave(value);
-                System.out.println("Octave: " + value);
-
-            }
+        slider.setOnMouseReleased(event -> {
+            int value = (int) ((Slider) event.getSource()).getValue();
+            player.setOctave(value);
+            System.out.println("Octave: " + value);
 
         });
         //player.setOctave((int)slider.getValue());
@@ -129,10 +125,10 @@ public class App extends Application {
 
 
         for (int i = 0; i < buttons.length; i++) {
-            buttons[i].setOnMousePressed(event -> playNote(event.getSource()));
-            buttons[i].setOnMouseReleased(event -> stopNote(event.getSource()));
-            buttons[i].setOnTouchPressed(event -> playNote(event.getSource()));
-            buttons[i].setOnTouchReleased(event -> stopNote(event.getSource()));
+            buttons[i].setOnMousePressed(event -> playNote((Button) event.getSource()));
+            buttons[i].setOnMouseReleased(event -> stopNote((Button) event.getSource()));
+            buttons[i].setOnTouchPressed(event -> playNote((Button) event.getSource()));
+            buttons[i].setOnTouchReleased(event -> stopNote((Button) event.getSource()));
         }
 
         VBox vBox = new VBox();
@@ -194,7 +190,7 @@ public class App extends Application {
             for (int i = 0; i < buttons.length; i++) {
                 if (event.getCode().equals(keycode[i])) {
                     playNote(buttons[i]);
-                    System.out.println("playNote");
+                    System.out.println("playNote" + player.getCurrentNotes().size());
                 }
             }
         });
@@ -202,7 +198,7 @@ public class App extends Application {
             for (int i = 0; i < buttons.length; i++) {
                 if (event.getCode().equals(keycode[i])) {
                     stopNote(buttons[i]);
-                    System.out.println("stopNote");
+                    System.out.println("stopNote" + player.getCurrentNotes().size());
                 }
             }
         });
@@ -227,14 +223,9 @@ public class App extends Application {
         volume.setMax(100);
         volume.setValue(100.0);
         volume.setAccessibleText("Volume:" + volume.getValue());
-        volume.setOnMouseReleased(new EventHandler<MouseEvent>() {
-
-            @Override
-            public void handle(MouseEvent event) {
-                player.setVolume(volume.getValue());
-                System.out.println("Volume du player: " + player.getVolume());
-
-            }
+        volume.setOnMouseReleased(event -> {
+            player.setVolume(volume.getValue());
+            System.out.println("Volume du player: " + player.getVolume());
 
         });
 
@@ -266,19 +257,16 @@ public class App extends Application {
     }
 
     // fires a button from code, providing visual feedback that the button is firing.
-    private void fireButton(final Button button) {
+    /*private void fireButton(final Button button) {
         button.arm();
         PauseTransition pt = new PauseTransition(Duration.millis(300));
-        pt.setOnFinished(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                button.fire();
+        pt.setOnFinished(event -> {
+            button.fire();
 
-                button.disarm();
-            }
+            button.disarm();
         });
         pt.play();
-    }
+    }*/
     public int getTone(Object source) {
         String id = ((Button) source).getText();
         String note;
@@ -356,7 +344,7 @@ public class App extends Application {
         player.setWaveform(waveform);
     }
 
-    private void playNote(Object source) {
+    private void playNote(Button source) {
         System.out.println("Tone:  " + getTone(source) + "  Note :"
                 + ((Button) source).getText() + "  "
                 + "Octave: " + (int) slider.getValue());
@@ -364,28 +352,30 @@ public class App extends Application {
         assert note != null;
         note.setWaveform(player.getForm());
         assert note != null;
-        Platform.runLater(new Runnable() {
-                              @Override
-                              public void run() {
-                                  player.addNote(note);
-                                  note.play();
-                              }
-                          }
+        Platform.runLater(() -> {
+                    if (!player.getCurrentNotes().contains(note)) {
+                        player.addNote(note);
+                        note.play();
+                    }
+                }
         );
 
     }
 
-    private void stopNote(Object source) {
+    private void stopNote(Button source) {
         Note note = noteMap.get(getTone(source));
         assert note != null;
         System.out.println(note.getTimer().getTimeElapsed());
-        note.stop();
 
         List<Note> notes = player.getCurrentNotes();
         synchronized (notes) {
-            notes.remove(note);
+            if (player.getCurrentNotes().contains(note)) {
+                note.stop();
+                notes.remove(note);
+
+            }
         }
-        System.out.println("Key pressed: " + notes.size());
+        System.out.println("Key pressed: " + player.getCurrentNotes().size());
     }
 
 }
