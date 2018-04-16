@@ -88,19 +88,23 @@ public class Player extends Thread {
         );
         total /= currentNotes.size() > 0 ? currentNotes.size() : 1;
 
+
+        short amplitude;
+
         if (getCurrentNotes().size() > 0) {
 
             audioViewer.sendDouble(total);
             audioViewer.sendDouble(total);
 
-            short amplitude = (short) (total * volume / 100.0);
+            amplitude = (short) (total * volume / 100.0);
             //System.out.println(amplitude);
 
-            playBuffer(amplitude);
         } else {
-            //audioViewer.sendDouble(0.0);
-            //audioViewer.sendDouble(0.0);
+            amplitude = 0;
+            audioViewer.sendDouble(0.0);
+            audioViewer.sendDouble(0.0);
         }
+        playBuffer(amplitude);
     }
 
     public void playBuffer(short amplitude) {
@@ -137,32 +141,23 @@ public class Player extends Thread {
         Timer timer = new Timer();
         note.setTimer(timer);
         timer.init();
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                getCurrentNotes().add(note);
-                System.out.println("After added " + getCurrentNotes().size());
-            }
+        Platform.runLater(() -> {
+            getCurrentNotes().add(note);
+            System.out.println("After added " + getCurrentNotes().size());
         });
 
         return note;
     }
 
     public void stopNote(int tone) {
-        getCurrentNotes().forEach(new Consumer<Note>() {
-            @Override
-            public void accept(Note note) {
-                if (note.getTone() == tone) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            //while (!note.isFinish())
-                                ;
-                            getCurrentNotes().remove(note);
-                            System.out.println("After removed " + getCurrentNotes().size());
-                        }
-                    });
-                }
+        getCurrentNotes().forEach(note -> {
+            if (note.getTone() == tone) {
+                Platform.runLater(() -> {
+                    //while (!note.isFinish())
+                    ;
+                    getCurrentNotes().remove(note);
+                    System.out.println("After removed " + getCurrentNotes().size());
+                });
             }
         });
     }
@@ -198,5 +193,26 @@ public class Player extends Thread {
 
     public double getVolume() {
         return volume;
+    }
+
+    void stopNote(Note note) {
+        List<Note> notes = getCurrentNotes();
+        synchronized (notes) {
+            if (getCurrentNotes().contains(note)) {
+                note.stop();
+                notes.remove(note);
+
+            }
+        }
+    }
+
+    void playNote(Note note) {
+        Platform.runLater(() -> {
+                    if (!getCurrentNotes().contains(note)) {
+                        addNote(note);
+                        note.play();
+                    }
+                }
+        );
     }
 }

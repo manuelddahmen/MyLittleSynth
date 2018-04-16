@@ -91,7 +91,7 @@ public class AudioViewer extends Thread {
                                 };
                         context2D.strokeLine(toDraw[0], toDraw[1], toDraw[2], toDraw[3]);
                         oldValues[i] = first;
-                        System.out.println(first);
+                        //System.out.println(first);
                     } catch (Exception ex) {
                         System.out.println("No such Element");
                     }
@@ -102,7 +102,7 @@ public class AudioViewer extends Thread {
                 if (position >= canvas.getWidth()) {
                     position = 0;
                     oldValues = new double[]{0.0, 0.0};
-                    System.out.println("+");
+                    //System.out.println("+");
 
                 }
             }

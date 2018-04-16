@@ -17,6 +17,7 @@ public class Note {
         positionNIncr = 0;
         this.timer = new Timer();
         timer.init();
+        enveloppe.setTimer(timer);
     }
 
     public double getMinDuration() {

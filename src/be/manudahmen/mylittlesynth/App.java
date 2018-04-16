@@ -15,10 +15,7 @@
  */
 package be.manudahmen.mylittlesynth;
 
-import javafx.animation.PauseTransition;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -28,10 +25,8 @@ import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.util.Duration;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class App extends Application {
@@ -352,13 +347,7 @@ public class App extends Application {
         assert note != null;
         note.setWaveform(player.getForm());
         assert note != null;
-        Platform.runLater(() -> {
-                    if (!player.getCurrentNotes().contains(note)) {
-                        player.addNote(note);
-                        note.play();
-                    }
-                }
-        );
+        player.playNote(note);
 
     }
 
@@ -367,14 +356,7 @@ public class App extends Application {
         assert note != null;
         System.out.println(note.getTimer().getTimeElapsed());
 
-        List<Note> notes = player.getCurrentNotes();
-        synchronized (notes) {
-            if (player.getCurrentNotes().contains(note)) {
-                note.stop();
-                notes.remove(note);
-
-            }
-        }
+        player.stopNote(note);
         System.out.println("Key pressed: " + player.getCurrentNotes().size());
     }
 

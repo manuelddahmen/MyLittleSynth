@@ -42,4 +42,7 @@ public class Timer {
     }
 
 
+    public void setTimeSeconds(double v) {
+        this.timeElapsedSystem = (long) (System.nanoTime() - v * 1E9);
+    }
 }
