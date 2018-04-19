@@ -21,7 +21,6 @@ import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class Player extends Thread {
     private List<Note> currentNotes;
@@ -58,7 +57,7 @@ public class Player extends Thread {
         total = 0.0;
         getCurrentNotes().forEach(note -> {
                     if (!note.isFinish()) {
-                        double noteTime = note.getTimer().getTimeElapsed();
+                        double noteTime = note.getTimer().getTotalTimeElapsed();
 
                         double positionRatioPerSecond = note.getPositionNIncr() / 44100.0;
 

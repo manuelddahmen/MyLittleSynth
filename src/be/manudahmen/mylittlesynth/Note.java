@@ -62,7 +62,7 @@ public class Note {
     }
 
     public boolean isFinish() {
-        return getTimer().getTimeElapsed() >= this.getMinDuration();
+        return false;//getTimer().getTotalTimeElapsed() >= this.getMinDuration();
     }
 
     public long getPositionNIncr() {

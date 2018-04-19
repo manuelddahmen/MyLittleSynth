@@ -354,7 +354,7 @@ public class App extends Application {
     private void stopNote(Button source) {
         Note note = noteMap.get(getTone(source));
         assert note != null;
-        System.out.println(note.getTimer().getTimeElapsed());
+        System.out.println(note.getTimer().getTotalTimeElapsed());
 
         player.stopNote(note);
         System.out.println("Key pressed: " + player.getCurrentNotes().size());
