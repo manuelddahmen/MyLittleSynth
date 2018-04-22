@@ -16,11 +16,16 @@
 
 package be.manudahmen.mylittlesynth;
 
+import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.util.LinkedList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class AudioViewer extends Thread {
     private WaitForData waitForData = new WaitForData();
@@ -55,6 +60,9 @@ public class AudioViewer extends Thread {
     private double position;
     private final LinkedList<Double> values;
     private boolean running;
+    ExecutorService
+            executorService = Executors.newSingleThreadExecutor();
+    Future<?> drawShapesFuture;
 
     public AudioViewer(float sampleRate, int channels, Canvas canvas) {
         this.sampleRate = sampleRate;
@@ -65,46 +73,78 @@ public class AudioViewer extends Thread {
         values = new LinkedList<>();
         waitForData = new WaitForData();
         waitForData.start();
+
+        new CanvasRedrawTask().start();
+
     }
 
-    public void run() {
+    void render() {
+
         GraphicsContext context2D = canvas.getGraphicsContext2D();
         drawBorder(canvas.getGraphicsContext2D(), Color.RED);
-        while (isRunning()) {
-            LinkedList<Double> doubles2 = waitForData.getDoubles();
-            if (doubles2.size() >= channels) {
-                context2D.setFill(Color.BLACK);
-                context2D.setStroke(Color.BLUE);
-                context2D.setLineWidth(2.0);
-                double maxHeight = canvas.getHeight() / 2;
-                double[] toDraw;
-                context2D.strokeLine(0, maxHeight, canvas.getWidth(), maxHeight);
-                for (int i = 0; i < channels; i++) {
-                    try {
-                        double first = doubles2.removeFirst();
-                        toDraw = new double[]
-                                {
-                                        position,
-                                        (oldValues[i] / max + 1) * maxHeight,
-                                        position + 1,
-                                        (first / max + 1) * maxHeight
-                                };
-                        context2D.strokeLine(toDraw[0], toDraw[1], toDraw[2], toDraw[3]);
-                        oldValues[i] = first;
-                        //System.out.println(first);
-                    } catch (Exception ex) {
-                        System.out.println("No such Element");
-                    }
-                }
+        Enveloppe enveloppe = new Enveloppe(1);
+        double[] ypoints = new double[enveloppe.points.length];
+        double[] xpoints = new double[enveloppe.points.length];
+        double maxHeight = canvas.getHeight() / 2;
+        for (int i = 0; i < enveloppe.points.length; i++) {
 
-                position++;
+            double y = enveloppe.points[i].getY() * maxHeight;
+            double z = enveloppe.points[i].getZ() * maxHeight;
+
+            xpoints[i] = z;
+            ypoints[i] = y;
+
+
+        }
+        context2D.strokePolyline(xpoints, ypoints, xpoints.length);
+        LinkedList<Double> doubles2 = waitForData.getDoubles();
+        if (doubles2.size() >= channels) {
+            //System.out.println("drawn");
+            int size = (int) Math.min(canvas.getWidth() * 2, doubles2.size());
+
+            double[] objects1 = new double[size];
+
+            int i = 0;
+
+
+            while ((doubles2.size() > 0) && (doubles2.getFirst() != null) && (i < size)) {
+                objects1[i++] = doubles2.getFirst();
+                doubles2.removeFirst();
+
+            }
+
+            double[] xs = new double[size / 2];
+            double[] ys1 = new double[size / 2];
+            double[] ys2 = new double[size / 2];
+
+
+            xpoints = new double[size / 2];
+            for (; i < size; ) {
+
+                xs[i / 2] = position++;
+
+                xpoints[i] = xs[i] / max + maxHeight / 2;
+
+                ys1[i / 2] = objects1[i++] / max + maxHeight / 2;
+
+                ys2[i / 2] = objects1[i++] / max + maxHeight / 2;
+
 
                 if (position >= canvas.getWidth()) {
                     position = 0;
-                    oldValues = new double[]{0.0, 0.0};
-                    //System.out.println("+");
-
                 }
+            }
+            context2D.setFill(Color.BLACK);
+            context2D.setStroke(Color.BLUE);
+            context2D.setLineWidth(4.0);
+            context2D.strokePolyline(xpoints, ys1, size / 2);
+            context2D.strokePolyline(xpoints, ys2, size / 2);
+
+
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -131,5 +171,17 @@ public class AudioViewer extends Thread {
 
     public void setRunning(boolean running) {
         this.running = running;
+    }
+
+    class CanvasRedrawTask extends AnimationTimer {
+        long time = System.nanoTime();
+
+        @Override
+        public void handle(long now) {
+            render();
+            long f = (System.nanoTime() - time) / 1000 / 1000;
+            System.out.println("Time since last redraw " + f + " ms");
+            time = System.nanoTime();
+        }
     }
 }

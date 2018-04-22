@@ -16,6 +16,7 @@
 
 package be.manudahmen.mylittlesynth;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 
 import java.util.ArrayList;
@@ -214,4 +215,6 @@ public class Player extends Thread {
                 }
         );
     }
+
+
 }

@@ -63,14 +63,17 @@ public class Enveloppe {
     }
 
     public double getVolume(double duration) {
-        if (!isRelease() && duration < minDuration / 2) {
+        if (end) {
+            return 0.0;
+        }
+        if (!isRelease() && duration < minDuration * 3 / 4.0) {
             return form.calculerPoint3D(duration).getY();
-        } else if (!isRelease() && duration >= minDuration / 2) {
-            timer.setTimeSeconds(minDuration / 2);
+        } else if (!isRelease() && duration >= minDuration * 3 / 4.) {
+            timer.setTimeSeconds(minDuration * 3 / 4.);
             return 1.0;
         } else if (isRelease()) {
-            double facteurAmpl = form.calculerPoint3D(duration - time).getY();
-            if (facteurAmpl <= 0.0)
+            double factorAmpl = form.calculerPoint3D(duration - timer.getTimeElapsed()).getY();
+            if (factorAmpl <= 0.0)
                 fireEndEvent();
         }
         return 0.0;

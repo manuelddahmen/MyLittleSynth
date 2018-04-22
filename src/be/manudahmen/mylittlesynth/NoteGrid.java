@@ -7,7 +7,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 public class NoteGrid extends TableView {
-    private final int MAXCOLUMN = 32;
+    private final int MAXCOLUMN = 16;
 
     public NoteGrid() {
         super();
