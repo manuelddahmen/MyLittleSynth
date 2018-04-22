@@ -17,7 +17,6 @@
 package be.manudahmen.mylittlesynth;
 
 import javafx.animation.AnimationTimer;
-import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -81,6 +80,7 @@ public class AudioViewer extends Thread {
     void render() {
 
         GraphicsContext context2D = canvas.getGraphicsContext2D();
+
         drawBorder(canvas.getGraphicsContext2D(), Color.RED);
         Enveloppe enveloppe = new Enveloppe(1);
         double[] ypoints = new double[enveloppe.points.length];
@@ -123,7 +123,7 @@ public class AudioViewer extends Thread {
 
                 xs[i / 2] = position++;
 
-                xpoints[i] = xs[i] / max + maxHeight / 2;
+                xpoints[i] = xs[i / 2];
 
                 ys1[i / 2] = objects1[i++] / max + maxHeight / 2;
 
