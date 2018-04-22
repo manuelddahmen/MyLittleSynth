@@ -83,26 +83,26 @@ public class AudioViewer extends Thread {
 
         drawBorder(canvas.getGraphicsContext2D(), Color.RED);
         Enveloppe enveloppe = new Enveloppe(1);
-        double[] ypoints = new double[enveloppe.points.length];
-        double[] xpoints = new double[enveloppe.points.length];
-        double maxHeight = canvas.getHeight() / 2;
+        final double[] ypoints = new double[enveloppe.points.length];
+        final double[] xpoints1 = new double[enveloppe.points.length];
+        final double maxHeight = canvas.getHeight() / 2;
         for (int i = 0; i < enveloppe.points.length; i++) {
 
             double y = enveloppe.points[i].getY() * maxHeight;
             double z = enveloppe.points[i].getZ() * maxHeight;
 
-            xpoints[i] = z;
+            xpoints1[i] = z;
             ypoints[i] = y;
 
 
         }
-        context2D.strokePolyline(xpoints, ypoints, xpoints.length);
+        context2D.strokePolyline(xpoints1, ypoints, xpoints1.length);
         LinkedList<Double> doubles2 = waitForData.getDoubles();
         if (doubles2.size() >= channels) {
             //System.out.println("drawn");
             int size = (int) Math.min(canvas.getWidth() * 2, doubles2.size());
 
-            double[] objects1 = new double[size];
+            final double[] objects1 = new double[size];
 
             int i = 0;
 
@@ -113,9 +113,10 @@ public class AudioViewer extends Thread {
 
             }
 
-            double[] xs = new double[size / 2];
-            double[] ys1 = new double[size / 2];
-            double[] ys2 = new double[size / 2];
+            final double[] xpoints;
+            final double[] xs = new double[size / 2];
+            final double[] ys1 = new double[size / 2];
+            final double[] ys2 = new double[size / 2];
 
 
             xpoints = new double[size / 2];
