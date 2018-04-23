@@ -16,8 +16,6 @@
 
 package be.manudahmen.mylittlesynth;
 
-import be.manudahmen.empty3.Point3D;
-import be.manudahmen.empty3.core.nurbs.ParametricCurve;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -27,33 +25,17 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class AudioViewer extends Thread {
     int numberOfSamplesPerPixel = 1;
-    private WaitForData waitForData = new WaitForData();
+    private final LinkedList<Double> doubles = new LinkedList<>();
 
-    class WaitForData extends Thread {
-        private final LinkedList<Double> doubles;
+    private LinkedList<Double> getDoubles() {
+        return doubles;
+    }
 
-        public WaitForData() {
-            doubles = values;
-        }
-
-        public void run() {
-
-        }
-
-        public LinkedList<Double> getDoubles() {
-            return doubles;
-        }
-
-        public void addDouble(Double value) {
-            this.doubles.add(value);
-        }
-
+    private void addDouble(Double value) {
+        this.doubles.add(value);
     }
 
     private final int channels;
@@ -65,9 +47,6 @@ public class AudioViewer extends Thread {
     private double position;
     private final LinkedList<Double> values;
     private boolean running;
-    ExecutorService
-            executorService = Executors.newSingleThreadExecutor();
-    Future<?> drawShapesFuture;
 
     public AudioViewer(float sampleRate, int channels, Canvas canvas) {
         this.sampleRate = sampleRate;
@@ -76,8 +55,6 @@ public class AudioViewer extends Thread {
         oldValues = new double[channels];
         running = true;
         values = new LinkedList<>();
-        waitForData = new WaitForData();
-        waitForData.start();
 
         new CanvasRedrawTask().start();
 
@@ -115,10 +92,10 @@ public class AudioViewer extends Thread {
         }
         context2D.strokePolyline(xpoints1, ypoints, xpoints1.length);
         context2D.strokePolyline(xpoints2, ypoints2, xpoints2.length);
-        LinkedList<Double> doubles2 = waitForData.getDoubles();
+        LinkedList<Double> doubles2 = getDoubles();
         if (doubles2.size() >= channels) {
             //System.out.println("DOUBLES:" + doubles2.getFirst());
-            int size = (int) Math.min(canvas.getWidth() * 2, doubles2.size());
+            int size = (int) Math.min(canvas.getWidth() * 2, doubles2.size() / numberOfSamplesPerPixel);
 
             final double[] samples = new double[size];
 
@@ -165,10 +142,12 @@ public class AudioViewer extends Thread {
                     }
                 }
 
-                i += 2;
 
                 ys1[i / 2] /= numberOfSamplesPerPixel;
                 ys2[i / 2] /= numberOfSamplesPerPixel;
+
+                i += 2;
+
             }
             context2D.setFill(Color.BLACK);
             context2D.setStroke(Color.BLUE);
@@ -214,7 +193,7 @@ public class AudioViewer extends Thread {
     }
 
     public void sendDouble(Double value) {
-        waitForData.addDouble(value);
+        addDouble(value);
     }
 
     public boolean isRunning() {
@@ -228,10 +207,11 @@ public class AudioViewer extends Thread {
     class CanvasRedrawTask extends AnimationTimer {
         long time = System.nanoTime();
         long f = System.nanoTime();
+
         @Override
         public void handle(long now) {
 
-            render(f, waitForData.getDoubles().size() / 2);
+            render(f, getDoubles().size() / 2);
             f = (System.nanoTime() - time) / 1000 / 1000;
             System.out.println("Time since last redraw " + f + " ms");
             time = System.nanoTime();
