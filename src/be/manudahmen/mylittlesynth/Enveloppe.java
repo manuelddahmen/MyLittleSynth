@@ -56,7 +56,7 @@ public class Enveloppe {
                         new Point3D(0.0, 1.0, minDuration / 10),
                         new Point3D(0.0, 1.0, minDuration / 2),
                         new Point3D(0.0, 1.0, minDuration * 3 / 4.0),
-                        new Point3D(0.0, 0.2, minDuration * 7 / 10.0),
+                        new Point3D(0.0, 0.2, minDuration * 8 / 10.0),
                         new Point3D(0.0, 0.0, minDuration)
                 });
 
@@ -98,5 +98,9 @@ public class Enveloppe {
 
     public void setTimer(Timer timer) {
         this.timer = timer;
+    }
+
+    public double getForm(double v) {
+        return form.calculerPoint3D(v).getY();
     }
 }

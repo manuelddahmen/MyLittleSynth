@@ -16,7 +16,6 @@
 
 package be.manudahmen.mylittlesynth;
 
-import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 
 import java.util.ArrayList;
@@ -92,11 +91,12 @@ public class Player extends Thread {
         short amplitude;
 
         if (getCurrentNotes().size() > 0) {
-
-            audioViewer.sendDouble(total);
-            audioViewer.sendDouble(total);
-
             amplitude = (short) (total * volume / 100.0);
+
+            audioViewer.sendDouble(amplitude * 1.);
+            audioViewer.sendDouble(amplitude * 1.);
+
+
             //System.out.println(amplitude);
 
         } else {
@@ -104,10 +104,10 @@ public class Player extends Thread {
             audioViewer.sendDouble(0.0);
             audioViewer.sendDouble(0.0);
         }
-        playBuffer(amplitude);
+        playBufferMono(amplitude);
     }
 
-    public void playBuffer(short amplitude) {
+    public void playBufferMono(short amplitude) {
         short a = amplitude;
         byte[] nextBuffer = new byte[4];
         nextBuffer[0] = (byte) (a & 0xFF); //write 8bits ________WWWWWWWW out of 16
