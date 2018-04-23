@@ -66,10 +66,10 @@ public class AudioViewer extends Thread {
         int maxWidth = (int) canvas.getWidth();
         drawBorder(canvas.getGraphicsContext2D(), Color.RED);
         Enveloppe enveloppe = new Enveloppe(1);
-        final double[] ypoints = new double[enveloppe.points.length];
-        final double[] xpoints1 = new double[enveloppe.points.length];
-        final double[] xpoints2 = new double[maxWidth];
-        final double[] ypoints2 = new double[maxWidth];
+        final double[] yPoints = new double[enveloppe.points.length];
+        final double[] xPoints = new double[enveloppe.points.length];
+        final double[] xPoints2 = new double[maxWidth];
+        final double[] yPoints2 = new double[maxWidth];
         final double maxHeight = canvas.getHeight() / 2;
         //System.out.println("maxHeight:" + maxHeight);
         for (int i = 0; i < enveloppe.points.length; i++) {
@@ -77,21 +77,19 @@ public class AudioViewer extends Thread {
             double y = enveloppe.points[i].getY() * maxHeight;
             double z = enveloppe.points[i].getZ() * canvas.getWidth();
 
-            xpoints1[i] = z;
-            ypoints[i] = -y + maxHeight;
+            xPoints[i] = z;
+            yPoints[i] = -y + maxHeight;
 
 
         }
-        for (int i = 0; i < xpoints2.length; i++) {
+        for (int i = 0; i < xPoints2.length; i++) {
 
             double v = enveloppe.getForm(1.0 * i / maxWidth);
-            xpoints2[i] = i;
-            ypoints2[i] = -v * maxHeight + maxHeight;
+            xPoints2[i] = i;
+            yPoints2[i] = -v * maxHeight + maxHeight;
 
 
         }
-        context2D.strokePolyline(xpoints1, ypoints, xpoints1.length);
-        context2D.strokePolyline(xpoints2, ypoints2, xpoints2.length);
         LinkedList<Double> doubles2 = getDoubles();
         if (doubles2.size() >= channels) {
             //System.out.println("DOUBLES:" + doubles2.getFirst());
@@ -132,9 +130,9 @@ public class AudioViewer extends Thread {
                 ys2[i / 2] = 0;
 
                 while (k < numberOfSamplesPerPixel * 2) {
-                    ys1[i / 2] += samples[k++] * maxHeight + maxHeight;
+                    ys1[i / 2] += samples[i / 2 + k++] * maxHeight / max + maxHeight;
 
-                    ys2[i / 2] += samples[k++] * maxHeight + maxHeight;
+                    ys2[i / 2] += samples[i / 2 + k++] * maxHeight / max + maxHeight;
 
 
                     if (position >= canvas.getWidth()) {
@@ -149,6 +147,11 @@ public class AudioViewer extends Thread {
                 i += 2;
 
             }
+
+
+            context2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+            context2D.strokePolyline(xPoints, yPoints, xPoints.length);
+            context2D.strokePolyline(xPoints2, yPoints2, xPoints2.length);
             context2D.setFill(Color.BLACK);
             context2D.setStroke(Color.BLUE);
             context2D.setLineWidth(4.0);
@@ -164,16 +167,10 @@ public class AudioViewer extends Thread {
         }
     }
 
-
-    int sizeTreated = 0;
-    Map<Long, Integer> treatmeentSpeed = new HashMap<>();
-
     private double treatmentSpeed(long time, int sample) {
         return 1.0 * sample / time;
     }
 
-
-    Map<Long, Integer> samplesSpeed = new HashMap<>();
 
     private double sampleSpeed(long time, int sample) {
 
