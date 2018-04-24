@@ -7,14 +7,14 @@ public class Note {
     private Timer timer;
     private double minDuration;
     private boolean finish;
-    private long positionNIncr;
+    private long position;
 
     public Note(double minDuration, int tone, SoundProductionSystem.Waveform waveform, Enveloppe enveloppe) {
         this.minDuration = minDuration;
         this.tone = tone;
         this.waveform = waveform;
         this.enveloppe = enveloppe;
-        positionNIncr = 0;
+        position = 0;
         this.timer = new Timer();
         timer.init();
         enveloppe.setTimer(timer);
@@ -65,16 +65,20 @@ public class Note {
         return false;//getTimer().getTotalTimeElapsed() >= this.getMinDuration();
     }
 
-    public long getPositionNIncr() {
-        return positionNIncr++;
+    public long getPosition() {
+        return position;
     }
 
     public void play() {
         getTimer().init();
-        positionNIncr = 0;
+        position = 0;
     }
 
     public void stop() {
 
+    }
+
+    public void positionInc() {
+        position++;
     }
 }

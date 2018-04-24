@@ -47,7 +47,6 @@ public class Enveloppe {
 
     public Enveloppe(double minDuration) {
         this.minDuration = minDuration;
-        this.timer = timer;
         form = new
                 CourbeParametriquePolynomialeBezier(
                 points = new Point3D[]{
@@ -73,8 +72,8 @@ public class Enveloppe {
             return getVolume(minDuration * 3 / 4.);
         } else if (isRelease()) {
             double factorAmpl = form.calculerPoint3D(duration - timer.getTimeElapsed()).getY();
-            if (factorAmpl <= 0.0)
-                fireEndEvent();
+            return factorAmpl;
+
         }
         return 0.0;
     }
@@ -102,5 +101,9 @@ public class Enveloppe {
 
     public double getForm(double v) {
         return form.calculerPoint3D(v).getY();
+    }
+
+    public double getBrutVolume(double noteDuration) {
+        return form.calculerPoint3D(noteDuration).getY();
     }
 }

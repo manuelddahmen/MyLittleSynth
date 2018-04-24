@@ -21,21 +21,25 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 public class AudioViewer extends Thread {
     int numberOfSamplesPerPixel = 1;
     private final LinkedList<Double> doubles = new LinkedList<>();
-
+    private HashMap<Integer, ArrayList<Double>> volumeEnvelopes = new HashMap<>();
     private LinkedList<Double> getDoubles() {
         return doubles;
     }
 
     private void addDouble(Double value) {
         this.doubles.add(value);
+    }
+
+    public void sendEnvelopeVolume(int tone, double volume) {
+        if (!volumeEnvelopes.containsKey(tone))
+            volumeEnvelopes.put(tone, new ArrayList<>());
+        this.volumeEnvelopes.get(tone).add(volume);
     }
 
     private final int channels;
@@ -115,7 +119,7 @@ public class AudioViewer extends Thread {
             final double[] xs = new double[size / 2];
             final double[] ys1 = new double[size / 2];
             final double[] ys2 = new double[size / 2];
-
+            final double[][] env = new double[volumeEnvelopes.size()][size / 2];
 
             xpoints = new double[size / 2];
             for (int i = 0; i < size; ) {
@@ -143,15 +147,29 @@ public class AudioViewer extends Thread {
 
                 ys1[i / 2] /= numberOfSamplesPerPixel;
                 ys2[i / 2] /= numberOfSamplesPerPixel;
-
                 i += 2;
 
             }
 
 
+            for (int i = 0; i < volumeEnvelopes.size(); i++) {
+                double[] yn = env[i];
+                volumeEnvelopes.forEach(new BiConsumer<Integer, ArrayList<Double>>() {
+                    @Override
+                    public void accept(Integer integer, ArrayList<Double> doubles) {
+                        int j = 0;
+                        yn[j++] = doubles.get(j);
+                    }
+                });
+            }
             context2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             context2D.strokePolyline(xPoints, yPoints, xPoints.length);
             context2D.strokePolyline(xPoints2, yPoints2, xPoints2.length);
+            for (int d = 0; d < env.length; d++) {
+                context2D.setFill(Color.BLACK);
+                context2D.setStroke(Color.GREEN);
+                context2D.strokePolyline(xPoints2, env[d], env[d].length);
+            }
             context2D.setFill(Color.BLACK);
             context2D.setStroke(Color.BLUE);
             context2D.setLineWidth(4.0);

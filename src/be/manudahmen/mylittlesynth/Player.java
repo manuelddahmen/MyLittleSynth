@@ -33,7 +33,7 @@ public class Player extends Thread {
     private String form;
     private SoundProductionSystem.Waveform waveform = SoundProductionSystem.Waveform.SIN;
     private double volume = 100;
-
+    private long position;
     public Player(AudioViewer audioViewer) {
         super();
         soundProductionSystem = new SoundProductionSystem();
@@ -43,6 +43,7 @@ public class Player extends Thread {
         this.audioViewer = audioViewer;
         that = this;
         playing = true;
+        position = 0;
     }
 
     public void addNote(Note note) {
@@ -59,11 +60,14 @@ public class Player extends Thread {
                     if (!note.isFinish()) {
                         double noteTime = note.getTimer().getTotalTimeElapsed();
 
-                        double positionRatioPerSecond = note.getPositionNIncr() / 44100.0;
+                        double positionRatioPerSecond = note.getPosition() / 44100.0;
+
+                        note.positionInc();
 
                         double angle = positionRatioPerSecond * soundProductionSystem.calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
 
                         facteurAmpl = note.getEnveloppe().getVolume(noteTime);
+
 
                         double ampl = 32767f * facteurAmpl;
 
@@ -82,6 +86,9 @@ public class Player extends Thread {
                                 break;
 
                         }
+
+                        audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe().getBrutVolume(noteTime));
+
                     }
                 }
         );
@@ -103,8 +110,10 @@ public class Player extends Thread {
             amplitude = 0;
             audioViewer.sendDouble(0.0);
             audioViewer.sendDouble(0.0);
+
+            playBufferMono(amplitude);
+            position++;
         }
-        playBufferMono(amplitude);
     }
 
     public void playBufferMono(short amplitude) {
