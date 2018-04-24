@@ -69,7 +69,7 @@ public class Enveloppe {
             return form.calculerPoint3D(duration).getY();
         } else if (!isRelease() && duration >= minDuration * 3 / 4.) {
             timer.setTimeSeconds(minDuration * 3 / 4.);
-            return getVolume(minDuration * 3 / 4.);
+            return form.calculerPoint3D(minDuration * 3 / 4.).getY();
         } else if (isRelease()) {
             double factorAmpl = form.calculerPoint3D(duration - timer.getTimeElapsed()).getY();
             return factorAmpl;

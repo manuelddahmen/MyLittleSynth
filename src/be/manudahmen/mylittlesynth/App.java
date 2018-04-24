@@ -36,7 +36,7 @@ public class App extends Application {
     private Player player;
     private AudioViewer audioViewer;
     private Map<Integer, Note> noteMap;
-    private double minDuration = 2000.0;
+    private double minDuration = 2.0;
     private Slider volume;
 
     public static void main(String[] args) {
@@ -239,7 +239,6 @@ public class App extends Application {
         });
         audioViewer = new AudioViewer(44100, 2, canvas);
         player = new Player(audioViewer);
-        audioViewer.start();
         player.setVolume(100);
         player.start();
 

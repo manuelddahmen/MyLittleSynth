@@ -110,10 +110,10 @@ public class Player extends Thread {
             amplitude = 0;
             audioViewer.sendDouble(0.0);
             audioViewer.sendDouble(0.0);
-
-            playBufferMono(amplitude);
-            position++;
         }
+        playBufferMono(amplitude);
+        position++;
+
     }
 
     public void playBufferMono(short amplitude) {

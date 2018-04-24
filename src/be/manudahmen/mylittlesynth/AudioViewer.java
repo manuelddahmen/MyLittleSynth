@@ -16,6 +16,7 @@
 
 package be.manudahmen.mylittlesynth;
 
+import com.sun.deploy.util.ArrayUtil;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -23,11 +24,14 @@ import javafx.scene.paint.Color;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.Stream;
 
-public class AudioViewer extends Thread {
+public class AudioViewer {
     int numberOfSamplesPerPixel = 1;
     private final LinkedList<Double> doubles = new LinkedList<>();
-    private HashMap<Integer, ArrayList<Double>> volumeEnvelopes = new HashMap<>();
+    private Map<Object, ArrayList<Double>> volumeEnvelopes = Collections.synchronizedMap(new HashMap<>());
     private LinkedList<Double> getDoubles() {
         return doubles;
     }
@@ -115,13 +119,12 @@ public class AudioViewer extends Thread {
                 }
             } while ((sampleSpeed(timeElapsed, numberOfSamples) > treatmentSpeed(timeElapsed, total)));
 
-            final double[] xpoints;
+            final double[] xpoints = new double[size / 2];
             final double[] xs = new double[size / 2];
             final double[] ys1 = new double[size / 2];
             final double[] ys2 = new double[size / 2];
             final double[][] env = new double[volumeEnvelopes.size()][size / 2];
 
-            xpoints = new double[size / 2];
             for (int i = 0; i < size; ) {
 
                 xs[i / 2] = position++;
@@ -151,24 +154,21 @@ public class AudioViewer extends Thread {
 
             }
 
-
             for (int i = 0; i < volumeEnvelopes.size(); i++) {
-                double[] yn = env[i];
-                volumeEnvelopes.forEach(new BiConsumer<Integer, ArrayList<Double>>() {
-                    @Override
-                    public void accept(Integer integer, ArrayList<Double> doubles) {
-                        int j = 0;
-                        yn[j++] = doubles.get(j);
-                    }
+                double[] envi = env[i];
+                volumeEnvelopes.forEach((integer, doubles) -> {
+                    Object[] doubles1 = doubles.toArray();
+                    double[] unboxed = Stream.of(doubles1).mapToDouble(value -> (double) value).toArray();
+                    context2D.setFill(Color.BLACK);
+                    context2D.setStroke(Color.GREEN);
+                    // context2D.strokePolyline(xPoints2, unboxed, unboxed.length);
+
                 });
             }
             context2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             context2D.strokePolyline(xPoints, yPoints, xPoints.length);
             context2D.strokePolyline(xPoints2, yPoints2, xPoints2.length);
             for (int d = 0; d < env.length; d++) {
-                context2D.setFill(Color.BLACK);
-                context2D.setStroke(Color.GREEN);
-                context2D.strokePolyline(xPoints2, env[d], env[d].length);
             }
             context2D.setFill(Color.BLACK);
             context2D.setStroke(Color.BLUE);
@@ -176,7 +176,7 @@ public class AudioViewer extends Thread {
             context2D.strokePolyline(xpoints, ys1, size / 2);
             context2D.strokePolyline(xpoints, ys2, size / 2);
             try {
-                Thread.sleep(200);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
