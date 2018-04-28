@@ -16,20 +16,16 @@
 
 package be.manudahmen.mylittlesynth;
 
-import com.sun.deploy.util.ArrayUtil;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
 
 public class AudioViewer {
-    int numberOfSamplesPerPixel = 1;
+    private int numberOfSamplesPerPixel = 1;
     private final LinkedList<Double> doubles = new LinkedList<>();
     private Map<Object, ArrayList<Double>> volumeEnvelopes = Collections.synchronizedMap(new HashMap<>());
     private LinkedList<Double> getDoubles() {
@@ -125,21 +121,24 @@ public class AudioViewer {
             final double[] ys2 = new double[size / 2];
             final double[][] env = new double[volumeEnvelopes.size()][size / 2];
 
-            for (int i = 0; i < size; ) {
 
-                xs[i / 2] = position++;
+            int halfSize = size / 2;
 
-                xpoints[i / 2] = xs[i / 2];
+            for (int i = 0; i < halfSize; ) {
+
+                xs[i] = position++;
+
+                xpoints[i] = xs[i];
 
                 int k = 0;
 
-                ys1[i / 2] = 0;
-                ys2[i / 2] = 0;
+                ys1[i] = 0;
+                ys2[i] = 0;
 
                 while (k < numberOfSamplesPerPixel * 2) {
-                    ys1[i / 2] += samples[i / 2 + k++] * maxHeight / max + maxHeight;
+                    ys1[i] += samples[i + k++] * maxHeight / max + maxHeight;
 
-                    ys2[i / 2] += samples[i / 2 + k++] * maxHeight / max + maxHeight;
+                    ys2[i] += samples[i + k++] * maxHeight / max + maxHeight;
 
 
                     if (position >= canvas.getWidth()) {
@@ -148,9 +147,9 @@ public class AudioViewer {
                 }
 
 
-                ys1[i / 2] /= numberOfSamplesPerPixel;
-                ys2[i / 2] /= numberOfSamplesPerPixel;
-                i += 2;
+                ys1[i] /= numberOfSamplesPerPixel;
+                ys2[i] /= numberOfSamplesPerPixel;
+                i += 1;
 
             }
 
