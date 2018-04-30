@@ -68,7 +68,6 @@ public class AudioViewer {
 
         GraphicsContext context2D = canvas.getGraphicsContext2D();
         int maxWidth = (int) canvas.getWidth();
-        drawBorder(canvas.getGraphicsContext2D(), Color.RED);
         Enveloppe enveloppe = new Enveloppe(1);
         final double[] yPoints = new double[enveloppe.points.length];
         final double[] xPoints = new double[enveloppe.points.length];
@@ -164,14 +163,27 @@ public class AudioViewer {
 
                 });
             }
+            context2D.setLineWidth(1.0);
             context2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawBorder(canvas.getGraphicsContext2D(), Color.RED);
             context2D.strokePolyline(xPoints, yPoints, xPoints.length);
+            for (int i = 0; i < xPoints2.length; i++) {
+                if (i % 100 == 0) {
+                    context2D.setFill(Color.BLACK);
+                    context2D.setStroke(Color.BLUE);
+
+                    context2D.strokeText("(" + ((int) (xPoints2[i] * 100)) / 100 + "," +
+                            ((int) (yPoints2[i] * 100)) / 100 + ")", xPoints2[i], yPoints2[i]);
+                }
+            }
+
+            context2D.setFill(Color.BLACK);
+            context2D.setStroke(Color.BLUE);
             context2D.strokePolyline(xPoints2, yPoints2, xPoints2.length);
             for (int d = 0; d < env.length; d++) {
             }
             context2D.setFill(Color.BLACK);
             context2D.setStroke(Color.BLUE);
-            context2D.setLineWidth(4.0);
             context2D.strokePolyline(xpoints, ys1, size / 2);
             context2D.strokePolyline(xpoints, ys2, size / 2);
             try {

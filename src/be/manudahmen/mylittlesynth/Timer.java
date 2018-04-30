@@ -23,7 +23,7 @@ package be.manudahmen.mylittlesynth;
 public class Timer {
     private long timeElapsed = 0;
     private long timeElapsedSystem = 0;
-
+    private long timePause = 0;
 
     public Timer() {
     }
@@ -33,24 +33,29 @@ public class Timer {
         timeElapsed = 0;
     }
 
+    public void pause() {
+        timePause = System.nanoTime();
+    }
+
+    public void resume() {
+        timePause = 0;
+
+    }
+
+
     public double getTotalTimeElapsed() {
         long timeInter = System.nanoTime();
 
-        timeElapsed = (timeInter - timeElapsedSystem);
+        if (timePause > 0) {
+            timeElapsed = timeInter - timePause + timeElapsedSystem;
+
+        } else {
+            timeElapsed = (timeInter - timeElapsedSystem);
+
+        }
+
 
         return timeElapsed / 1E9;
     }
 
-    public double getTimeElapsed() {
-        long timeInter = System.nanoTime() - timeElapsed;
-
-        timeElapsed = (timeInter - timeElapsedSystem);
-
-        return timeElapsed / 1E9;
-    }
-
-
-    public void setTimeSeconds(double v) {
-        this.timeElapsedSystem = (long) (System.nanoTime() - v * 1E9);
-    }
 }

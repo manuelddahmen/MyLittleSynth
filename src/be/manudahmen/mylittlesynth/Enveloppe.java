@@ -56,7 +56,8 @@ public class Enveloppe {
                         new Point3D(0.0, 1.0, minDuration / 2),
                         new Point3D(0.0, 1.0, minDuration * 3 / 4.0),
                         new Point3D(0.0, 0.2, minDuration * 8 / 10.0),
-                        new Point3D(0.0, 0.0, minDuration)
+                        new Point3D(0.0, 0.0, minDuration),
+                        new Point3D(0.0, 0.0, minDuration + 1)
                 });
 
     }
@@ -68,12 +69,9 @@ public class Enveloppe {
         if (!isRelease() && duration < minDuration * 3 / 4.0) {
             return form.calculerPoint3D(duration).getY();
         } else if (!isRelease() && duration >= minDuration * 3 / 4.) {
-            timer.setTimeSeconds(minDuration * 3 / 4.);
             return form.calculerPoint3D(minDuration * 3 / 4.).getY();
         } else if (isRelease()) {
-            double factorAmpl = form.calculerPoint3D(duration - timer.getTimeElapsed()).getY();
-            return factorAmpl;
-
+            return form.calculerPoint3D(duration - timer.getTotalTimeElapsed()).getY();
         }
         return 0.0;
     }
