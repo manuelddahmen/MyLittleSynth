@@ -344,6 +344,7 @@ public class App extends Application {
                 + "Octave: " + (int) slider.getValue());
         Note note = noteMap.get(getTone(source));
         assert note != null;
+        note.setEnveloppe(new Enveloppe(minDuration));
         note.setWaveform(player.getForm());
         assert note != null;
         player.playNote(note);

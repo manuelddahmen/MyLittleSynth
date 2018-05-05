@@ -69,7 +69,8 @@ public class Enveloppe {
         if (!isRelease() && duration < minDuration * 3 / 4.0) {
             return form.calculerPoint3D(duration).getY();
         } else if (!isRelease() && duration >= minDuration * 3 / 4.) {
-            return form.calculerPoint3D(minDuration * 3 / 4.).getY();
+            setDuration(duration - minDuration * 3 / 4.);
+            return form.calculerPoint3D(duration).getY();
         } else if (isRelease()) {
             return form.calculerPoint3D(duration - timer.getTotalTimeElapsed()).getY();
         }
@@ -103,5 +104,11 @@ public class Enveloppe {
 
     public double getBrutVolume(double noteDuration) {
         return form.calculerPoint3D(noteDuration).getY();
+    }
+
+    public void setDuration(double inc) {
+        for (int i = 0; i < points.length; i++) {
+            points[i].setZ(points[i].getZ() + inc);
+        }
     }
 }
