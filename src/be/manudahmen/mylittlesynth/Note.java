@@ -70,8 +70,10 @@ public class Note {
     }
 
     public void play() {
-        getTimer().init();
+        Timer timer = new Timer();
+        setTimer(timer);
         position = 0;
+        timer.init();
     }
 
     public void stop() {

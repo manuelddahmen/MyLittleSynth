@@ -187,12 +187,6 @@ public class SoundProductionSystem {
             for (int i = 0; i < points.length; i++)
                 tubulaire.add(points[i]);
 
-/*
-            tubulaire.generateWire();
-
-            tubulaire.nbrAnneaux(100);
-            tubulaire.nbrRotations(100);
-*/
             for (int i = 0; i < durationMs * 44100 / 1000.0; i++) {
                 double angle = i / (44100.0 / calculateNoteFrequency(tone)) * 2.0 * Math.PI;
 

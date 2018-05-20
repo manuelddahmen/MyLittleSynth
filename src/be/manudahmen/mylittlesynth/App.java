@@ -346,7 +346,6 @@ public class App extends Application {
         assert note != null;
         note.setEnveloppe(new Enveloppe(minDuration));
         note.setWaveform(player.getForm());
-        assert note != null;
         player.playNote(note);
 
     }
