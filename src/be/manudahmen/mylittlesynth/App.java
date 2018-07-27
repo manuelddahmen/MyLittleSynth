@@ -353,7 +353,7 @@ public class App extends Application {
         player.setWaveform(waveform);
     }
 
-    private void playNote(Button source) {
+    public void playNote(Button source) {
         System.out.println("Tone:  " + getTone(source) + "  Note :"
                 + ((Button) source).getText() + "  "
                 + "Octave: " + (int) slider.getValue());
@@ -365,7 +365,7 @@ public class App extends Application {
 
     }
 
-    private void stopNote(Button source) {
+    public void stopNote(Button source) {
         Note note = noteMap.get(getTone(source));
         assert note != null;
         System.out.println(note.getTimer().getTotalTimeElapsed());

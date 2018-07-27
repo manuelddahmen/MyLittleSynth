@@ -23,6 +23,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class Player extends Thread {
+    private List<NoteState> notesRecorded;
+
+    public List<NoteState> getNoteStates() {
+        return noteStates;
+    }
+
     private final List<NoteState> noteStates;
     private List<Note> currentNotes;
     private Timer timer;
@@ -211,7 +217,7 @@ public class Player extends Thread {
         return volume;
     }
 
-    void stopNote(Note note) {
+    public void stopNote(Note note) {
         List<Note> notes = getCurrentNotes();
         synchronized (notes) {
             if (getCurrentNotes().contains(note)) {
@@ -256,44 +262,14 @@ public class Player extends Thread {
         if (isRecording()) {
             timerRecording.stop();
             timerRecording.init();
+            setPlayingBuffer(true);
         } else {
             timerRecording.stop();
-            setPlayingBuffer(true);
-            playNoteBuffer(timerRecording.getNotesRecorded());
         }
     }
 
     private void playNoteBuffer(List<NoteState> notesRecorded) {
-        new Thread() {
-            long timeStart = System.nanoTime()
-                    - timerRecording
-                    .getInitTime();
-
-            public void run() {
-                while (isPlayingBuffer()) {
-                    long current =
-                            (System.nanoTime()
-                                    - timerRecording.getInitTime());
-                    notesRecorded.forEach(noteState -> {
-                        synchronized (noteStates) {
-
-                            if (noteState.getTotalTimeElapsed() > current && noteState.isPlaying() &&
-                                    !noteStates.contains(noteState.getNote())) {
-                                Note note = noteState.getNote();
-                                addNote(note);
-                                noteStates.add(noteState);
-
-                            } else if (noteState.getTotalTimeElapsed() > current && !noteState.isPlaying() &&
-                                    noteStates.contains(noteState.getNote())) {
-                                Note note = noteState.getNote();
-                                stopNote(note);
-                                noteStates.remove(noteState);
-
-                            }
-                        }
-                    });
-                }
-            }
+        new RepeatThread(this) {
 
         }.start();
 
@@ -313,5 +289,25 @@ public class Player extends Thread {
             setPlayingBuffer(true);
         }
         setRecording(recording);
+    }
+
+    public boolean isLoopPlayingBuffer() {
+        return loopPlayingBuffer;
+    }
+
+    public void setLoopPlayingBuffer(boolean loopPlayingBuffer) {
+        this.loopPlayingBuffer = loopPlayingBuffer;
+    }
+
+    public NoteTimer getTimerRecording() {
+        return timerRecording;
+    }
+
+    public void setTimerRecording(NoteTimer timerRecording) {
+        this.timerRecording = timerRecording;
+    }
+
+    public List<NoteState> getNotesRecorded() {
+        return notesRecorded;
     }
 }
