@@ -62,7 +62,7 @@ public class Note {
     }
 
     public boolean isFinish() {
-        return false;//getTimer().getTotalTimeElapsed() >= this.getMinDuration();
+        return timer.getDefinitiveTime() > 0 || timer.getTotalTimeElapsed() >= getMinDuration();//getTimer().getTotalTimeElapsed() >= this.getMinDuration();
     }
 
     public long getPosition() {
@@ -77,7 +77,7 @@ public class Note {
     }
 
     public void stop() {
-
+        timer.stop();
     }
 
     public void positionInc() {

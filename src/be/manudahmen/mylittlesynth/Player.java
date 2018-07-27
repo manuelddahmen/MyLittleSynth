@@ -34,6 +34,10 @@ public class Player extends Thread {
     private SoundProductionSystem.Waveform waveform = SoundProductionSystem.Waveform.SIN;
     private double volume = 100;
     private long position;
+    private boolean recording;
+    private boolean repeat;
+    private NoteTimer timerRecording;
+
     public Player(AudioViewer audioViewer) {
         super();
         soundProductionSystem = new SoundProductionSystem();
@@ -210,6 +214,12 @@ public class Player extends Thread {
             if (getCurrentNotes().contains(note)) {
                 note.stop();
                 notes.remove(note);
+                if (isRecording()) {
+                    NoteState noteState = new NoteState(
+                            note, timerRecording.getTotalTimeElapsed(),
+                            false);
+                    timerRecording.add(noteState);
+                }
 
             }
         }
@@ -220,10 +230,29 @@ public class Player extends Thread {
                     if (!getCurrentNotes().contains(note)) {
                         addNote(note);
                         note.play();
+                        if (isRecording()) {
+                            NoteState noteState = new NoteState(
+                                    note, timerRecording.getTotalTimeElapsed(),
+                                    true);
+                            timerRecording.add(noteState);
+                        }
                     }
                 }
         );
     }
 
 
+    public boolean isRecording() {
+        return recording;
+    }
+
+    public void setRecording(boolean recording) {
+        this.recording = recording;
+        this.timerRecording = new NoteTimer();
+        timerRecording.init();
+    }
+
+    public void setRepeat(boolean repeat) {
+        this.repeat = repeat;
+    }
 }

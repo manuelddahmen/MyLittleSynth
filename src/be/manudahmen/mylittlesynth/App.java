@@ -16,16 +16,19 @@
 package be.manudahmen.mylittlesynth;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -163,6 +166,23 @@ public class App extends Application {
             player.setForm(value);
         });
         vBox.getChildren().add(radioButton);
+
+
+        Button record = new Button("REC SAMPLE");
+        vBox.getChildren().add(record);
+        record.setOnAction(actionEvent -> {
+            if (player.isRecording())
+                player.setRecording(false);
+            else
+                player.setRepeat(true);
+        });
+        Button stop = new Button("STOP REPEAT");
+        vBox.getChildren().add(stop);
+        record.setOnAction(actionEvent -> {
+            player.setRecording(false);
+            player.setRepeat(false);
+
+        });
 
 
         bp.setLeft(vBox);
