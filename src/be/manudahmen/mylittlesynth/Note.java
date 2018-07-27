@@ -66,6 +66,7 @@ public class Note {
     }
 
     public long getPosition() {
+        position = System.nanoTime() - getTimer().getInitTime();
         return position;
     }
 

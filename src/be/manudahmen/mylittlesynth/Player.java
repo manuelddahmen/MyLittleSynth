@@ -234,7 +234,7 @@ public class Player extends Thread {
         }
     }
 
-    void playNote(Note note) {
+    public void playNote(Note note) {
         Platform.runLater(() -> {
                     if (!getCurrentNotes().contains(note)) {
                         addNote(note);
