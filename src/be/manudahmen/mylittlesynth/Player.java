@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Player extends Thread {
+    private final List<NoteState> noteStates;
     private List<Note> currentNotes;
     private Timer timer;
     private boolean playing;
@@ -35,13 +36,15 @@ public class Player extends Thread {
     private double volume = 100;
     private long position;
     private boolean recording;
-    private boolean repeat;
-    private NoteTimer timerRecording;
+    private boolean playingBuffer = false;
+    private boolean loopPlayingBuffer = false;
+    private NoteTimer timerRecording = new NoteTimer();
 
     public Player(AudioViewer audioViewer) {
         super();
         soundProductionSystem = new SoundProductionSystem();
         currentNotes = Collections.synchronizedList(new ArrayList<>());
+        noteStates = Collections.synchronizedList(new ArrayList<>());
         timer = new Timer();
         timer.init();
         this.audioViewer = audioViewer;
@@ -247,12 +250,68 @@ public class Player extends Thread {
     }
 
     public void setRecording(boolean recording) {
+        System.out.println("Recording: " + recording);
+
         this.recording = recording;
-        this.timerRecording = new NoteTimer();
-        timerRecording.init();
+        if (isRecording()) {
+            timerRecording.stop();
+            timerRecording.init();
+        } else {
+            timerRecording.stop();
+            setPlayingBuffer(true);
+            playNoteBuffer(timerRecording.getNotesRecorded());
+        }
     }
 
-    public void setRepeat(boolean repeat) {
-        this.repeat = repeat;
+    private void playNoteBuffer(List<NoteState> notesRecorded) {
+        new Thread() {
+            long timeStart = System.nanoTime()
+                    - timerRecording
+                    .getInitTime();
+
+            public void run() {
+                while (isPlayingBuffer()) {
+                    long current =
+                            (System.nanoTime()
+                                    - timerRecording.getInitTime());
+                    notesRecorded.forEach(noteState -> {
+                        synchronized (noteStates) {
+
+                            if (noteState.getTotalTimeElapsed() > current && noteState.isPlaying() &&
+                                    !noteStates.contains(noteState.getNote())) {
+                                Note note = noteState.getNote();
+                                addNote(note);
+                                noteStates.add(noteState);
+
+                            } else if (noteState.getTotalTimeElapsed() > current && !noteState.isPlaying() &&
+                                    noteStates.contains(noteState.getNote())) {
+                                Note note = noteState.getNote();
+                                stopNote(note);
+                                noteStates.remove(noteState);
+
+                            }
+                        }
+                    });
+                }
+            }
+
+        }.start();
+
+    }
+
+    public void setPlayingBuffer(boolean playingBuffer) {
+        this.playingBuffer = playingBuffer;
+    }
+
+    public boolean isPlayingBuffer() {
+        return playingBuffer;
+    }
+
+    public void toggleRecording() {
+        recording = !recording;
+        if (!isRecording()) {
+            setPlayingBuffer(true);
+        }
+        setRecording(recording);
     }
 }

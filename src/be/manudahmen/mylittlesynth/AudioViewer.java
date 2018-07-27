@@ -239,7 +239,7 @@ public class AudioViewer {
 
             render(f, getDoubles().size() / 2);
             f = (System.nanoTime() - time) / 1000 / 1000;
-            System.out.println("Time since last redraw " + f + " ms");
+            //System.out.println("Time since last redraw " + f + " ms");
             time = System.nanoTime();
         }
     }

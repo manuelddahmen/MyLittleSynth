@@ -65,7 +65,11 @@ public class Timer {
         definitiveTime = (long) (getTotalTimeElapsed() * 1E9);
     }
 
-    public double getDefinitiveTime() {
+    public long getDefinitiveTime() {
         return definitiveTime;
+    }
+
+    public long getInitTime() {
+        return timeElapsedSystem;
     }
 }

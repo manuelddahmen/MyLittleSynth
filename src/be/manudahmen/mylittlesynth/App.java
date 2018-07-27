@@ -16,7 +16,6 @@
 package be.manudahmen.mylittlesynth;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -28,7 +27,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -167,24 +165,20 @@ public class App extends Application {
         });
         vBox.getChildren().add(radioButton);
 
+        boolean recording = false;
 
         Button record = new Button("REC SAMPLE");
         vBox.getChildren().add(record);
         record.setOnAction(actionEvent -> {
-            if (player.isRecording())
-                player.setRecording(false);
-            else
-                player.setRepeat(true);
+            player.toggleRecording();
         });
         Button stop = new Button("STOP REPEAT");
         vBox.getChildren().add(stop);
-        record.setOnAction(actionEvent -> {
+        stop.setOnAction(actionEvent -> {
             player.setRecording(false);
-            player.setRepeat(false);
+            player.setPlayingBuffer(false);
 
         });
-
-
         bp.setLeft(vBox);
 
 
@@ -259,6 +253,7 @@ public class App extends Application {
         });
         audioViewer = new AudioViewer(44100, 2, canvas);
         player = new Player(audioViewer);
+        player.setRecording(false);
         player.setVolume(100);
         player.start();
 
