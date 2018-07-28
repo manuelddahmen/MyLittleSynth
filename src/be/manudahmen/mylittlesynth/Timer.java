@@ -32,6 +32,7 @@ public class Timer {
     public void init() {
         timeElapsedSystem = System.nanoTime();
         timeElapsed = 0;
+        definitiveTime = -1;
     }
 
     public void pause() {
@@ -44,21 +45,21 @@ public class Timer {
     }
 
 
-    public double getTotalTimeElapsed() {
+    public long getTotalTimeElapsed() {
         long timeInter = System.nanoTime();
 
         if (timePause > 0) {
             timeElapsed = timeInter - timePause + timeElapsedSystem;
 
         } else if (definitiveTime > 0) {
-            return definitiveTime / 1E9;
+            return definitiveTime;
         } else {
             timeElapsed = (timeInter - timeElapsedSystem);
 
         }
 
 
-        return timeElapsed / 1E9;
+        return timeElapsed;
     }
 
     public void stop() {

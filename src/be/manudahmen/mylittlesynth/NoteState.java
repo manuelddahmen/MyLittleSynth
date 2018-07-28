@@ -5,10 +5,10 @@ package be.manudahmen.mylittlesynth;
  */
 public class NoteState {
     private Note note;
-    private double totalTimeElapsed;
+    private long totalTimeElapsed;
     private boolean isPlaying;
 
-    public NoteState(Note note, double totalTimeElapsed, boolean isPlaying) {
+    public NoteState(Note note, long totalTimeElapsed, boolean isPlaying) {
         this.note = note;
         this.totalTimeElapsed = totalTimeElapsed;
         this.isPlaying = isPlaying;
@@ -22,11 +22,11 @@ public class NoteState {
         this.note = note;
     }
 
-    public double getTotalTimeElapsed() {
+    public long getTotalTimeElapsed() {
         return totalTimeElapsed;
     }
 
-    public void setTotalTimeElapsed(double totalTimeElapsed) {
+    public void setTotalTimeElapsed(long totalTimeElapsed) {
         this.totalTimeElapsed = totalTimeElapsed;
     }
 

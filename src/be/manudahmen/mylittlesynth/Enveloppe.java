@@ -45,31 +45,28 @@ public class Enveloppe {
     private Timer timer;
 
 
-    public Enveloppe(double minDuration) {
+    public Enveloppe(long minDuration) {
         this.minDuration = minDuration;
         form = new
                 CourbeParametriquePolynomialeBezier(
                 points = new Point3D[]{
                         new Point3D(0.0, 0.0, 0.0),
                         new Point3D(0.0, 0.0, 0.0),
-                        new Point3D(0.0, 1.0, minDuration / 10),
-                        new Point3D(0.0, 1.0, minDuration / 2),
-                        new Point3D(0.0, 1.0, minDuration * 3 / 4.0),
-                        new Point3D(0.0, 0.2, minDuration * 8 / 10.0),
-                        new Point3D(0.0, 0.0, minDuration),
-                        new Point3D(0.0, 0.0, minDuration + 1)
+                        new Point3D(0.0, 1.0, minDuration),
+                        new Point3D(0.0, 1.0, minDuration),
                 });
 
     }
 
     public double getVolume(double duration) {
+
         if (end) {
-            return 0.0;
+            return 1;
         }
-        if (!isRelease() && duration < minDuration * 3 / 4.0) {
+        if (!isRelease() && duration < minDuration) {
             return form.calculerPoint3D(duration).getY();
-        } else if (!isRelease() && duration >= minDuration * 3 / 4.) {
-            setDuration(duration - minDuration * 3 / 4.);
+        } else if (!isRelease() && duration >= minDuration) {
+            setDuration(duration - minDuration);
             return form.calculerPoint3D(duration).getY();
         } else if (isRelease()) {
             return form.calculerPoint3D(duration - timer.getTotalTimeElapsed()).getY();

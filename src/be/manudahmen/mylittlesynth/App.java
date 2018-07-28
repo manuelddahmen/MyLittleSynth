@@ -37,8 +37,10 @@ public class App extends Application {
     private Player player;
     private AudioViewer audioViewer;
     private Map<Integer, Note> noteMap;
-    private double minDuration = 2.0;
+    private long minDuration = 4;
     private Slider volume;
+    private Button[] buttons;
+    private int[] buttonNo;
 
     public static void main(String[] args) {
         launch(args);
@@ -55,8 +57,8 @@ public class App extends Application {
 
         Scene scene = new Scene(root);
 
-        Button[] buttons = new Button[16];
-
+        buttons = new Button[16];
+        buttonNo = new int[16];
         HBox[] pane = new HBox[2];
         pane[0] = new HBox();
         pane[1] = new HBox();
@@ -125,6 +127,7 @@ public class App extends Application {
             buttons[i].setOnMouseReleased(event -> stopNote((Button) event.getSource()));
             buttons[i].setOnTouchPressed(event -> playNote((Button) event.getSource()));
             buttons[i].setOnTouchReleased(event -> stopNote((Button) event.getSource()));
+            buttonNo[i] = getTone(buttons[i]);
         }
 
         VBox vBox = new VBox();
@@ -252,7 +255,7 @@ public class App extends Application {
             }
         });
         audioViewer = new AudioViewer(44100, 2, canvas);
-        player = new Player(audioViewer);
+        player = new Player(this, audioViewer);
         player.setRecording(false);
         player.setVolume(100);
         player.start();
@@ -356,7 +359,8 @@ public class App extends Application {
     public void playNote(Button source) {
         System.out.println("Tone:  " + getTone(source) + "  Note :"
                 + ((Button) source).getText() + "  "
-                + "Octave: " + (int) slider.getValue());
+                + "Octave: " + (int) slider.getValue()
+                + "\nVolume: " + player.getVolume());
         Note note = noteMap.get(getTone(source));
         assert note != null;
         note.setEnveloppe(new Enveloppe(minDuration));
@@ -368,11 +372,19 @@ public class App extends Application {
     public void stopNote(Button source) {
         Note note = noteMap.get(getTone(source));
         assert note != null;
-        System.out.println(note.getTimer().getTotalTimeElapsed());
+        System.out.println(note.getTimer().getTotalTimeElapsed() / 1E9);
 
         player.stopNote(note);
         System.out.println("Key pressed: " + player.getCurrentNotes().size());
     }
 
+    public Button getButton(Integer halfTone) {
+        for (int i = 0; i < buttons.length; i++) {
+            if (new Integer(halfTone).equals(buttonNo[i])) {
+                return buttons[i];
+            }
+        }
+        return null;
+    }
 }
 

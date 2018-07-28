@@ -68,7 +68,7 @@ public class AudioViewer {
 
         GraphicsContext context2D = canvas.getGraphicsContext2D();
         int maxWidth = (int) canvas.getWidth();
-        Enveloppe enveloppe = new Enveloppe(1);
+        Enveloppe enveloppe = new Enveloppe(timeElapsed);
         final double[] yPoints = new double[enveloppe.points.length];
         final double[] xPoints = new double[enveloppe.points.length];
         final double[] xPoints2 = new double[maxWidth];
@@ -152,8 +152,6 @@ public class AudioViewer {
 
             }
 
-            for (int i = 0; i < volumeEnvelopes.size(); i++) {
-                double[] envi = env[i];
                 volumeEnvelopes.forEach((integer, doubles) -> {
                     Object[] doubles1 = doubles.toArray();
                     double[] unboxed = Stream.of(doubles1).mapToDouble(value -> (double) value).toArray();
@@ -162,7 +160,6 @@ public class AudioViewer {
                     // context2D.strokePolyline(xPoints2, unboxed, unboxed.length);
 
                 });
-            }
             context2D.setLineWidth(1.0);
             context2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             drawBorder(canvas.getGraphicsContext2D(), Color.RED);
@@ -180,8 +177,7 @@ public class AudioViewer {
             context2D.setFill(Color.BLACK);
             context2D.setStroke(Color.BLUE);
             context2D.strokePolyline(xPoints2, yPoints2, xPoints2.length);
-            for (int d = 0; d < env.length; d++) {
-            }
+
             context2D.setFill(Color.BLACK);
             context2D.setStroke(Color.BLUE);
             context2D.strokePolyline(xpoints, ys1, size / 2);
@@ -238,7 +234,7 @@ public class AudioViewer {
         public void handle(long now) {
 
             render(f, getDoubles().size() / 2);
-            f = (System.nanoTime() - time) / 1000 / 1000;
+            f = System.nanoTime() - time;
             //System.out.println("Time since last redraw " + f + " ms");
             time = System.nanoTime();
         }

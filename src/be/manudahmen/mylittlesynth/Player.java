@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Player extends Thread {
+    private final App app;
     private List<NoteState> notesRecorded;
 
     public List<NoteState> getNoteStates() {
@@ -46,8 +47,9 @@ public class Player extends Thread {
     private boolean loopPlayingBuffer = false;
     private NoteTimer timerRecording = new NoteTimer();
 
-    public Player(AudioViewer audioViewer) {
+    public Player(App app, AudioViewer audioViewer) {
         super();
+        this.app = app;
         soundProductionSystem = new SoundProductionSystem();
         currentNotes = Collections.synchronizedList(new ArrayList<>());
         noteStates = Collections.synchronizedList(new ArrayList<>());
@@ -61,6 +63,7 @@ public class Player extends Thread {
 
     public void addNote(Note note) {
         currentNotes.add(note);
+
     }
 
     double total = 0;
@@ -71,9 +74,9 @@ public class Player extends Thread {
         total = 0.0;
         getCurrentNotes().forEach(note -> {
                     if (!note.isFinish()) {
-                        double noteTime = note.getTimer().getTotalTimeElapsed();
+                        double noteTime = note.getTimer().getTotalTimeElapsed() / 1E9;
 
-                        double positionRatioPerSecond = note.getPosition() / 44100.0;
+                        double positionRatioPerSecond = note.getPosition() * 44100;
 
                         note.positionInc();
 
@@ -82,7 +85,7 @@ public class Player extends Thread {
                         facteurAmpl = note.getEnveloppe().getVolume(noteTime);
 
 
-                        double ampl = 32767f * facteurAmpl;
+                        double ampl = 32767d * facteurAmpl;
 
                         switch (note.getWaveform()) {
                             case SIN: // SIN
@@ -157,12 +160,9 @@ public class Player extends Thread {
         this.playing = playing;
     }
 
-    public Note addNote(int tone, double minDuration) {
+    public Note addNote(int tone, long minDuration) {
         Note note = new Note(minDuration, tone, waveform, new Enveloppe(minDuration));
-
-        Timer timer = new Timer();
-        note.setTimer(timer);
-        timer.init();
+        note.getTimer().init();
         Platform.runLater(() -> {
             getCurrentNotes().add(note);
             System.out.println("After added " + getCurrentNotes().size());
@@ -309,5 +309,9 @@ public class Player extends Thread {
 
     public List<NoteState> getNotesRecorded() {
         return notesRecorded;
+    }
+
+    public App getApp() {
+        return app;
     }
 }
