@@ -65,27 +65,26 @@ public class Player extends Thread {
         currentNotes.add(note);
 
     }
-
     double total = 0;
     double facteurAmpl = 0;
     Short a = 0;
 
+
     public void playCurrentNotes() {
+
         total = 0.0;
         getCurrentNotes().forEach(note -> {
                     if (!note.isFinish()) {
-                        double noteTime = note.getTimer().getTotalTimeElapsed() / 1E9;
+                        double noteTimeSec = note.getTimer().getTotalTimeElapsed() / 1E9;
 
-                        double positionRatioPerSecond = note.getPosition() * 44100;
+                        double positionRatioPerSecond = 1.0 * noteTimeSec;
 
-                        note.positionInc();
+                        double angle = 1.0 / positionRatioPerSecond * soundProductionSystem.calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
 
-                        double angle = positionRatioPerSecond * soundProductionSystem.calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
-
-                        facteurAmpl = note.getEnveloppe().getVolume(noteTime);
+                        facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
 
 
-                        double ampl = 32767d * facteurAmpl;
+                        double ampl = 32767 * facteurAmpl;
 
                         switch (note.getWaveform()) {
                             case SIN: // SIN
@@ -103,7 +102,8 @@ public class Player extends Thread {
 
                         }
 
-                        audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe().getBrutVolume(noteTime));
+                        audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe()
+                                .getBrutVolume(noteTimeSec));
 
                     }
                 }
@@ -160,8 +160,8 @@ public class Player extends Thread {
         this.playing = playing;
     }
 
-    public Note addNote(int tone, long minDuration) {
-        Note note = new Note(minDuration, tone, waveform, new Enveloppe(minDuration));
+    public Note addNote(int tone, long minDurationSec) {
+        Note note = new Note(minDurationSec, tone, waveform, new Enveloppe(minDurationSec));
         note.getTimer().init();
         Platform.runLater(() -> {
             getCurrentNotes().add(note);
@@ -261,7 +261,7 @@ public class Player extends Thread {
         this.recording = recording;
         if (isRecording()) {
             timerRecording.stop();
-            timerRecording.init();
+            //timerRecording.init();
             setPlayingBuffer(true);
         } else {
             timerRecording.stop();

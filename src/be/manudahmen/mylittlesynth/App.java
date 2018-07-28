@@ -37,7 +37,7 @@ public class App extends Application {
     private Player player;
     private AudioViewer audioViewer;
     private Map<Integer, Note> noteMap;
-    private long minDuration = 4;
+    private double minDurationSec = 4.0;
     private Slider volume;
     private Button[] buttons;
     private int[] buttonNo;
@@ -111,9 +111,9 @@ public class App extends Application {
 
         for (int i = 0; i < 8 * 12; i++) {
             noteMap.put(i,
-                    new Note(minDuration, i,
+                    new Note(minDurationSec, i,
                             SoundProductionSystem.Waveform.SIN,
-                            new Enveloppe(minDuration)));
+                            new Enveloppe(minDurationSec)));
 
         }
         KeyCode[] keycode = new KeyCode[]{KeyCode.A, KeyCode.Z, KeyCode.E,
@@ -363,7 +363,7 @@ public class App extends Application {
                 + "\nVolume: " + player.getVolume());
         Note note = noteMap.get(getTone(source));
         assert note != null;
-        note.setEnveloppe(new Enveloppe(minDuration));
+        note.setEnveloppe(new Enveloppe(minDurationSec));
         note.setWaveform(player.getForm());
         player.playNote(note);
 

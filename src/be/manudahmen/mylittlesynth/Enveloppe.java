@@ -36,47 +36,43 @@ import be.manudahmen.empty3.Point3D;
 import be.manudahmen.empty3.core.nurbs.CourbeParametriquePolynomialeBezier;
 
 public class Enveloppe {
-    private final double minDuration;
+    private double minDurationSec;
     private CourbeParametriquePolynomialeBezier form;
     private boolean release = false;
     private boolean end = false;
     Point3D[] points;
     private double time;
     private Timer timer;
+    private double timeFactMax = 10;
 
-
-    public Enveloppe(long minDuration) {
-        this.minDuration = minDuration;
+    public Enveloppe(double minDurationSec) {
+        this.minDurationSec = minDurationSec;
         form = new
                 CourbeParametriquePolynomialeBezier(
                 points = new Point3D[]{
                         new Point3D(0.0, 0.0, 0.0),
                         new Point3D(0.0, 0.0, 0.0),
-                        new Point3D(0.0, 1.0, minDuration),
-                        new Point3D(0.0, 1.0, minDuration),
+                        new Point3D(0.0, 1.0, minDurationSec),
+                        new Point3D(0.0, 1.0, minDurationSec * timeFactMax),
                 });
 
     }
 
     public double getVolume(double duration) {
-
-        if (end) {
-            return 1;
+        if (!isRelease()) {
+            double volume = form.calculerPoint3D(duration).getY();
+            if (volume > 1)
+                return 1.0;
+            else
+                return volume;
+        } else {
+            return form.calculerPoint3D(timer.getTotalTimeElapsed()).getY();
         }
-        if (!isRelease() && duration < minDuration) {
-            return form.calculerPoint3D(duration).getY();
-        } else if (!isRelease() && duration >= minDuration) {
-            setDuration(duration - minDuration);
-            return form.calculerPoint3D(duration).getY();
-        } else if (isRelease()) {
-            return form.calculerPoint3D(duration - timer.getTotalTimeElapsed()).getY();
-        }
-        return 0.0;
     }
 
     public void setRelease() {
         this.release = true;
-        time = 0.5;
+        //time = 0.5;
     }
 
     public void fireEndEvent() {
@@ -99,8 +95,8 @@ public class Enveloppe {
         return form.calculerPoint3D(v).getY();
     }
 
-    public double getBrutVolume(double noteDuration) {
-        return form.calculerPoint3D(noteDuration).getY();
+    public double getBrutVolume(double noteDurationSec) {
+        return getVolume(noteDurationSec);
     }
 
     public void setDuration(double inc) {

@@ -5,13 +5,13 @@ public class Note {
     private SoundProductionSystem.Waveform waveform;
     private Enveloppe enveloppe;
     private Timer timer;
-    private long minDuration;
+    private double minDurationSec;
     private boolean finish;
     private long position;
     private long definitivePosition;
 
-    public Note(long minDuration, int tone, SoundProductionSystem.Waveform waveform, Enveloppe enveloppe) {
-        this.minDuration = minDuration;
+    public Note(double minDurationSec, int tone, SoundProductionSystem.Waveform waveform, Enveloppe enveloppe) {
+        this.minDurationSec = minDurationSec;
         this.tone = tone;
         this.waveform = waveform;
         this.enveloppe = enveloppe;
@@ -21,11 +21,11 @@ public class Note {
     }
 
     public double getMinDuration() {
-        return minDuration;
+        return minDurationSec;
     }
 
     public void setMinDuration(long minDuration) {
-        this.minDuration = minDuration;
+        this.minDurationSec = minDuration;
     }
 
     public int getTone() {
@@ -82,8 +82,8 @@ public class Note {
 
     public void stop() {
 
-        timer.stop();
         definitivePosition = position;
+        timer.stop();
     }
 
     public void positionInc() {

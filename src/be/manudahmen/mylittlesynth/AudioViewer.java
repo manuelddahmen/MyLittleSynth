@@ -68,7 +68,7 @@ public class AudioViewer {
 
         GraphicsContext context2D = canvas.getGraphicsContext2D();
         int maxWidth = (int) canvas.getWidth();
-        Enveloppe enveloppe = new Enveloppe(timeElapsed);
+        Enveloppe enveloppe = new Enveloppe(timeElapsed / 1E9);
         final double[] yPoints = new double[enveloppe.points.length];
         final double[] xPoints = new double[enveloppe.points.length];
         final double[] xPoints2 = new double[maxWidth];
