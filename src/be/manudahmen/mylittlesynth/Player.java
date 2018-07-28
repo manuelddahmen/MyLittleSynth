@@ -77,27 +77,29 @@ public class Player extends Thread {
                     if (!note.isFinish()) {
                         double noteTimeSec = note.getTimer().getTotalTimeElapsed() / 1E9;
 
-                        double positionRatioPerSecond = 1.0 * noteTimeSec;
+                        double positionRatioPerSecond = noteTimeSec;
 
-                        double angle = 1.0 / positionRatioPerSecond * soundProductionSystem.calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
+                        double f2pi = soundProductionSystem.calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
+
+                        double f2piT = f2pi * positionRatioPerSecond;
 
                         facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
 
 
-                        double ampl = 32767 * facteurAmpl;
+                        double ampl = 30000 * facteurAmpl;
 
                         switch (note.getWaveform()) {
                             case SIN: // SIN
-                                total += (Math.sin(angle) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
+                                total += (Math.sin(f2piT) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
                                 break;
                             case RECT: // RECT
-                                total += (Math.signum(Math.sin(angle)) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
+                                total += (Math.signum(Math.sin(f2piT)) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
                             case SAWTOOTH: // SAWTOOTH LINEAR
-                                total += ((1 - angle / 2 * Math.PI) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
+                                total += ((1 - f2piT / 2 * Math.PI) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
                             case TRI: // TRIANGLE LINEAR
-                                total += ((1 - Math.abs(angle / 2 * Math.PI) * ampl));  //32767 - max value for sample to take (-32767 to 32767)
+                                total += ((1 - Math.abs(f2piT / 2 * Math.PI) * ampl));  //32767 - max value for sample to take (-32767 to 32767)
                             default: // SIN
-                                total += (Math.sin(angle) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
+                                total += (Math.sin(f2piT) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
                                 break;
 
                         }

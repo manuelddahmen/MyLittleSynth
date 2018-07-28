@@ -59,15 +59,17 @@ public class Enveloppe {
     }
 
     public double getVolume(double duration) {
+        double volume = 1.0;
+
         if (!isRelease()) {
-            double volume = form.calculerPoint3D(duration).getY();
-            if (volume > 1)
-                return 1.0;
-            else
-                return volume;
+            volume = form.calculerPoint3D(duration).getY();
         } else {
-            return form.calculerPoint3D(timer.getTotalTimeElapsed()).getY();
+            volume = form.calculerPoint3D(timer.getTotalTimeElapsed()).getY();
         }
+        if (Math.abs(volume) > 1)
+            return Math.signum(volume);
+        else
+            return volume;
     }
 
     public void setRelease() {
