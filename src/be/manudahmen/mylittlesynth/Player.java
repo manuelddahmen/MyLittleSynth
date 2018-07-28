@@ -34,7 +34,6 @@ public class Player extends Thread {
     private List<Note> currentNotes;
     private Timer timer;
     private boolean playing;
-    private SoundProductionSystem soundProductionSystem;
     private Player that;
     private AudioViewer audioViewer;
     private int octave = 4;
@@ -50,7 +49,6 @@ public class Player extends Thread {
     public Player(App app, AudioViewer audioViewer) {
         super();
         this.app = app;
-        soundProductionSystem = new SoundProductionSystem();
         currentNotes = Collections.synchronizedList(new ArrayList<>());
         noteStates = Collections.synchronizedList(new ArrayList<>());
         timer = new Timer();
@@ -74,12 +72,13 @@ public class Player extends Thread {
 
         total = 0.0;
         getCurrentNotes().forEach(note -> {
-                    if (!note.isFinish()) {
+            if (true || !note.isFinish()) {
                         double noteTimeSec = note.getTimer().getTotalTimeElapsed() / 1E9;
 
                         double positionRatioPerSecond = noteTimeSec;
 
-                        double f2pi = soundProductionSystem.calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
+                double f2pi = app.getSoundProductionSystem()
+                        .calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
 
                         double f2piT = f2pi * positionRatioPerSecond;
 
@@ -142,7 +141,8 @@ public class Player extends Thread {
         nextBuffer[2] = (byte) (a & 0xFF); //write 8bits ________WWWWWWWW out of 16
         nextBuffer[3] = (byte) (a >> 8); //write 8bits WWWWWWWW________ out of 16
         try {
-            soundProductionSystem.getLine().write(nextBuffer, 0, 4);
+            app.getSoundProductionSystem().getLine().write(nextBuffer, 0, 4);
+            app.getSoundProductionSystem().writeWaveBuffer(nextBuffer);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

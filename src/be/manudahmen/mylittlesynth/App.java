@@ -27,11 +27,21 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 public class App extends Application {
     private Slider slider;
+
+    public SoundProductionSystem getSoundProductionSystem() {
+        return soundProductionSystem;
+    }
+
+    public void setSoundProductionSystem(SoundProductionSystem soundProductionSystem) {
+        this.soundProductionSystem = soundProductionSystem;
+    }
+
     private SoundProductionSystem soundProductionSystem;
     private ToggleGroup group;
     private Player player;
@@ -48,8 +58,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-
-        soundProductionSystem = new SoundProductionSystem();
+        setSoundProductionSystem(new SoundProductionSystem(60f));
         Parent root = new AnchorPane();
 
         root.minWidth(800);
@@ -182,6 +191,12 @@ public class App extends Application {
             player.setPlayingBuffer(false);
 
         });
+        Button wav = new Button("WAVE");
+        vBox.getChildren().add(wav);
+        stop.setOnAction(actionEvent -> {
+            setSoundProductionSystem(new SoundProductionSystem(60f));
+
+        });
         bp.setLeft(vBox);
 
 
@@ -251,7 +266,12 @@ public class App extends Application {
             public void handle(WindowEvent event) {
                 player.setPlaying(false);
                 audioViewer.setRunning(false);
+                getSoundProductionSystem().write();
+                getSoundProductionSystem().end();
+                getSoundProductionSystem().setEnded(true);
+
                 System.exit(0);
+
             }
         });
         audioViewer = new AudioViewer(44100, 2, canvas);

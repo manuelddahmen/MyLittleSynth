@@ -112,40 +112,89 @@
 
 package be.manudahmen.mylittlesynth;
 
-import be.manudahmen.empty3.Point3D;
-import be.manudahmen.empty3.core.nurbs.CourbeParametriquePolynomialeBezier;
-import be.manudahmen.empty3.core.tribase.Tubulaire;
-
 import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class SoundProductionSystem {
 
+
+    private ByteArrayInputStream audioInputStreamWave;
+    private OutputStream newOutWavFile;
+    private boolean ended;
 
     public SourceDataLine getLine() {
         return sdl;
     }
 
+    public OutputStream getNewOutWavFile() {
+        outWavFile = getOutWavFile();
+        try {
+            return new FileOutputStream(outWavFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean isEnded() {
+        return ended;
+    }
+
     public enum Waveform {SIN, RECT, SAWTOOTH, TRI}
 
     ;
-    private boolean fileOutput;
     private File outWavFile;
     private AudioFormat af;
     byte[] buffer;
     AudioInputStream audioInputStream;
     private int buffIdx = 0;
     private final int samplerate = 44100;
+    private int buffLen = 100 * 4;
     private SourceDataLine sdl;
+    private final int BUFFMAXLENGTH = 3 * 44100 * 60 * 4;
+    boolean bigEndian = false;
+    boolean signed = true;
+    int bits = 16;
+    int channels = 2;
+    double sampleRate = 44100.0;
 
-    public SoundProductionSystem(float secondsFile, File outWavFile) {
+    public SoundProductionSystem(float secondsFile) {
         this();
-        this.outWavFile = outWavFile;
-        this.fileOutput = true;
-        int channels = 2;
-        buffer = new byte[(int) (channels * secondsFile * 44100)];
+        this.outWavFile = getOutWavFile();
+        buffer = new byte[BUFFMAXLENGTH];
+        af = new AudioFormat((float) sampleRate, bits, channels, signed, bigEndian);
+    }
+
+    public File getOutWavFile() {
+        return
+                new File
+                        (
+                                "outputWave-" + Math.random() + "record.wav"
+                        );
+    }
+
+    public void writeWaveBuffer(byte[] data) {
+        for (int i = 0; i < data.length; i++) {
+            buffer[i] = data[i];
+            buffLen++;
+        }
+        if (buffLen >= BUFFMAXLENGTH || isEnded()) {
+            write();
+        }
+    }
+
+    public void write() {
+        try {
+            byte[] buf2 = new byte[buffLen];
+            ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+            audioInputStream = new AudioInputStream(bais, af, buffLen / 4);
+            AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, outWavFile);
+            audioInputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        buffLen = 0;
+        outWavFile = getOutWavFile();
     }
 
     public SoundProductionSystem() {
@@ -172,19 +221,12 @@ public class SoundProductionSystem {
     public void end() {
         sdl.drain();
         sdl.stop();
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-
-        audioInputStream = new AudioInputStream(bais, af, buffer.length);
-        try {
-            AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, outWavFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         try {
             audioInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     public int equiv(String noteAnglaise) {
@@ -232,5 +274,13 @@ public class SoundProductionSystem {
         tone += (noteAnglaise.charAt(noteAnglaise.length() - 1) == 'b') ? 0.5 : 0;
 
         return tone;
+    }
+
+    public byte[] getBuffer() {
+        return buffer;
+    }
+
+    public void setEnded(boolean ended) {
+        this.ended = ended;
     }
 }
