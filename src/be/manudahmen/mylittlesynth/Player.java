@@ -133,9 +133,9 @@ public class Player extends Thread {
 
     }
 
+    byte[] nextBuffer = new byte[4];
     public void playBufferMono(short amplitude) {
         short a = amplitude;
-        byte[] nextBuffer = new byte[4];
         nextBuffer[0] = (byte) (a & 0xFF); //write 8bits ________WWWWWWWW out of 16
         nextBuffer[1] = (byte) (a >> 8); //write 8bits WWWWWWWW________ out of 16
         nextBuffer[2] = (byte) (a & 0xFF); //write 8bits ________WWWWWWWW out of 16
@@ -239,6 +239,7 @@ public class Player extends Thread {
     public void playNote(Note note) {
         Platform.runLater(() -> {
                     if (!getCurrentNotes().contains(note)) {
+                        note.setWaveform(getForm());
                         addNote(note);
                         note.play();
                         if (isRecording()) {

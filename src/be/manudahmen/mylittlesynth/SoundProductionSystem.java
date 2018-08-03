@@ -169,15 +169,16 @@ public class SoundProductionSystem {
         return
                 new File
                         (
-                                "outputWave-" + Math.random() + "record.wav"
+                                "outputWave-" + System.nanoTime() + "record.wav"
                         );
     }
 
     public void writeWaveBuffer(byte[] data) {
-        for (int i = 0; i < data.length; i++) {
-            buffer[i] = data[i];
-            buffLen++;
+        int j = 0;
+        for (int i = buffLen; i < buffLen + data.length; i++) {
+            buffer[i] = data[j++];
         }
+        buffLen += 4;
         if (buffLen >= BUFFMAXLENGTH || isEnded()) {
             write();
         }

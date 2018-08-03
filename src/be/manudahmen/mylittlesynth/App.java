@@ -17,6 +17,7 @@ package be.manudahmen.mylittlesynth;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -27,7 +28,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,8 +107,8 @@ public class App extends Application {
 
         for (int i = 0; i < buttons.length; i++) {
             buttons[i] = new Button(notes[i]);
-            buttons[i].setLayoutX(100 + i * 30);
-            buttons[i].setLayoutY(150 + (i >= 8 ? 30 : 0));
+            buttons[i].setLayoutX(100 + i * 90);
+            buttons[i].setLayoutY(150 + (i >= 8 ? 60 : 0));
             buttons[i].setId("Button" + i);
             buttons[i].arm();
             //noteMap.put(getTone(buttons[i]), new Note(minDuration, getTone(buttons[i]),
@@ -136,6 +136,7 @@ public class App extends Application {
             buttons[i].setOnMouseReleased(event -> stopNote((Button) event.getSource()));
             buttons[i].setOnTouchPressed(event -> playNote((Button) event.getSource()));
             buttons[i].setOnTouchReleased(event -> stopNote((Button) event.getSource()));
+            buttons[i].setPadding(new Insets(10, 10, 10, 10)); //margins around the whole grid
             buttonNo[i] = getTone(buttons[i]);
         }
 
@@ -146,34 +147,42 @@ public class App extends Application {
         RadioButton radioButton = new RadioButton();
         radioButton.setText("Sine");
         radioButton.setToggleGroup(group);
+        radioButton.setUserData(SoundProductionSystem.Waveform.SIN);
         radioButton.setSelected(true);
         radioButton.setOnAction(event -> {
-            String value = ((RadioButton) event.getSource()).getText();
-            player.setForm(value);
+            RadioButton source = (RadioButton) event.getSource();
+            String value = source.getText();
+            setForm((SoundProductionSystem.Waveform) source.getUserData());
         });
         vBox.getChildren().add(radioButton);
         radioButton = new RadioButton();
         radioButton.setText("Square");
+        radioButton.setUserData(SoundProductionSystem.Waveform.RECT);
         radioButton.setToggleGroup(group);
         radioButton.setOnAction(event -> {
-            String value = ((RadioButton) event.getSource()).getText();
-            player.setForm(value);
+            RadioButton source = (RadioButton) event.getSource();
+            String value = source.getText();
+            setForm((SoundProductionSystem.Waveform) source.getUserData());
         });
         vBox.getChildren().add(radioButton);
         radioButton = new RadioButton();
         radioButton.setText("Triangle");
         radioButton.setToggleGroup(group);
+        radioButton.setUserData(SoundProductionSystem.Waveform.TRI);
         radioButton.setOnAction(event -> {
-            String value = ((RadioButton) event.getSource()).getText();
-            player.setForm(value);
+            RadioButton source = (RadioButton) event.getSource();
+            String value = source.getText();
+            setForm((SoundProductionSystem.Waveform) source.getUserData());
         });
         vBox.getChildren().add(radioButton);
         radioButton = new RadioButton();
         radioButton.setText("Sawtooth");
+        radioButton.setUserData(SoundProductionSystem.Waveform.SAWTOOTH);
         radioButton.setToggleGroup(group);
         radioButton.setOnAction(event -> {
-            String value = ((RadioButton) event.getSource()).getText();
-            player.setForm(value);
+            RadioButton source = (RadioButton) event.getSource();
+            String value = source.getText();
+            setForm((SoundProductionSystem.Waveform) source.getUserData());
         });
         vBox.getChildren().add(radioButton);
 
@@ -193,10 +202,46 @@ public class App extends Application {
         });
         Button wav = new Button("WAVE");
         vBox.getChildren().add(wav);
-        stop.setOnAction(actionEvent -> {
+        wav.setOnAction(actionEvent -> {
             setSoundProductionSystem(new SoundProductionSystem(60f));
 
         });
+        Button roundButton = new Button();
+/*
+        roundButton.setStyle(
+                "-fx-background-radius: 50em; " +
+                        "-fx-min-width: 30px; " +
+                        "-fx-min-height: 30px; " +
+                        "-fx-max-width: 30px; " +
+                        "-fx-max-height: 30px;"
+        );
+*/
+        roundButton.setOnRotate(new EventHandler<RotateEvent>() {
+            @Override
+            public void handle(RotateEvent rotateEvent) {
+                System.out.println("rotate" + rotateEvent.getAngle());
+            }
+        });
+        roundButton.setOnRotationFinished(new EventHandler<RotateEvent>() {
+            @Override
+            public void handle(RotateEvent rotateEvent) {
+                System.out.println("rotation finish" + rotateEvent.getAngle());
+            }
+        });
+        vBox.getChildren().add(roundButton);
+
+        audioViewer = new AudioViewer(44100, 2, canvas);
+        Slider zoomSlider = new Slider();
+        zoomSlider.setMin(1.0);
+        zoomSlider.setMin(20.0);
+        zoomSlider.setValue(1.0);
+        audioViewer.setZoom(1.0);
+        zoomSlider.setOnMouseReleased(mouseEvent -> {
+            audioViewer.setZoom(zoomSlider.getValue());
+        });
+        vBox.getChildren().add(zoomSlider);
+
+
         bp.setLeft(vBox);
 
 
@@ -232,6 +277,7 @@ public class App extends Application {
 
 
         titledPanes[0].setContent(bp2);
+        bp2.setPadding(new Insets(20.0, 20., 20., 20.));
 
         titledPanes[1] = new TitledPane();
         titledPanes[1].setContent(new NoteGrid());
@@ -244,7 +290,6 @@ public class App extends Application {
 
         accordion.setExpandedPane(titledPanes[0]);
 
-
         bp2.setBottom(volume = new Slider());
         volume.setMin(0);
         volume.setMax(100);
@@ -255,10 +300,10 @@ public class App extends Application {
             System.out.println("Volume du player: " + player.getVolume());
 
         });
+        //(top/right/bottom/left)
 
         primaryStage.setTitle("Plants 2.0 synth");
         primaryStage.setScene(scene);
-
 
         primaryStage.show();
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -274,7 +319,6 @@ public class App extends Application {
 
             }
         });
-        audioViewer = new AudioViewer(44100, 2, canvas);
         player = new Player(this, audioViewer);
         player.setRecording(false);
         player.setVolume(100);
@@ -354,8 +398,9 @@ public class App extends Application {
 
     }
 
-    public void setForm() {
-        SoundProductionSystem.Waveform waveform = SoundProductionSystem.Waveform.SIN;
+    public void setForm(SoundProductionSystem.Waveform userData) {
+        SoundProductionSystem.Waveform waveform = userData;
+/*
         RadioButton selectedRadioButton = (RadioButton) group.getSelectedToggle();
         String toogleGroupValue = selectedRadioButton.getText();
         switch (toogleGroupValue) {
@@ -373,6 +418,7 @@ public class App extends Application {
                 break;
 
         }
+*/
         player.setWaveform(waveform);
     }
 
