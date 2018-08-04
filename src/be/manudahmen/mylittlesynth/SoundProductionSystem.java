@@ -151,7 +151,7 @@ public class SoundProductionSystem {
     private final int samplerate = 44100;
     private int buffLen = 100 * 4;
     private SourceDataLine sdl;
-    private final int BUFFMAXLENGTH = 3 * 44100 * 60 * 4;
+    private final int BUFFMAXLENGTH = 16 * 44100 * 60 * 4;
     boolean bigEndian = false;
     boolean signed = true;
     int bits = 16;

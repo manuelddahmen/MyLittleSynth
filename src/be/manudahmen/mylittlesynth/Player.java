@@ -72,20 +72,20 @@ public class Player extends Thread {
 
         total = 0.0;
         getCurrentNotes().forEach(note -> {
-            if (true || !note.isFinish()) {
-                        double noteTimeSec = note.getTimer().getTotalTimeElapsed() / 1E9;
+            if (!note.isFinish()) {
+                double noteTimeSec = note.getTimer().getTotalTimeElapsed() / 1E9;
 
-                        double positionRatioPerSecond = noteTimeSec;
+                double positionRatioPerSecond = noteTimeSec;
 
                 double f2pi = app.getSoundProductionSystem()
                         .calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
 
-                        double f2piT = f2pi * positionRatioPerSecond;
+                double f2piT = f2pi * positionRatioPerSecond;
 
-                        facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
+                facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
 
 
-                        double ampl = 30000 * facteurAmpl;
+                double ampl = 30000 * facteurAmpl;
 
                         switch (note.getWaveform()) {
                             case SIN: // SIN
@@ -103,8 +103,8 @@ public class Player extends Thread {
 
                         }
 
-                        audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe()
-                                .getBrutVolume(noteTimeSec));
+                audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe()
+                        .getBrutVolume(noteTimeSec));
 
                     }
                 }
