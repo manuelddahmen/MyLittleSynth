@@ -5,27 +5,27 @@ public class Note {
     private SoundProductionSystem.Waveform waveform;
     private Enveloppe enveloppe;
     private Timer timer;
-    private double minDuration;
+    private double minDurationSec;
     private boolean finish;
     private long position;
+    private long definitivePosition;
 
-    public Note(double minDuration, int tone, SoundProductionSystem.Waveform waveform, Enveloppe enveloppe) {
-        this.minDuration = minDuration;
+    public Note(double minDurationSec, int tone, SoundProductionSystem.Waveform waveform, Enveloppe enveloppe) {
+        this.minDurationSec = minDurationSec;
         this.tone = tone;
         this.waveform = waveform;
         this.enveloppe = enveloppe;
         position = 0;
-        this.timer = new Timer();
-        timer.init();
-        enveloppe.setTimer(timer);
+        init();
+
     }
 
     public double getMinDuration() {
-        return minDuration;
+        return minDurationSec;
     }
 
-    public void setMinDuration(double minDuration) {
-        this.minDuration = minDuration;
+    public void setMinDuration(long minDuration) {
+        this.minDurationSec = minDuration;
     }
 
     public int getTone() {
@@ -57,30 +57,52 @@ public class Note {
         timer.init();
     }
 
+    public void init() {
+        this.timer = new Timer();
+        timer.init();
+        enveloppe.setTimer(timer);
+    }
     public Timer getTimer() {
         return timer;
     }
 
     public boolean isFinish() {
-        return timer.getDefinitiveTime() > 0 || timer.getTotalTimeElapsed() >= getMinDuration();//getTimer().getTotalTimeElapsed() >= this.getMinDuration();
+        return timer.getDefinitiveTime() > timer.getTotalTimeElapsed();
     }
 
     public long getPosition() {
+        position = System.nanoTime() - getTimer().getInitTime();
         return position;
     }
 
     public void play() {
-        Timer timer = new Timer();
-        setTimer(timer);
         position = 0;
         timer.init();
     }
 
     public void stop() {
+
+        definitivePosition = position;
         timer.stop();
     }
 
     public void positionInc() {
         position++;
+    }
+
+    public void setFinish(boolean finish) {
+        this.finish = finish;
+    }
+
+    public void setPosition(long position) {
+        this.position = position;
+    }
+
+    public long getDefinitivePosition() {
+        return definitivePosition;
+    }
+
+    public void setDefinitivePosition(long definitivePosition) {
+        this.definitivePosition = definitivePosition;
     }
 }

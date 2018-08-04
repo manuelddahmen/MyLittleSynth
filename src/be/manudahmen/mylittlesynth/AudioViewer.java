@@ -28,6 +28,8 @@ public class AudioViewer {
     private int numberOfSamplesPerPixel = 1;
     private final LinkedList<Double> doubles = new LinkedList<>();
     private Map<Object, ArrayList<Double>> volumeEnvelopes = Collections.synchronizedMap(new HashMap<>());
+    private double zoom = 1.0;
+
     private LinkedList<Double> getDoubles() {
         return doubles;
     }
@@ -68,11 +70,13 @@ public class AudioViewer {
 
         GraphicsContext context2D = canvas.getGraphicsContext2D();
         int maxWidth = (int) canvas.getWidth();
-        Enveloppe enveloppe = new Enveloppe(1);
-        final double[] yPoints = new double[enveloppe.points.length];
+        Enveloppe enveloppe = new Enveloppe(timeElapsed / 1E9);
         final double[] xPoints = new double[enveloppe.points.length];
+        final double[] yPoints = new double[enveloppe.points.length];
+
         final double[] xPoints2 = new double[maxWidth];
         final double[] yPoints2 = new double[maxWidth];
+
         final double maxHeight = canvas.getHeight() / 2;
         //System.out.println("maxHeight:" + maxHeight);
         for (int i = 0; i < enveloppe.points.length; i++) {
@@ -94,13 +98,13 @@ public class AudioViewer {
 
         }
         LinkedList<Double> doubles2 = getDoubles();
+        int total = 0;
         if (doubles2.size() >= channels) {
             //System.out.println("DOUBLES:" + doubles2.getFirst());
-            int size = (int) Math.min(canvas.getWidth() * 2, doubles2.size() / numberOfSamplesPerPixel);
+            int size = (int) Math.min(canvas.getWidth() * 2 * numberOfSamplesPerPixel, doubles2.size());
 
             final double[] samples = new double[size];
 
-            int total = 0;
 
             do {
                 int i = 0;
@@ -114,16 +118,20 @@ public class AudioViewer {
                 }
             } while ((sampleSpeed(timeElapsed, numberOfSamples) > treatmentSpeed(timeElapsed, total)));
 
-            final double[] xpoints = new double[size / 2];
-            final double[] xs = new double[size / 2];
-            final double[] ys1 = new double[size / 2];
-            final double[] ys2 = new double[size / 2];
-            final double[][] env = new double[volumeEnvelopes.size()][size / 2];
+            int halfSize = total / 2;
+            numberOfSamplesPerPixel = (int) (zoom);
+            //System.out.println("Total"+total);
+            //System.out.println("Zoom"+zoom);
+            //System.out.println("numberOfSamplesPerPixel"+numberOfSamplesPerPixel);
+            //System.out.println("Draw size"+halfSize/(int)zoom);
 
+            final double[] xpoints = new double[halfSize / (int) zoom];
+            final double[] xs = new double[halfSize / (int) zoom];
+            final double[] ys1 = new double[halfSize / (int) zoom];
+            final double[] ys2 = new double[halfSize / (int) zoom];
+            final double[][] env = new double[volumeEnvelopes.size()][total / 2];
 
-            int halfSize = size / 2;
-
-            for (int i = 0; i < halfSize; ) {
+            for (int i = 0; i < halfSize / (int) zoom; i += 1) {
 
                 xs[i] = position++;
 
@@ -134,26 +142,25 @@ public class AudioViewer {
                 ys1[i] = 0;
                 ys2[i] = 0;
 
-                while (k < numberOfSamplesPerPixel * 2) {
-                    ys1[i] += samples[i + k++] * maxHeight / max + maxHeight;
+                while (k < numberOfSamplesPerPixel && i + k <= samples.length - channels) {
 
-                    ys2[i] += samples[i + k++] * maxHeight / max + maxHeight;
+                    ys1[i] += samples[i + k++];
+
+                    ys2[i] += samples[i + k++];
 
 
                     if (position >= canvas.getWidth()) {
                         position = 0;
+                        context2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
                     }
                 }
 
 
-                ys1[i] /= numberOfSamplesPerPixel;
-                ys2[i] /= numberOfSamplesPerPixel;
-                i += 1;
+                ys1[i] = ys1[i] / numberOfSamplesPerPixel * maxHeight / max + maxHeight;
+                ys2[i] = ys2[i] / numberOfSamplesPerPixel * maxHeight / max + maxHeight;
 
             }
 
-            for (int i = 0; i < volumeEnvelopes.size(); i++) {
-                double[] envi = env[i];
                 volumeEnvelopes.forEach((integer, doubles) -> {
                     Object[] doubles1 = doubles.toArray();
                     double[] unboxed = Stream.of(doubles1).mapToDouble(value -> (double) value).toArray();
@@ -162,9 +169,7 @@ public class AudioViewer {
                     // context2D.strokePolyline(xPoints2, unboxed, unboxed.length);
 
                 });
-            }
             context2D.setLineWidth(1.0);
-            context2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             drawBorder(canvas.getGraphicsContext2D(), Color.RED);
             context2D.strokePolyline(xPoints, yPoints, xPoints.length);
             for (int i = 0; i < xPoints2.length; i++) {
@@ -180,12 +185,11 @@ public class AudioViewer {
             context2D.setFill(Color.BLACK);
             context2D.setStroke(Color.BLUE);
             context2D.strokePolyline(xPoints2, yPoints2, xPoints2.length);
-            for (int d = 0; d < env.length; d++) {
-            }
+
             context2D.setFill(Color.BLACK);
             context2D.setStroke(Color.BLUE);
-            context2D.strokePolyline(xpoints, ys1, size / 2);
-            context2D.strokePolyline(xpoints, ys2, size / 2);
+            context2D.strokePolyline(xpoints, ys1, Math.min(ys1.length, xpoints.length));
+            context2D.strokePolyline(xpoints, ys2, Math.min(ys2.length, xpoints.length));
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -238,9 +242,17 @@ public class AudioViewer {
         public void handle(long now) {
 
             render(f, getDoubles().size() / 2);
-            f = (System.nanoTime() - time) / 1000 / 1000;
-            System.out.println("Time since last redraw " + f + " ms");
+            f = System.nanoTime() - time;
+            //System.out.println("Time since last redraw " + f + " ms");
             time = System.nanoTime();
         }
+    }
+
+    public double getZoom() {
+        return zoom;
+    }
+
+    public void setZoom(double zoom) {
+        this.zoom = zoom;
     }
 }

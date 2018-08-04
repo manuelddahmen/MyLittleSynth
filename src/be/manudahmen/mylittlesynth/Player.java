@@ -23,10 +23,17 @@ import java.util.Collections;
 import java.util.List;
 
 public class Player extends Thread {
+    private final App app;
+    private List<NoteState> notesRecorded;
+
+    public List<NoteState> getNoteStates() {
+        return noteStates;
+    }
+
+    private final List<NoteState> noteStates;
     private List<Note> currentNotes;
     private Timer timer;
     private boolean playing;
-    private SoundProductionSystem soundProductionSystem;
     private Player that;
     private AudioViewer audioViewer;
     private int octave = 4;
@@ -34,10 +41,16 @@ public class Player extends Thread {
     private SoundProductionSystem.Waveform waveform = SoundProductionSystem.Waveform.SIN;
     private double volume = 100;
     private long position;
-    public Player(AudioViewer audioViewer) {
+    private boolean recording;
+    private boolean playingBuffer = false;
+    private boolean loopPlayingBuffer = false;
+    private NoteTimer timerRecording = new NoteTimer();
+
+    public Player(App app, AudioViewer audioViewer) {
         super();
-        soundProductionSystem = new SoundProductionSystem();
+        this.app = app;
         currentNotes = Collections.synchronizedList(new ArrayList<>());
+        noteStates = Collections.synchronizedList(new ArrayList<>());
         timer = new Timer();
         timer.init();
         this.audioViewer = audioViewer;
@@ -48,46 +61,50 @@ public class Player extends Thread {
 
     public void addNote(Note note) {
         currentNotes.add(note);
-    }
 
+    }
     double total = 0;
     double facteurAmpl = 0;
     Short a = 0;
 
+
     public void playCurrentNotes() {
+
         total = 0.0;
         getCurrentNotes().forEach(note -> {
-                    if (!note.isFinish()) {
-                        double noteTime = note.getTimer().getTotalTimeElapsed();
+            if (true || !note.isFinish()) {
+                        double noteTimeSec = note.getTimer().getTotalTimeElapsed() / 1E9;
 
-                        double positionRatioPerSecond = note.getPosition() / 44100.0;
+                        double positionRatioPerSecond = noteTimeSec;
 
-                        note.positionInc();
+                double f2pi = app.getSoundProductionSystem()
+                        .calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
 
-                        double angle = positionRatioPerSecond * soundProductionSystem.calculateNoteFrequency(note.getTone()) * 2.0 * Math.PI;
+                        double f2piT = f2pi * positionRatioPerSecond;
 
-                        facteurAmpl = note.getEnveloppe().getVolume(noteTime);
+                        facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
 
 
-                        double ampl = 32767f * facteurAmpl;
+                        double ampl = 30000 * facteurAmpl;
 
                         switch (note.getWaveform()) {
                             case SIN: // SIN
-                                total += (Math.sin(angle) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
+                                total += (Math.sin(f2piT) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
                                 break;
                             case RECT: // RECT
-                                total += (Math.signum(Math.sin(angle)) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
+                                total += (Math.signum(Math.sin(f2piT)) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
                             case SAWTOOTH: // SAWTOOTH LINEAR
-                                total += ((1 - angle / 2 * Math.PI) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
+                                total += ((1 - f2piT / 2 * Math.PI) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
                             case TRI: // TRIANGLE LINEAR
-                                total += ((1 - Math.abs(angle / 2 * Math.PI) * ampl));  //32767 - max value for sample to take (-32767 to 32767)
+                                total += ((1 - Math.abs(f2piT / 2 * Math.PI) * ampl));  //32767 - max value for sample to take (-32767 to 32767)
                             default: // SIN
-                                total += (Math.sin(angle) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
+                                total += (Math.sin(f2piT) * ampl);  //32767 - max value for sample to take (-32767 to 32767)
                                 break;
 
                         }
 
-                        audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe().getBrutVolume(noteTime));
+                        audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe()
+                                .getBrutVolume(noteTimeSec));
 
                     }
                 }
@@ -116,15 +133,16 @@ public class Player extends Thread {
 
     }
 
+    byte[] nextBuffer = new byte[4];
     public void playBufferMono(short amplitude) {
         short a = amplitude;
-        byte[] nextBuffer = new byte[4];
         nextBuffer[0] = (byte) (a & 0xFF); //write 8bits ________WWWWWWWW out of 16
         nextBuffer[1] = (byte) (a >> 8); //write 8bits WWWWWWWW________ out of 16
         nextBuffer[2] = (byte) (a & 0xFF); //write 8bits ________WWWWWWWW out of 16
         nextBuffer[3] = (byte) (a >> 8); //write 8bits WWWWWWWW________ out of 16
         try {
-            soundProductionSystem.getLine().write(nextBuffer, 0, 4);
+            app.getSoundProductionSystem().getLine().write(nextBuffer, 0, 4);
+            app.getSoundProductionSystem().writeWaveBuffer(nextBuffer);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -144,12 +162,9 @@ public class Player extends Thread {
         this.playing = playing;
     }
 
-    public Note addNote(int tone, double minDuration) {
-        Note note = new Note(minDuration, tone, waveform, new Enveloppe(minDuration));
-
-        Timer timer = new Timer();
-        note.setTimer(timer);
-        timer.init();
+    public Note addNote(int tone, long minDurationSec) {
+        Note note = new Note(minDurationSec, tone, waveform, new Enveloppe(minDurationSec));
+        note.getTimer().init();
         Platform.runLater(() -> {
             getCurrentNotes().add(note);
             System.out.println("After added " + getCurrentNotes().size());
@@ -204,26 +219,102 @@ public class Player extends Thread {
         return volume;
     }
 
-    void stopNote(Note note) {
+    public void stopNote(Note note) {
         List<Note> notes = getCurrentNotes();
         synchronized (notes) {
             if (getCurrentNotes().contains(note)) {
                 note.stop();
                 notes.remove(note);
+                if (isRecording()) {
+                    NoteState noteState = new NoteState(
+                            note, timerRecording.getTotalTimeElapsed(),
+                            false);
+                    timerRecording.add(noteState);
+                }
 
             }
         }
     }
 
-    void playNote(Note note) {
+    public void playNote(Note note) {
         Platform.runLater(() -> {
                     if (!getCurrentNotes().contains(note)) {
+                        note.setWaveform(getForm());
                         addNote(note);
                         note.play();
+                        if (isRecording()) {
+                            NoteState noteState = new NoteState(
+                                    note, timerRecording.getTotalTimeElapsed(),
+                                    true);
+                            timerRecording.add(noteState);
+                        }
                     }
                 }
         );
     }
 
 
+    public boolean isRecording() {
+        return recording;
+    }
+
+    public void setRecording(boolean recording) {
+        System.out.println("Recording: " + recording);
+
+        this.recording = recording;
+        if (isRecording()) {
+            timerRecording.stop();
+            //timerRecording.init();
+            setPlayingBuffer(true);
+        } else {
+            timerRecording.stop();
+        }
+    }
+
+    private void playNoteBuffer(List<NoteState> notesRecorded) {
+        new RepeatThread(this) {
+
+        }.start();
+
+    }
+
+    public void setPlayingBuffer(boolean playingBuffer) {
+        this.playingBuffer = playingBuffer;
+    }
+
+    public boolean isPlayingBuffer() {
+        return playingBuffer;
+    }
+
+    public void toggleRecording() {
+        recording = !recording;
+        if (!isRecording()) {
+            setPlayingBuffer(true);
+        }
+        setRecording(recording);
+    }
+
+    public boolean isLoopPlayingBuffer() {
+        return loopPlayingBuffer;
+    }
+
+    public void setLoopPlayingBuffer(boolean loopPlayingBuffer) {
+        this.loopPlayingBuffer = loopPlayingBuffer;
+    }
+
+    public NoteTimer getTimerRecording() {
+        return timerRecording;
+    }
+
+    public void setTimerRecording(NoteTimer timerRecording) {
+        this.timerRecording = timerRecording;
+    }
+
+    public List<NoteState> getNotesRecorded() {
+        return notesRecorded;
+    }
+
+    public App getApp() {
+        return app;
+    }
 }

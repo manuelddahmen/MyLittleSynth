@@ -17,10 +17,12 @@ package be.manudahmen.mylittlesynth;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -31,13 +33,24 @@ import java.util.Map;
 
 public class App extends Application {
     private Slider slider;
+
+    public SoundProductionSystem getSoundProductionSystem() {
+        return soundProductionSystem;
+    }
+
+    public void setSoundProductionSystem(SoundProductionSystem soundProductionSystem) {
+        this.soundProductionSystem = soundProductionSystem;
+    }
+
     private SoundProductionSystem soundProductionSystem;
     private ToggleGroup group;
     private Player player;
     private AudioViewer audioViewer;
     private Map<Integer, Note> noteMap;
-    private double minDuration = 2.0;
+    private double minDurationSec = 4.0;
     private Slider volume;
+    private Button[] buttons;
+    private int[] buttonNo;
 
     public static void main(String[] args) {
         launch(args);
@@ -45,8 +58,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-
-        soundProductionSystem = new SoundProductionSystem();
+        setSoundProductionSystem(new SoundProductionSystem(60f));
         Parent root = new AnchorPane();
 
         root.minWidth(800);
@@ -54,8 +66,8 @@ public class App extends Application {
 
         Scene scene = new Scene(root);
 
-        Button[] buttons = new Button[16];
-
+        buttons = new Button[16];
+        buttonNo = new int[16];
         HBox[] pane = new HBox[2];
         pane[0] = new HBox();
         pane[1] = new HBox();
@@ -95,8 +107,8 @@ public class App extends Application {
 
         for (int i = 0; i < buttons.length; i++) {
             buttons[i] = new Button(notes[i]);
-            buttons[i].setLayoutX(100 + i * 30);
-            buttons[i].setLayoutY(150 + (i >= 8 ? 30 : 0));
+            buttons[i].setLayoutX(100 + i * 90);
+            buttons[i].setLayoutY(150 + (i >= 8 ? 60 : 0));
             buttons[i].setId("Button" + i);
             buttons[i].arm();
             //noteMap.put(getTone(buttons[i]), new Note(minDuration, getTone(buttons[i]),
@@ -108,9 +120,9 @@ public class App extends Application {
 
         for (int i = 0; i < 8 * 12; i++) {
             noteMap.put(i,
-                    new Note(minDuration, i,
+                    new Note(minDurationSec, i,
                             SoundProductionSystem.Waveform.SIN,
-                            new Enveloppe(minDuration)));
+                            new Enveloppe(minDurationSec)));
 
         }
         KeyCode[] keycode = new KeyCode[]{KeyCode.A, KeyCode.Z, KeyCode.E,
@@ -124,6 +136,8 @@ public class App extends Application {
             buttons[i].setOnMouseReleased(event -> stopNote((Button) event.getSource()));
             buttons[i].setOnTouchPressed(event -> playNote((Button) event.getSource()));
             buttons[i].setOnTouchReleased(event -> stopNote((Button) event.getSource()));
+            buttons[i].setPadding(new Insets(10, 10, 10, 10)); //margins around the whole grid
+            buttonNo[i] = getTone(buttons[i]);
         }
 
         VBox vBox = new VBox();
@@ -133,36 +147,99 @@ public class App extends Application {
         RadioButton radioButton = new RadioButton();
         radioButton.setText("Sine");
         radioButton.setToggleGroup(group);
+        radioButton.setUserData(SoundProductionSystem.Waveform.SIN);
         radioButton.setSelected(true);
         radioButton.setOnAction(event -> {
-            String value = ((RadioButton) event.getSource()).getText();
-            player.setForm(value);
+            RadioButton source = (RadioButton) event.getSource();
+            String value = source.getText();
+            setForm((SoundProductionSystem.Waveform) source.getUserData());
         });
         vBox.getChildren().add(radioButton);
         radioButton = new RadioButton();
         radioButton.setText("Square");
+        radioButton.setUserData(SoundProductionSystem.Waveform.RECT);
         radioButton.setToggleGroup(group);
         radioButton.setOnAction(event -> {
-            String value = ((RadioButton) event.getSource()).getText();
-            player.setForm(value);
+            RadioButton source = (RadioButton) event.getSource();
+            String value = source.getText();
+            setForm((SoundProductionSystem.Waveform) source.getUserData());
         });
         vBox.getChildren().add(radioButton);
         radioButton = new RadioButton();
         radioButton.setText("Triangle");
         radioButton.setToggleGroup(group);
+        radioButton.setUserData(SoundProductionSystem.Waveform.TRI);
         radioButton.setOnAction(event -> {
-            String value = ((RadioButton) event.getSource()).getText();
-            player.setForm(value);
+            RadioButton source = (RadioButton) event.getSource();
+            String value = source.getText();
+            setForm((SoundProductionSystem.Waveform) source.getUserData());
         });
         vBox.getChildren().add(radioButton);
         radioButton = new RadioButton();
         radioButton.setText("Sawtooth");
+        radioButton.setUserData(SoundProductionSystem.Waveform.SAWTOOTH);
         radioButton.setToggleGroup(group);
         radioButton.setOnAction(event -> {
-            String value = ((RadioButton) event.getSource()).getText();
-            player.setForm(value);
+            RadioButton source = (RadioButton) event.getSource();
+            String value = source.getText();
+            setForm((SoundProductionSystem.Waveform) source.getUserData());
         });
         vBox.getChildren().add(radioButton);
+
+        boolean recording = false;
+
+        Button record = new Button("REC SAMPLE");
+        vBox.getChildren().add(record);
+        record.setOnAction(actionEvent -> {
+            player.toggleRecording();
+        });
+        Button stop = new Button("STOP REPEAT");
+        vBox.getChildren().add(stop);
+        stop.setOnAction(actionEvent -> {
+            player.setRecording(false);
+            player.setPlayingBuffer(false);
+
+        });
+        Button wav = new Button("WAVE");
+        vBox.getChildren().add(wav);
+        wav.setOnAction(actionEvent -> {
+            setSoundProductionSystem(new SoundProductionSystem(60f));
+
+        });
+        Button roundButton = new Button();
+/*
+        roundButton.setStyle(
+                "-fx-background-radius: 50em; " +
+                        "-fx-min-width: 30px; " +
+                        "-fx-min-height: 30px; " +
+                        "-fx-max-width: 30px; " +
+                        "-fx-max-height: 30px;"
+        );
+*/
+        roundButton.setOnRotate(new EventHandler<RotateEvent>() {
+            @Override
+            public void handle(RotateEvent rotateEvent) {
+                System.out.println("rotate" + rotateEvent.getAngle());
+            }
+        });
+        roundButton.setOnRotationFinished(new EventHandler<RotateEvent>() {
+            @Override
+            public void handle(RotateEvent rotateEvent) {
+                System.out.println("rotation finish" + rotateEvent.getAngle());
+            }
+        });
+        vBox.getChildren().add(roundButton);
+
+        audioViewer = new AudioViewer(44100, 2, canvas);
+        Slider zoomSlider = new Slider();
+        zoomSlider.setMin(1.0);
+        zoomSlider.setMin(20.0);
+        zoomSlider.setValue(1.0);
+        audioViewer.setZoom(1.0);
+        zoomSlider.setOnMouseReleased(mouseEvent -> {
+            audioViewer.setZoom(zoomSlider.getValue());
+        });
+        vBox.getChildren().add(zoomSlider);
 
 
         bp.setLeft(vBox);
@@ -200,6 +277,7 @@ public class App extends Application {
 
 
         titledPanes[0].setContent(bp2);
+        bp2.setPadding(new Insets(20.0, 20., 20., 20.));
 
         titledPanes[1] = new TitledPane();
         titledPanes[1].setContent(new NoteGrid());
@@ -212,7 +290,6 @@ public class App extends Application {
 
         accordion.setExpandedPane(titledPanes[0]);
 
-
         bp2.setBottom(volume = new Slider());
         volume.setMin(0);
         volume.setMax(100);
@@ -223,10 +300,10 @@ public class App extends Application {
             System.out.println("Volume du player: " + player.getVolume());
 
         });
+        //(top/right/bottom/left)
 
         primaryStage.setTitle("Plants 2.0 synth");
         primaryStage.setScene(scene);
-
 
         primaryStage.show();
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -234,11 +311,16 @@ public class App extends Application {
             public void handle(WindowEvent event) {
                 player.setPlaying(false);
                 audioViewer.setRunning(false);
+                getSoundProductionSystem().write();
+                getSoundProductionSystem().end();
+                getSoundProductionSystem().setEnded(true);
+
                 System.exit(0);
+
             }
         });
-        audioViewer = new AudioViewer(44100, 2, canvas);
-        player = new Player(audioViewer);
+        player = new Player(this, audioViewer);
+        player.setRecording(false);
         player.setVolume(100);
         player.start();
 
@@ -316,8 +398,9 @@ public class App extends Application {
 
     }
 
-    public void setForm() {
-        SoundProductionSystem.Waveform waveform = SoundProductionSystem.Waveform.SIN;
+    public void setForm(SoundProductionSystem.Waveform userData) {
+        SoundProductionSystem.Waveform waveform = userData;
+/*
         RadioButton selectedRadioButton = (RadioButton) group.getSelectedToggle();
         String toogleGroupValue = selectedRadioButton.getText();
         switch (toogleGroupValue) {
@@ -335,29 +418,39 @@ public class App extends Application {
                 break;
 
         }
+*/
         player.setWaveform(waveform);
     }
 
-    private void playNote(Button source) {
+    public void playNote(Button source) {
         System.out.println("Tone:  " + getTone(source) + "  Note :"
                 + ((Button) source).getText() + "  "
-                + "Octave: " + (int) slider.getValue());
+                + "Octave: " + (int) slider.getValue()
+                + "\nVolume: " + player.getVolume());
         Note note = noteMap.get(getTone(source));
         assert note != null;
-        note.setEnveloppe(new Enveloppe(minDuration));
+        note.setEnveloppe(new Enveloppe(minDurationSec));
         note.setWaveform(player.getForm());
         player.playNote(note);
 
     }
 
-    private void stopNote(Button source) {
+    public void stopNote(Button source) {
         Note note = noteMap.get(getTone(source));
         assert note != null;
-        System.out.println(note.getTimer().getTotalTimeElapsed());
+        System.out.println(note.getTimer().getTotalTimeElapsed() / 1E9);
 
         player.stopNote(note);
         System.out.println("Key pressed: " + player.getCurrentNotes().size());
     }
 
+    public Button getButton(Integer halfTone) {
+        for (int i = 0; i < buttons.length; i++) {
+            if (new Integer(halfTone).equals(buttonNo[i])) {
+                return buttons[i];
+            }
+        }
+        return null;
+    }
 }
 
