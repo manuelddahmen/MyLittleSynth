@@ -24,6 +24,7 @@ public class Timer {
     private long timeElapsed = 0;
     private long timeElapsedSystem = 0;
     private long timePause = 0;
+    private long definitiveTime = -1;
 
     public Timer() {
     }
@@ -49,6 +50,8 @@ public class Timer {
         if (timePause > 0) {
             timeElapsed = timeInter - timePause + timeElapsedSystem;
 
+        } else if (definitiveTime > 0) {
+            return definitiveTime / 1E9;
         } else {
             timeElapsed = (timeInter - timeElapsedSystem);
 
@@ -58,4 +61,11 @@ public class Timer {
         return timeElapsed / 1E9;
     }
 
+    public void stop() {
+        definitiveTime = (long) (getTotalTimeElapsed() * 1E9);
+    }
+
+    public double getDefinitiveTime() {
+        return definitiveTime;
+    }
 }
