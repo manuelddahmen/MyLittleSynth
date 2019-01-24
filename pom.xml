@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>be.manudahmen</groupId>
+  <artifactId>mylittlesynth</artifactId>
+  <version>67.2</version>
+  <name>MyLittleSynth</name>
+  <description>Some sound curves and more</description>
+
+    <distributionManagement>
+        <repository>
+            <id>demoniakmachine.com</id>
+            <name>demoniakmachine.com</name>
+            <url>ftp://ftp.demoniakmachine.com/m2</url>
+        </repository>
+    </distributionManagement>
+    <build>
+       <defaultGoal>install</defaultGoal>
+       <directory>${basedir}/target</directory>
+       <finalName>${project.artifactId}-${project.version}</finalName>
+       <resources>
+           <resource>
+               <targetPath>${basedir}/target/classes</targetPath>
+               <filtering>false</filtering>
+               <directory>${basedir}/src/main/java</directory>
+               <includes>
+                   <include>**/*.*</include>
+               </includes>
+               <excludes>
+                   <exclude>**/*.java</exclude>
+                   <exclude>**/*.form</exclude>
+               </excludes>
+           </resource>
+       </resources>
+       <sourceDirectory>${basedir}/src/main</sourceDirectory>
+
+       <scriptSourceDirectory>${basedir}/src/main</scriptSourceDirectory>
+       <testSourceDirectory>${basedir}/src</testSourceDirectory>
+       <outputDirectory>${basedir}/target/classes</outputDirectory>
+       <testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
+
+       <plugins>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-surefire-plugin</artifactId>
+               <version>2.12.4</version>
+               <configuration>
+                   <skipTests>true</skipTests>
+               </configuration>
+           </plugin>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-jar-plugin</artifactId>
+               <version>2.0</version>
+               <configuration>
+                   <archive>
+                       <manifest>
+                           <mainClass>info.emptycanvas.library.gui.NEWMain</mainClass>
+                           <packageName>info.emptycanvas.library.gui</packageName>
+                           <addClasspath>true</addClasspath>
+                       </manifest>
+                       <manifestEntries>
+                           <mode>development</mode>
+                           <url>${pom.url}</url>
+                       </manifestEntries>
+                   </archive>
+               </configuration>
+           </plugin>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <version>2.3.2</version>
+               <configuration>
+                   <showDeprecation>true</showDeprecation>
+                   <source>1.8</source>
+                   <target>1.8</target>
+                   <encoding>UTF-8</encoding>
+
+               </configuration>
+
+           </plugin>
+
+
+           <plugin>
+               <artifactId>maven-dependency-plugin</artifactId>
+               <executions>
+               </executions>
+           </plugin>
+
+           <plugin>
+               <artifactId>maven-resources-plugin</artifactId>
+               <version>2.6</version>
+               <executions>
+                   <execution>
+                       <id>copy-resources</id>
+                       <!-- here the phase you need -->
+                       <phase>validate</phase>
+                       <goals>
+                           <goal>copy-resources</goal>
+                       </goals>
+                       <configuration>
+                           <outputDirectory>${basedir}/target/</outputDirectory>
+                           <resources>
+                               <resource>
+                                   <directory>runscripts/</directory>
+                                   <filtering>true</filtering>
+                               </resource>
+                           </resources>
+                       </configuration>
+                   </execution>
+               </executions>
+           </plugin>
+
+       </plugins>
+
+       <extensions>
+           <!-- Enabling the use of FTP -->
+           <extension>
+               <groupId>org.apache.maven.wagon</groupId>
+               <artifactId>wagon-ftp</artifactId>
+               <version>2.12</version>
+           </extension>
+       </extensions>
+  </build>
+<repositories>   <repository>
+    <id>xuggle repo</id>
+    <url>http://xuggle.googlecode.com/svn/trunk/repo/share/java/</url>
+</repository>
+</repositories>
+    <dependencies>
+        <dependency>
+            <groupId>xuggle</groupId>
+            <artifactId>xuggle-xuggler</artifactId>
+            <version>5.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>be.manudahmen</groupId>
+            <artifactId>empty3</artifactId>
+            <version>68</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

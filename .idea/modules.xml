@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MyLittleSynth.iml" filepath="$PROJECT_DIR$/MyLittleSynth.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mylittlesynth.iml" filepath="$PROJECT_DIR$/mylittlesynth.iml" />
     </modules>
   </component>
 </project>
