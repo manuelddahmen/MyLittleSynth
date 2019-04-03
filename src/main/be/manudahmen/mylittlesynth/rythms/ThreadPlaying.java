@@ -21,16 +21,16 @@ public class ThreadPlaying extends Thread {
     public synchronized void run() {
         while (running) {
             this.timeline.getTimes().forEach(
-                    (time3PC, file) -> {
+                    (timeOnTimelinePC, file) -> {
 
-                        double time = (double) time3PC * timeline.getDuration();
-                            if (time < timer.getCurrentTimeOnLineSec() &&
-                            time>timeline.hasPlayed((File)file))
+                        double timeOnTimelineSec = timeOnTimelinePC * timeline.getDuration();
+                            if (timeOnTimelineSec < timer.getCurrentTimeOnLineSec() &&
+                            timeOnTimelineSec>timeline.hasPlayed(file))
                             {
                                 try {
-                                    System.out.println("Play at " + time + " on timeline of duration" + timeline.getDuration());
-                                    timeline.setPlayed((File)file);
-                                    (new PlayWave(AudioSystem.getAudioInputStream((File) file))).start();
+                                    System.out.println("Play at " + timeOnTimelineSec + " on timeline of duration" + timeline.getDuration());
+                                    timeline.setPlayed(file);
+                                    (new PlayWave(AudioSystem.getAudioInputStream(file))).start();
                                 } catch (UnsupportedAudioFileException | IOException ex) {
                                     ex.printStackTrace();
                                 }

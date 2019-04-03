@@ -7,7 +7,7 @@ public class Timeline {
    ConcurrentHashMap model = new ConcurrentHashMap<Double, File>();
     private RythmPanel panel;
     private ConcurrentHashMap<File, Double> played = new ConcurrentHashMap<>();
-    public ConcurrentHashMap getTimes() {
+    public ConcurrentHashMap<Double, File> getTimes() {
       return this.model;
    }
 
