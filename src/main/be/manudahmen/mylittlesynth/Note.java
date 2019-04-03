@@ -2,7 +2,6 @@ package be.manudahmen.mylittlesynth;
 
 import be.manudahmen.mylittlesynth.processor.WaveForm;
 
-import java.util.List;
 import java.util.Map;
 
 public class Note {
@@ -75,7 +74,7 @@ public class Note {
 
    public boolean isFinish() {
 
-      boolean isFinshed = this.timer.getDefinitiveTime() > this.timer.getTotalTimeElapsed();
+      boolean isFinshed = this.timer.getDefinitiveTime() > this.timer.getTotalTimeElapsedNanoSec();
 
       if(isFinshed)
       {

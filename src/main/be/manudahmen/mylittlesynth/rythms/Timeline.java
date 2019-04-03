@@ -1,16 +1,22 @@
 package be.manudahmen.mylittlesynth.rythms;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Timeline {
-   HashMap model = new HashMap();
-
-   public HashMap getTimes() {
+   ConcurrentHashMap model = new ConcurrentHashMap<Double, File>();
+    private RythmPanel panel;
+    private ConcurrentHashMap<File, Double> played = new ConcurrentHashMap<>();
+    public ConcurrentHashMap getTimes() {
       return this.model;
    }
 
-   public void add(Double time, File file) {
+   public Timeline(RythmPanel rythmPanel)
+
+   {
+       this.panel = rythmPanel;
+   }
+   public synchronized void addFileAtTimePC(Double time, File file) {
       this.model.put(time, file);
    }
 
@@ -20,8 +26,20 @@ public class Timeline {
    public void deleteFromTo(Double time0, Double time1) {
    }
 
-   class Model {
-      Double time;
-      File file;
-   }
+    public double getDuration() {
+        return panel.timelineTimeSec();
+    }
+
+    public double getDurationPC() {
+        return 1.0;
+    }
+
+    public Double hasPlayed(File file) {
+        return played.get(file)==null?-1000d:played.get(file);
+    }
+
+    public void setPlayed(File file) {
+        played.remove(file);
+        played.put(file, panel.loopTimer.getCurrentTimeOnLineSec());
+    }
 }

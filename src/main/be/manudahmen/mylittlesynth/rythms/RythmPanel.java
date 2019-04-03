@@ -6,25 +6,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -33,15 +28,21 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class RythmPanel extends GridPane {
-   private static final double DEFAULT_DURATION = 5.0D;
+   private double tempo = 20;
+   protected double timelineTimeSec(){return  60./tempo; }
+   private int size = 8;
+   private int columnCount = 4;
+   private int timelineSize = 4;
+   private int buttonsCount = size*columnCount;
    private TitledPane container;
    private ResourceBundle resourceBundle;
    private RythmPanel.Model model;
    private ListView listView;
-   private Timeline timeline = new Timeline();
+   private Timeline timeline = new Timeline(this);
    private GridPane gridPaneTime;
    private Button[] buttonLine;
-   RythmPanel.LoopTimer loopTimer = new RythmPanel.LoopTimer(5.0D);
+   private TextField tempoText;
+   RythmPanel.LoopTimer loopTimer = new RythmPanel.LoopTimer();
 
    public GridPane getGridPaneTime() {
       return this.gridPaneTime;
@@ -61,10 +62,10 @@ public class RythmPanel extends GridPane {
    public void init() {
       this.setGridLinesVisible(true);
 
-      for(int i = 0; i < 4; ++i) {
-         for(int j = 0; j < 4; ++j) {
-            Node[] nodes = new Node[4];
-            nodes[j] = this.model.buttons[i * 4 + j];
+      for(int i = 0; i < size; ++i) {
+         for(int j = 0; j < columnCount; ++j) {
+            Node[] nodes = new Node[columnCount];
+            nodes[j] = this.model.buttons[i * columnCount + j];
             setConstraints(nodes[j], j, i);
             this.getChildren().addAll(new Node[]{nodes[j]});
          }
@@ -79,7 +80,7 @@ public class RythmPanel extends GridPane {
          FileChooser fileChooser = new FileChooser();
          fileChooser.setTitle("Choose files");
          List files2 = fileChooser.showOpenMultipleDialog((Window)null);
-         if (files2.size() > 0) {
+         if (files2 == null || files2.size() > 0) {
             this.model.init(files2);
             FileCell[] list2 = new FileCell[files2.size()];
 
@@ -107,9 +108,9 @@ public class RythmPanel extends GridPane {
          this.listView.getItems().clear();
       });
       this.gridPaneTime = new GridPane();
-      this.buttonLine = new Button[16];
+      this.buttonLine = new Button[timelineSize];
 
-      for(int i = 0; i < 16; ++i) {
+      for(int i = 0; i < timelineSize; ++i) {
          this.buttonLine[i] = new Button("" + i);
          GridPane var10000 = this.gridPaneTime;
          GridPane.setConstraints(this.buttonLine[i], i, 0);
@@ -127,11 +128,34 @@ public class RythmPanel extends GridPane {
       RythmPanel.MyTimer myTimer = new RythmPanel.MyTimer();
       myTimer.start();
       (new ThreadPlaying(this.loopTimer, this.timeline)).start();
+      tempoText = new TextField("100");
+      tempoText.setOnAction(new EventHandler<ActionEvent>(){
+         @Override
+         public void handle(ActionEvent event) {
+            try {
+               tempo = Integer.parseInt(tempoText.getText());
+               System.out.println("Tempo: " + tempo);
+            }
+            catch (Exception ex)
+            {
+
+            }
+         }
+
+      });
+      tempoText.onScrollProperty().set(new EventHandler<ScrollEvent>() {
+         @Override
+         public void handle(ScrollEvent event) {
+            tempo = (int)(event.getTouchCount()+tempo);
+            tempoText.setText(""+tempo);
+         }
+      });
+      this.getChildren().add(tempoText);
    }
 
    class MyTimer extends AnimationTimer {
       public void handle(long now) {
-         int i = (int)RythmPanel.this.loopTimer.getTimeOnLine();
+         int i = (int)timeline.getDurationPC();
          Image imageDecline = null;
          try {
             imageDecline = new Image(new FileInputStream(new File("resources/decline-button.png")));
@@ -144,11 +168,11 @@ public class RythmPanel extends GridPane {
          } catch (FileNotFoundException e) {
             e.printStackTrace();
          }
-         if (i >= 0 && i < 15) {
+         if (i >= 0 && i < timelineSize) {
             RythmPanel.this.buttonLine[i].setGraphic(new ImageView(state));
          }
 
-         for(int j = 0; j < 16 && i != j; ++j) {
+         for(int j = 0; j < timelineSize && i != j; ++j) {
             RythmPanel.this.buttonLine[j].setGraphic(new ImageView(imageDecline));
          }
 
@@ -156,16 +180,16 @@ public class RythmPanel extends GridPane {
    }
 
    public class Model {
-      private List files = new ArrayList(16);
-      private Button[] buttons = new Button[16];
+      private List files = new ArrayList(buttonsCount);
+      private Button[] buttons = new Button[buttonsCount];
 
       public void modelFromDirectory(String directory) {
-         String[] var2 = (new File(directory)).list();
-         int var3 = var2.length;
+         String[] fileArray = (new File(directory)).list();
+         int var3 = fileArray.length;
 
          int var4;
          for(var4 = 0; var4 < var3; ++var4) {
-            String s = var2[var4];
+            String s = fileArray[var4];
             this.files.add(new File(directory + "/" + s));
          }
 
@@ -185,10 +209,10 @@ public class RythmPanel extends GridPane {
          this.init(this.files);
       }
 
-      public void init(List files) {
+      public synchronized void init(List files) {
          ListView source = RythmPanel.this.listView;
 
-         for(int i = 0; i < Math.min(files.size(), 16); ++i) {
+         for(int i = 0; i < Math.min(files.size(), buttonsCount); ++i) {
             File file = (File)files.get(i);
             if (!file.exists()) {
                System.out.println("error file not exist");
@@ -205,9 +229,9 @@ public class RythmPanel extends GridPane {
 
                this.buttons[i].setOnMouseClicked((mouseEvent) -> {
                   try {
-                     double d = RythmPanel.this.loopTimer.getTimeOnLine();
-                     RythmPanel.this.timeline.add(d, file);
-                     System.out.println(d);
+                     double d = loopTimer.getCurrentTimeOnLineSec();
+                     timeline.addFileAtTimePC(d/timelineTimeSec(), file);
+                     System.out.println(d*timelineTimeSec());
                      AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
                      (new Thread(new PlayWave(audioInputStream))).start();
                   } catch (IOException var6) {
@@ -226,26 +250,16 @@ public class RythmPanel extends GridPane {
    }
 
    class LoopTimer extends Timer {
-       private double loopDurationSec;
+      public LoopTimer()
+      {
+         super();
+         init();
+      }
 
-       public double getLoopDurationSec() {
-           return loopDurationSec;
-       }
-
-       public void setLoopDurationSec(double loopDurationSec) {
-           this.loopDurationSec = loopDurationSec;
-       }
-
-       public LoopTimer(double loopDurationSec) {
-           this.loopDurationSec = loopDurationSec;
-       }
-
-       public double getTimeOnLine() {
-           return (double) this.getTotalTimeElapsed() / 1.0E9D % 16.0D;
-       }
-
-       public long getTotalTimeElapsed() {
-           return (long) ((double) super.getTotalTimeElapsed() * RythmPanel.this.loopTimer.getLoopDurationSec());
+       public double getCurrentTimeOnLineSec() {
+          double remainder = Math.IEEEremainder((getTotalTimeElapsedNanoSec()+timelineTimeSec()*1E9d),
+                  timelineTimeSec()/1E9d)*1E9;
+          return remainder;
        }
    }
 }

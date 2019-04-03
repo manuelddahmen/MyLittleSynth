@@ -5,7 +5,6 @@ import be.manudahmen.mylittlesynth.rythms.RythmPanel;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -18,14 +17,12 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.RotateEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 public class App extends Application {
    private Slider slider;
@@ -373,7 +370,7 @@ public class App extends Application {
 
       assert note != null;
 
-      System.out.println((double)note.getTimer().getTotalTimeElapsed() / 1.0E9D);
+      System.out.println((double)note.getTimer().getTotalTimeElapsedNanoSec() / 1.0E9D);
       this.player.stopNote(note);
       System.out.println("Key pressed: " + this.player.getCurrentNotes().size());
    }

@@ -4,7 +4,7 @@ import be.manudahmen.mylittlesynth.processor.WaveForm;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
+
 import javafx.application.Platform;
 
 public class Player extends Thread {
@@ -63,7 +63,7 @@ public class Player extends Thread {
       this.total = 0.0D;
       this.getCurrentNotes().forEach((note1) -> {
          Note note = (Note)note1;
-         double noteTimeSec = (double)note.getTimer().getTotalTimeElapsed() / 1.0E9D;
+         double noteTimeSec = (double)note.getTimer().getTotalTimeElapsedNanoSec() / 1.0E9D;
          double f2pi = (double)this.app.getSoundProductionSystem().calculateNoteFrequency((float)note.getTone()) * 2.0D * 3.141592653589793D;
          double f2piT = f2pi * noteTimeSec;
          this.facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
@@ -192,7 +192,7 @@ public class Player extends Thread {
             note.stop();
             notes.remove(note);
             if (this.isRecording()) {
-               NoteState noteState = new NoteState(note, this.timerRecording.getTotalTimeElapsed(), false);
+               NoteState noteState = new NoteState(note, this.timerRecording.getTotalTimeElapsedNanoSec(), false);
                this.timerRecording.add(noteState);
             }
          }
@@ -207,7 +207,7 @@ public class Player extends Thread {
             this.addNote(note);
             note.play();
             if (this.isRecording()) {
-               NoteState noteState = new NoteState(note, this.timerRecording.getTotalTimeElapsed(), true);
+               NoteState noteState = new NoteState(note, this.timerRecording.getTotalTimeElapsedNanoSec(), true);
                this.timerRecording.add(noteState);
             }
          }

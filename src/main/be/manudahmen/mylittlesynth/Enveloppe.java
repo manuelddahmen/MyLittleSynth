@@ -23,7 +23,7 @@ public class Enveloppe {
       if (!this.isRelease()) {
          volume = this.form.calculerPoint3D(duration).getY();
       } else {
-         volume = this.form.calculerPoint3D((double)this.timer.getTotalTimeElapsed()).getY();
+         volume = this.form.calculerPoint3D((double)this.timer.getTotalTimeElapsedNanoSec()).getY();
       }
 
       return Math.abs(volume) > 1.0D ? Math.signum(volume) : volume;

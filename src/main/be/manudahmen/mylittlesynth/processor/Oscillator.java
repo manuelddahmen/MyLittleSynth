@@ -2,7 +2,6 @@ package be.manudahmen.mylittlesynth.processor;
 
 import be.manudahmen.mylittlesynth.NoteTimer;
 import be.manudahmen.mylittlesynth.Timer;
-import java.util.function.BiConsumer;
 
 public class Oscillator extends Processor {
    private final NoteTimer timer;
@@ -25,7 +24,7 @@ public class Oscillator extends Processor {
       double ecartSamples = 0.0D;
 
       while(this.isRunning()) {
-         double noteTimeSec = (double)this.timer.getTotalTimeElapsed() / 1.0E9D;
+         double noteTimeSec = (double)this.timer.getTotalTimeElapsedNanoSec() / 1.0E9D;
          gap += noteTimeSec;
          double f2pi = this.frequency * 2.0D * 3.141592653589793D;
          double f2piT = f2pi * noteTimeSec;
