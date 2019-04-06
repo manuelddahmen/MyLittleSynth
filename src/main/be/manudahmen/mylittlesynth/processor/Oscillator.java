@@ -18,7 +18,6 @@ public class Oscillator extends Processor {
    }
 
    public void run() {
-      this.timer.init();
       double gap = 0.0D;
       int countSample = 0;
       double ecartSamples = 0.0D;

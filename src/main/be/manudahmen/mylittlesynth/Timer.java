@@ -1,14 +1,9 @@
 package be.manudahmen.mylittlesynth;
 
 public class Timer {
-   private long timeStartSystemNanoSec = 0L;
+   private long timeStartSystemNanoSec = System.nanoTime();
    private long timePause = 0L;
    private long definitiveTime = -1L;
-
-   public void init() {
-      this.timeStartSystemNanoSec = System.nanoTime();
-      this.definitiveTime = -1L;
-   }
 
    public void pause() {
       this.timePause = System.nanoTime();

@@ -59,12 +59,10 @@ public class Note {
 
    public void setTimer(Timer timer) {
       this.timer = timer;
-      timer.init();
    }
 
    public void init() {
       this.timer = new Timer();
-      this.timer.init();
       this.enveloppe.setTimer(this.timer);
    }
 
@@ -92,7 +90,6 @@ public class Note {
 
    public void play() {
       this.position = 0L;
-      this.timer.init();
    }
 
    public void stop() {

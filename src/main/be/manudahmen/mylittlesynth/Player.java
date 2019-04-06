@@ -48,7 +48,6 @@ public class Player extends Thread {
       this.currentNotes = Collections.synchronizedList(new ArrayList());
       this.noteStates = Collections.synchronizedList(new ArrayList());
       this.timer = new Timer();
-      this.timer.init();
       this.audioViewer = audioViewer;
       this.that = this;
       this.playing = true;
@@ -132,7 +131,6 @@ public class Player extends Thread {
 
    public Note addNote(int tone, long minDurationSec) {
       Note note = new Note(getApp().noteMap, (double)minDurationSec, tone, this.waveform, new Enveloppe((double)minDurationSec));
-      note.getTimer().init();
       Platform.runLater(() -> {
          this.getCurrentNotes().add(note);
          System.out.println("After added " + this.getCurrentNotes().size());

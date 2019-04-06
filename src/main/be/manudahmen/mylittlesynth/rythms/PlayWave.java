@@ -11,12 +11,17 @@ import javax.sound.sampled.AudioFormat.Encoding;
 public class PlayWave extends Thread {
    private static int BUFFER_SIZE_WAV = 2000;
    private final AudioInputStream audio;
+   private final TimelineThread timelineThread;
+   private final Timeline.Model model;
 
-   public PlayWave(AudioInputStream audioInputStream) {
+   public PlayWave(Timeline.Model model, AudioInputStream audioInputStream, TimelineThread timelineThread) {
+      this.timelineThread = timelineThread;
       this.audio = audioInputStream;
+      this.model = model;
    }
 
-   public static void playWave(AudioInputStream audioInputStream) {
+   public void playWave(AudioInputStream audioInputStream) {
+      timelineThread.start(model);
       new AudioFormat(Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4, -1.0F, true);
       Object var2 = null;
 
@@ -48,6 +53,7 @@ public class PlayWave extends Thread {
       } catch (IllegalArgumentException var10) {
          System.out.println("if the system does not support at least one line matching the specified Line.Info object through any installed mixer");
       }
+      timelineThread.del(model);
    }
 
    public void run() {

@@ -42,7 +42,7 @@ public class RythmPanel extends GridPane {
    private GridPane gridPaneTime;
    private Button[] buttonLine;
    private TextField tempoText;
-   RythmPanel.LoopTimer loopTimer = new RythmPanel.LoopTimer();
+   LoopTimer loopTimer = new LoopTimer(this);
 
    public GridPane getGridPaneTime() {
       return this.gridPaneTime;
@@ -127,7 +127,6 @@ public class RythmPanel extends GridPane {
       slider.setValueChanging(true);
       RythmPanel.MyTimer myTimer = new RythmPanel.MyTimer();
       myTimer.start();
-      (new ThreadPlaying(this.loopTimer, this.timeline)).start();
       tempoText = new TextField("100");
       tempoText.setOnAction(new EventHandler<ActionEvent>(){
          @Override
@@ -228,17 +227,11 @@ public class RythmPanel extends GridPane {
                }
 
                this.buttons[i].setOnMouseClicked((mouseEvent) -> {
-                  try {
                      double d = loopTimer.getCurrentTimeOnLineSec();
                      timeline.addFileAtTimePC(d/timelineTimeSec(), file);
-                     System.out.println(d*timelineTimeSec());
-                     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
-                     (new Thread(new PlayWave(audioInputStream))).start();
-                  } catch (IOException var6) {
-                     var6.printStackTrace();
-                  } catch (UnsupportedAudioFileException var7) {
-                     var7.printStackTrace();
-                  }
+                     System.out.println(d);
+//                     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
+//                     (new Thread(new PlayWave(audioInputStream))).start();
 
                });
             }
@@ -249,17 +242,4 @@ public class RythmPanel extends GridPane {
       }
    }
 
-   class LoopTimer extends Timer {
-      public LoopTimer()
-      {
-         super();
-         init();
-      }
-
-       public double getCurrentTimeOnLineSec() {
-          double remainder = Math.IEEEremainder((getTotalTimeElapsedNanoSec()+timelineTimeSec()*1E9d),
-                  timelineTimeSec()/1E9d)*1E9;
-          return remainder;
-       }
-   }
 }

@@ -1,14 +1,17 @@
 package be.manudahmen.mylittlesynth.rythms;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Timeline {
-   ConcurrentHashMap model = new ConcurrentHashMap<Double, File>();
+   ArrayList<Model> model = new ArrayList<Model>();
     private RythmPanel panel;
-    private ConcurrentHashMap<File, Double> played = new ConcurrentHashMap<>();
-    public ConcurrentHashMap<Double, File> getTimes() {
-      return this.model;
+    private ArrayList<Model> modelCurrent;
+    private int index = 0;
+
+    public ArrayList<Model> getTimes() {
+      return model;
    }
 
    public Timeline(RythmPanel rythmPanel)
@@ -17,10 +20,10 @@ public class Timeline {
        this.panel = rythmPanel;
    }
    public synchronized void addFileAtTimePC(Double time, File file) {
-      this.model.put(time, file);
+      this.model.add(new Model(time, file));
    }
 
-   public void delete(Double time) {
+   public void delete(Model model) {
    }
 
    public void deleteFromTo(Double time0, Double time1) {
@@ -34,12 +37,44 @@ public class Timeline {
         return 1.0;
     }
 
-    public Double hasPlayed(File file) {
-        return played.get(file)==null?-1000d:played.get(file);
+    public void init()
+    {
+        modelCurrent = (ArrayList<Model>) model.clone();
     }
 
-    public void setPlayed(File file) {
-        played.remove(file);
-        played.put(file, panel.loopTimer.getCurrentTimeOnLineSec());
+    public Model getNext() {
+        index++;
+        if(index<model.size())
+            return modelCurrent.remove(index);
+        else {
+            init();
+            if(modelCurrent.size()>0)
+                return modelCurrent.remove(0);
+            else
+                return null;
+        }
+    }
+
+    public void add(Model model) {
+        addFileAtTimePC(model.timeOnTimeline, model.wave);
+    }
+
+    public void remove(Model model) {
+        modelCurrent.remove(model);
+    }
+
+    public void queue(Model model) {
+        addFileAtTimePC(model.timeOnTimeline, model.wave);
+
+    }
+
+    class Model {
+        double timeOnTimeline;
+        File wave;
+
+        public Model(Double time, File file) {
+            this.timeOnTimeline = time;
+            this.wave = file;
+        }
     }
 }
