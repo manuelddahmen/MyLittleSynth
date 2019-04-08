@@ -26,9 +26,13 @@ import javafx.stage.Window;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.*;
 
 public class RythmPanel extends GridPane {
    private double tempo = 20;
+   private TimelineThread timelineThread;
+   TextField textTimeline;
+
    protected double timelineTimeSec(){return  60./tempo; }
    private int size = 8;
    private int columnCount = 4;
@@ -43,6 +47,14 @@ public class RythmPanel extends GridPane {
    private Button[] buttonLine;
    private TextField tempoText;
    LoopTimer loopTimer = new LoopTimer(this);
+
+   public TimelineThread getTimelineThread() {
+      return timelineThread;
+   }
+
+   public void setTimelineThread(TimelineThread timelineThread) {
+      this.timelineThread = timelineThread;
+   }
 
    public GridPane getGridPaneTime() {
       return this.gridPaneTime;
@@ -118,7 +130,6 @@ public class RythmPanel extends GridPane {
          this.gridPaneTime.setOnMouseClicked((mouseEvent) -> {
          });
       }
-
       setConstraints(this.gridPaneTime, 5, 0);
       this.getChildren().addAll(new Node[]{this.gridPaneTime});
       Slider slider = new Slider(0.1D, 20.0D, 1.0D);
@@ -128,30 +139,35 @@ public class RythmPanel extends GridPane {
       RythmPanel.MyTimer myTimer = new RythmPanel.MyTimer();
       myTimer.start();
       tempoText = new TextField("100");
-      tempoText.setOnAction(new EventHandler<ActionEvent>(){
-         @Override
-         public void handle(ActionEvent event) {
-            try {
-               tempo = Integer.parseInt(tempoText.getText());
-               System.out.println("Tempo: " + tempo);
-            }
-            catch (Exception ex)
-            {
+      tempoText.setOnAction(new EventHandler<ActionEvent>() {
+                               @Override
+                               public void handle(ActionEvent event) {
+                                  try {
+                                     tempo = Integer.parseInt(tempoText.getText());
+                                     System.out.println("Tempo: " + tempo);
+                                  } catch (Exception ex) {
 
-            }
-         }
-
-      });
+                                  }
+                               }
+                            });
       tempoText.onScrollProperty().set(new EventHandler<ScrollEvent>() {
-         @Override
+        @Override
          public void handle(ScrollEvent event) {
             tempo = (int)(event.getTouchCount()+tempo);
             tempoText.setText(""+tempo);
          }
       });
       this.getChildren().add(tempoText);
-   }
 
+      textTimeline = new TextField("Time0");
+      this.getChildren().add(textTimeline);
+   }
+public void init2()
+{
+   timelineThread = new TimelineThread(this.timeline);
+   timelineThread.start();
+
+}
    class MyTimer extends AnimationTimer {
       public void handle(long now) {
          int i = (int)timeline.getDurationPC();
@@ -167,6 +183,7 @@ public class RythmPanel extends GridPane {
          } catch (FileNotFoundException e) {
             e.printStackTrace();
          }
+         // TODO Simplifier et corriger
          if (i >= 0 && i < timelineSize) {
             RythmPanel.this.buttonLine[i].setGraphic(new ImageView(state));
          }
@@ -206,6 +223,7 @@ public class RythmPanel extends GridPane {
          }
 
          this.init(this.files);
+         init2();
       }
 
       public synchronized void init(List files) {

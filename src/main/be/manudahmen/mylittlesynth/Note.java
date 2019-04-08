@@ -72,7 +72,7 @@ public class Note {
 
    public boolean isFinish() {
 
-      boolean isFinshed = this.timer.getDefinitiveTime() > this.timer.getTotalTimeElapsedNanoSec();
+      boolean isFinshed = this.timer.getDefinitiveTimeNano() > this.timer.getTotalTimeElapsedNanoSec();
 
       if(isFinshed)
       {

@@ -12,29 +12,44 @@ public class TimelineThread extends Thread {
     public static final int ENDS = 0;
     private Timeline timeline;
     private double TINCR = 0.001;
+    public TimelineThread(Timeline tImeline)
+    {
+        this.timeline = tImeline;
 
+    }
     public void run()
     {
+        double t = 0;
+        int millis = 20;
         while(isRunning())
         {
-            double t = 0;
+            t = timeline.getRythmPanel().loopTimer.getCurrentTimeOnLineSec();
             while(t<timeline.getDuration())
             {
+
+                t = timeline.getRythmPanel().loopTimer.getCurrentTimeOnLineSec();
                 Timeline.Model next = timeline.getNext();
-                if(next.timeOnTimeline>t) {
-                    try {
-                        (new PlayWave(next, AudioSystem.getAudioInputStream(
-                                next.wave), this)
-                        ).start();
-                        Thread.sleep(10);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (UnsupportedAudioFileException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                if(next != null) {
+                    if (next.timeOnTimeline > t) {
+                        try {
+                            PlayWave playWave = new PlayWave(next, AudioSystem.getAudioInputStream(
+                                    next.wave), this);
+                            playWave.start();
+                            timeline.setTextTimeOnTimeline(next.wave);
+                            while(playWave.isRunning())
+                            {
+                                Thread.sleep(millis);
+                            }
+                            timeline.hasPlayed(millis);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (UnsupportedAudioFileException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -47,10 +62,10 @@ public class TimelineThread extends Thread {
     }
 
     public void del(Timeline.Model model) {
-        timeline.queue(model);
+        timeline.remove(model);
+        timeline.add(model);
     }
 
     public void start(Timeline.Model model) {
-        timeline.remove(model);
     }
 }

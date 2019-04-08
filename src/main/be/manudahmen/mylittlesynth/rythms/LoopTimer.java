@@ -10,10 +10,8 @@ public class LoopTimer extends Timer {
         super();
         this.panel = rythmPanel;
     }
-
+    // TODO Je crois que le problème vient de cette classe avec des long de grandes tailles, le calcul en double et le reste en double en 0.0 et la durée de la loop
     public double getCurrentTimeOnLineSec() {
-        double remainder = Math.IEEEremainder((getTotalTimeElapsedNanoSec()),
-                panel.timelineTimeSec()*1E9d)/1E9d;
-        return remainder;
+        return Math.IEEEremainder(getTotalTimeElapsedSec(), panel.timelineTimeSec());
     }
 }

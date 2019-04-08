@@ -68,6 +68,22 @@ public class Timeline {
 
     }
 
+    public RythmPanel getRythmPanel() {
+        return panel;
+    }
+
+    public void hasPlayed(int millisThread) {
+        this.hasPlayedMillis(System.nanoTime(), millisThread) ;
+    }
+
+    private void hasPlayedMillis(long nanoTime, int millisThread) {
+
+    }
+
+    public void setTextTimeOnTimeline(File file) {
+        panel.textTimeline.setText(""+panel.loopTimer.getCurrentTimeOnLineSec()+" "+file.getName());
+    }
+
     class Model {
         double timeOnTimeline;
         File wave;

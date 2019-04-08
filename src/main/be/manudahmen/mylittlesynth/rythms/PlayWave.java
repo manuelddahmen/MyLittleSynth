@@ -13,6 +13,7 @@ public class PlayWave extends Thread {
    private final AudioInputStream audio;
    private final TimelineThread timelineThread;
    private final Timeline.Model model;
+   private boolean isRunning = true;
 
    public PlayWave(Timeline.Model model, AudioInputStream audioInputStream, TimelineThread timelineThread) {
       this.timelineThread = timelineThread;
@@ -21,9 +22,15 @@ public class PlayWave extends Thread {
    }
 
    public void playWave(AudioInputStream audioInputStream) {
+
       timelineThread.start(model);
+
+
       new AudioFormat(Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4, -1.0F, true);
       Object var2 = null;
+
+
+      isRunning = true;
 
       try {
          SourceDataLine sourceLine = AudioSystem.getSourceDataLine(audioInputStream.getFormat());
@@ -53,10 +60,17 @@ public class PlayWave extends Thread {
       } catch (IllegalArgumentException var10) {
          System.out.println("if the system does not support at least one line matching the specified Line.Info object through any installed mixer");
       }
+
+      isRunning = false;
+
       timelineThread.del(model);
    }
 
    public void run() {
       playWave(this.audio);
+   }
+
+   public boolean isRunning() {
+      return isRunning;
    }
 }
