@@ -23,8 +23,6 @@ public class PlayWave extends Thread {
 
    public void playWave(AudioInputStream audioInputStream) {
 
-      timelineThread.start(model);
-
 
       new AudioFormat(Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4, -1.0F, true);
       Object var2 = null;
@@ -63,7 +61,6 @@ public class PlayWave extends Thread {
 
       isRunning = false;
 
-      timelineThread.del(model);
    }
 
    public void run() {

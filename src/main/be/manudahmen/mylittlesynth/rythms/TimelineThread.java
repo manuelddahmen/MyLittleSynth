@@ -30,8 +30,11 @@ public class TimelineThread extends Thread {
                 t = timeline.getRythmPanel().loopTimer.getCurrentTimeOnLineSec();
                 Timeline.Model next = timeline.getNext();
                 if(next != null) {
-                    if (next.timeOnTimeline > t) {
+                    if (next.timeOnTimeline > t-0.1 && next.timeOnTimeline < t+0.1) {
                         try {
+
+                            timeline.queue(next);
+
                             PlayWave playWave = new PlayWave(next, AudioSystem.getAudioInputStream(
                                     next.wave), this);
                             playWave.start();
@@ -61,11 +64,4 @@ public class TimelineThread extends Thread {
         return true;
     }
 
-    public void del(Timeline.Model model) {
-        timeline.remove(model);
-        timeline.add(model);
-    }
-
-    public void start(Timeline.Model model) {
-    }
 }
