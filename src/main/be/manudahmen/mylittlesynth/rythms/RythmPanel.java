@@ -16,11 +16,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javax.sound.sampled.AudioInputStream;
@@ -32,11 +35,12 @@ public class RythmPanel extends GridPane {
    private double tempo = 20;
    private TimelineThread timelineThread;
    TextField textTimeline;
+   private GridPane paneLine;
 
    protected double timelineTimeSec(){return  60./tempo; }
    private int size = 8;
    private int columnCount = 4;
-   private int timelineSize = 4;
+   private int timelineSize =  16;
    private int buttonsCount = size*columnCount;
    private TitledPane container;
    private ResourceBundle resourceBundle;
@@ -72,7 +76,11 @@ public class RythmPanel extends GridPane {
    }
 
    public void init() {
+
       this.setGridLinesVisible(true);
+
+
+
 
       for(int i = 0; i < size; ++i) {
          for(int j = 0; j < columnCount; ++j) {
@@ -121,11 +129,21 @@ public class RythmPanel extends GridPane {
       });
       this.gridPaneTime = new GridPane();
       this.buttonLine = new Button[timelineSize];
+/*
+      paneLine = new GridPane();
+      Canvas canvas = new Canvas(1000, 100);
+      paneLine.getChildren().add(canvas);
+      getChildren().add(paneLine);
+      GraphicsContext graphicsContext2D = canvas.getGraphicsContext2D();
+      graphicsContext2D.setFill(Color.BLACK);
+      graphicsContext2D.fill();
+      new CanvasPaint(canvas).start();
+      setConstraints(canvas, 0, 20, 16, 20);
+    */  for(int i = 0; i < timelineSize; ++i) {
 
-      for(int i = 0; i < timelineSize; ++i) {
          this.buttonLine[i] = new Button("" + i);
          GridPane var10000 = this.gridPaneTime;
-         GridPane.setConstraints(this.buttonLine[i], i, 0);
+         setConstraints(this.buttonLine[i], i, 0);
          this.gridPaneTime.getChildren().addAll(new Node[]{this.buttonLine[i]});
          this.gridPaneTime.setOnMouseClicked((mouseEvent) -> {
          });
@@ -137,7 +155,6 @@ public class RythmPanel extends GridPane {
       this.getChildren().addAll(new Node[]{slider});
       slider.setValueChanging(true);
       RythmPanel.MyTimer myTimer = new RythmPanel.MyTimer();
-      myTimer.start();
       tempoText = new TextField("100");
       tempoText.setOnAction(new EventHandler<ActionEvent>() {
                                @Override
@@ -153,14 +170,23 @@ public class RythmPanel extends GridPane {
       tempoText.onScrollProperty().set(new EventHandler<ScrollEvent>() {
         @Override
          public void handle(ScrollEvent event) {
-            tempo = (int)(event.getTouchCount()+tempo);
+           int sign = 0;
+           if (event.getX() > 0) {
+              sign = 1;
+           } else if (event.getX() <= 0) {
+              sign = -1;
+           }
+            tempo = (int)(tempo+sign);
             tempoText.setText(""+tempo);
          }
       });
       this.getChildren().add(tempoText);
+      setConstraints(tempoText, 0, 10);
 
       textTimeline = new TextField("Time0");
       this.getChildren().add(textTimeline);
+      setConstraints(textTimeline, 1, 10);
+      myTimer.start();
    }
 public void init2()
 {
@@ -169,8 +195,12 @@ public void init2()
 
 }
    class MyTimer extends AnimationTimer {
+      MyTimer()
+      {
+         super();
+      }
       public void handle(long now) {
-         int i = (int)timeline.getDurationPC();
+         int i = (int)(loopTimer.getCurrentTimeOnLineSec()/timeline.getDuration()*timelineSize);
          Image imageDecline = null;
          try {
             imageDecline = new Image(new FileInputStream(new File("resources/decline-button.png")));
@@ -245,11 +275,9 @@ public void init2()
                }
 
                this.buttons[i].setOnMouseClicked((mouseEvent) -> {
-                     double d = loopTimer.getCurrentTimeOnLineSec();
+                     double d = loopTimer.getCurrentTimeOnLineSec()+loopTimer.getCurrentTimeOnLineSec()/2;
                      timeline.addFileAtTimePC(d/timelineTimeSec(), file);
                      System.out.println(d);
-//                     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
-//                     (new Thread(new PlayWave(audioInputStream))).start();
 
                });
             }
@@ -260,4 +288,20 @@ public void init2()
       }
    }
 
+   class CanvasPaint extends AnimationTimer
+   {
+      private Canvas canvas;
+      public CanvasPaint(Canvas canvas)
+      {
+         CanvasPaint.this.canvas  = canvas;
+      }
+      @Override
+      public void handle(long now) {
+         double duration = timeline.getDuration();
+         GraphicsContext graphicsContext2D = canvas.getGraphicsContext2D();
+         graphicsContext2D.setFill(Color.BLACK);
+         graphicsContext2D.fill();
+
+      }
+   }
 }

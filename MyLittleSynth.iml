@@ -134,5 +134,6 @@
     <orderEntry type="library" name="Maven: batik:batik-awt-util:1.6-1" level="project" />
     <orderEntry type="library" name="Maven: com.jcraft:jsch:0.1.54" level="project" />
     <orderEntry type="library" name="Maven: de.javagl:obj:0.3.0" level="project" />
+    <orderEntry type="library" name="empty3-67.2" level="project" />
   </component>
 </module>

@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MyLittleSynth.iml" filepath="$PROJECT_DIR$/.idea/modules/MyLittleSynth.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MyLittleSynth.main.iml" filepath="$PROJECT_DIR$/.idea/modules/MyLittleSynth.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MyLittleSynth.test.iml" filepath="$PROJECT_DIR$/.idea/modules/MyLittleSynth.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/mylittlesynth.iml" filepath="$PROJECT_DIR$/mylittlesynth.iml" />
     </modules>
   </component>

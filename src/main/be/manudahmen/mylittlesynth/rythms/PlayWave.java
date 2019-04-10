@@ -27,6 +27,7 @@ public class PlayWave extends Thread {
       new AudioFormat(Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4, -1.0F, true);
       Object var2 = null;
 
+      System.out.println(timelineThread.timeline.toString());
 
       isRunning = true;
 

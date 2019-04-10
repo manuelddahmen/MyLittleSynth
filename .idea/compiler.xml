@@ -14,6 +14,8 @@
       <module name="mylittlesynth-revive" target="1.8" />
       <module name="mylittlesynth-revive_main" target="1.8" />
       <module name="mylittlesynth-revive_test" target="1.8" />
+      <module name="MyLittleSynth.main" target="1.8" />
+      <module name="MyLittleSynth.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
