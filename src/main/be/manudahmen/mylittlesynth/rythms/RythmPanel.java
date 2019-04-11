@@ -99,6 +99,7 @@ public class RythmPanel extends GridPane {
       buttonLoad.setOnMouseClicked((mouseEvent) -> {
          FileChooser fileChooser = new FileChooser();
          fileChooser.setTitle("Choose files");
+         fileChooser.setInitialDirectory(new File("."));
          List files2 = fileChooser.showOpenMultipleDialog((Window)null);
          if (files2 == null || files2.size() > 0) {
             this.model.init(files2);
@@ -195,21 +196,24 @@ public void init2()
 
 }
    class MyTimer extends AnimationTimer {
+      private Image state = null;
+      private Image imageDecline = null;
+
       MyTimer()
       {
          super();
       }
       public void handle(long now) {
          int i = (int)(loopTimer.getCurrentTimeOnLineSec()/timeline.getDuration()*timelineSize);
-         Image imageDecline = null;
+         if(imageDecline==null)
          try {
             imageDecline = new Image(new FileInputStream(new File("resources/decline-button.png")));
          } catch (FileNotFoundException e) {
             e.printStackTrace();
          }
-         Image state = null;
+         if(state==null)
          try {
-            state = new Image(new FileInputStream(new File("resources/button-states.png")));
+            state  = new Image(new FileInputStream(new File("resources/button-states.png")));
          } catch (FileNotFoundException e) {
             e.printStackTrace();
          }

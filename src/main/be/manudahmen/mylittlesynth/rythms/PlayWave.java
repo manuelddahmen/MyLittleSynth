@@ -24,9 +24,6 @@ public class PlayWave extends Thread {
    public void playWave(AudioInputStream audioInputStream) {
 
 
-      new AudioFormat(Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4, -1.0F, true);
-      Object var2 = null;
-
       System.out.println(timelineThread.timeline.toString());
 
       isRunning = true;
@@ -41,8 +38,8 @@ public class PlayWave extends Thread {
          while(nBytesRead != -1) {
             try {
                nBytesRead = audioInputStream.read(abData, 0, abData.length);
-            } catch (IOException var7) {
-               var7.printStackTrace();
+            } catch (IOException ex) {
+               ex.printStackTrace();
             }
 
             if (nBytesRead >= 0) {
