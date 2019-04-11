@@ -7,19 +7,28 @@ import java.util.Comparator;
 import java.util.List;
 
 public class Timeline {
-   List<Model> model = Collections.synchronizedList(new ArrayList<Model>());
+    private PlayList playList;
+    List<Model> model = Collections.synchronizedList(new ArrayList<Model>());
     private RythmPanel panel;
 
+    public Timeline(PlayList playList)
+    {
+        this.playList = playList;
+    }
     public List<Model> getTimes() {
       return model;
    }
 
-   public Timeline(RythmPanel rythmPanel)
+   Timeline(RythmPanel rythmPanel)
 
    {
+       this.playList = rythmPanel.playList;
+
        this.panel = rythmPanel;
    }
-   public synchronized void addFileAtTimePC(Double timePC, File file) {
+   synchronized void addFileAtTimePC(
+           Double timePC, File file) {
+
       this.model.add(new Model(timePC, file));
       this.model.sort((o1, o2) -> {
           if(o1.timeOnTimelinePC < o2.timeOnTimelinePC)
@@ -27,6 +36,7 @@ public class Timeline {
           else
               return -1;
       });
+      playList.display(this.model);
       System.out.println("add "+this.toString());
    }
     public double getDuration() {
@@ -44,7 +54,6 @@ public class Timeline {
     public void queue(Model model) {
         remove(model);
         add(model);
-
     }
 
     public RythmPanel getRythmPanel() {

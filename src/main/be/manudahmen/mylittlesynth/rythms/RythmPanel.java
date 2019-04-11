@@ -43,7 +43,7 @@ public class RythmPanel extends GridPane {
    TextField textTimeline;
    private GridPane paneLine;
    private ListFolderFiles listFolderFiles;
-
+   PlayList playList;
    double timelineTimeSec(){return  60./tempo; }
    private int size = 8;
    private int columnCount = 4;
@@ -146,6 +146,10 @@ public class RythmPanel extends GridPane {
 
       timelineThread = new TimelineThread(this.timeline);
       timelineThread.start();
+
+      playList = new PlayList();
+      setConstraints(playList, 8,  0, 2, 10);
+      getChildren().add(playList);
 
       textTimeline = new TextField("Time0");
       this.getChildren().add(textTimeline);
