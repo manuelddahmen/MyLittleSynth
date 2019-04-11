@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="tritonus_mp3-0.3.6">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/tritonus_mp3-0.3.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

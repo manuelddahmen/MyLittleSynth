@@ -1,28 +1,27 @@
 package be.manudahmen.mylittlesynth.rythms;
 
-import javafx.scene.Node;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import javafx.scene.text.Text;
 
 public class PlayList extends ListView {
 
     private Timeline timeline;
 
-   PlayList(){
-        getChildren().addAll(new Node[]{new TextField("Position"), new TextField("name")});
-
+   PlayList(Timeline timeline){
+        this.timeline = timeline;
 
     }
 
-    public void display(List<Timeline.Model> model)
+    public void display()
     {
-        getChildren().clear();
-        timeline.model.forEach(model1 -> getChildren().add(new TextField(model1.timeOnTimelinePC+ " "+ model1.wave.getName()+"")));
+        getItems().clear();
+        getItems().add(new Text("position/name"));
+        timeline.times.forEach(model1 ->
+        {
+            getItems().add(new Text(model1.wave.getName()+"/"+model1.timeOnTimelinePC));
+        }
+        );
+
     }
 
 

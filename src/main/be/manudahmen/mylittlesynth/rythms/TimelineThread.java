@@ -1,7 +1,12 @@
 package be.manudahmen.mylittlesynth.rythms;
 
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 public class TimelineThread extends Thread {
@@ -22,20 +27,14 @@ public class TimelineThread extends Thread {
             Timeline.Model next = timeline.next();
             if (next != null) {
                 if (next.timeOnTimelinePC*timeline.getDuration() > t - 0.3 && next.timeOnTimelinePC*timeline.getDuration() < t + 0.3) {
-                    try {
 
 
-                        timeline.setTextTimeOnTimeline(next.wave);
-                        PlayWave playWave = new PlayWave(next, AudioSystem.getAudioInputStream(
-                                next.wave), this);
-                        playWave.start();
+                    Media hit = new Media(next.wave.toURI().toString());
+                    MediaPlayer mediaPlayer = new MediaPlayer(hit);
+                    mediaPlayer.play();
+                    timeline.hasPlayed(millis);
+                    timeline.queue(next);
 
-                        timeline.hasPlayed(millis);
-                        timeline.queue(next);
-
-                    } catch (UnsupportedAudioFileException | IOException  e) {
-                        e.printStackTrace();
-                    }
                 }
             }
 

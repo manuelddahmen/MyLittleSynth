@@ -30,9 +30,11 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -147,10 +149,22 @@ public class RythmPanel extends GridPane {
       timelineThread = new TimelineThread(this.timeline);
       timelineThread.start();
 
-      playList = new PlayList();
+      playList = new PlayList(timeline);
       setConstraints(playList, 8,  0, 2, 10);
       getChildren().add(playList);
+      playList.setOnMouseClicked(new EventHandler<MouseEvent>() {
+         @Override
+         public void handle(MouseEvent event) {
+            Object selectedItem = playList.getSelectionModel().getSelectedItem();
+            Text item = (Text) selectedItem;
+            String position = item.getText().split("/")[1];
+            try {
+                  timeline.deleteAt(Double.parseDouble(position));
+            }catch(Exception ex)
+               {}
 
+         }
+      });
       textTimeline = new TextField("Time0");
       this.getChildren().add(textTimeline);
       setConstraints(textTimeline, 1, 10);
@@ -234,7 +248,7 @@ public class RythmPanel extends GridPane {
                System.exit(-1);
             }
 
-            if (file.getName().endsWith(".wav")) {
+            if (file.getName().endsWith(".wav")||file.getName().endsWith(".mp3")||file.getName().endsWith(".aiff")) {
                String name = file.getName().toString();
                if (this.buttons[i] == null) {
                   this.buttons[i] = new Button(name);
