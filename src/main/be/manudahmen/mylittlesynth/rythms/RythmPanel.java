@@ -6,9 +6,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
+
+import com.sun.javafx.geom.BaseBounds;
+import com.sun.javafx.geom.transform.BaseTransform;
+import com.sun.javafx.jmx.MXNodeAlgorithm;
+import com.sun.javafx.jmx.MXNodeAlgorithmContext;
+import com.sun.javafx.sg.prism.NGNode;
+import com.sun.org.apache.xerces.internal.impl.xs.opti.DefaultElement;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -26,18 +35,16 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.*;
 
 public class RythmPanel extends GridPane {
-   private double tempo = 20;
+   private final App app;
+   private double tempo = 60;
    private TimelineThread timelineThread;
    TextField textTimeline;
    private GridPane paneLine;
+   private ListFolderFiles listFolderFiles;
 
-   protected double timelineTimeSec(){return  60./tempo; }
+   double timelineTimeSec(){return  60./tempo; }
    private int size = 8;
    private int columnCount = 4;
    private int timelineSize =  16;
@@ -45,7 +52,6 @@ public class RythmPanel extends GridPane {
    private TitledPane container;
    private ResourceBundle resourceBundle;
    private RythmPanel.Model model;
-   private ListView listView;
    private Timeline timeline = new Timeline(this);
    private GridPane gridPaneTime;
    private Button[] buttonLine;
@@ -72,6 +78,7 @@ public class RythmPanel extends GridPane {
       this.container = container;
       this.model = new RythmPanel.Model();
       this.model.modelFromDirectory("rythmFiles");
+      this.app = app;
       this.init();
    }
 
@@ -91,58 +98,11 @@ public class RythmPanel extends GridPane {
          }
       }
 
-      ObservableList files = FXCollections.observableArrayList();
-      this.listView = new ListView();
-      Button buttonLoad = new Button("Load...");
-      setConstraints(buttonLoad, 5, 0);
-      this.getChildren().addAll(new Node[]{buttonLoad});
-      buttonLoad.setOnMouseClicked((mouseEvent) -> {
-         FileChooser fileChooser = new FileChooser();
-         fileChooser.setTitle("Choose files");
-         fileChooser.setInitialDirectory(new File("."));
-         List files2 = fileChooser.showOpenMultipleDialog((Window)null);
-         if (files2 == null || files2.size() > 0) {
-            this.model.init(files2);
-            FileCell[] list2 = new FileCell[files2.size()];
-
-            for(int d = 0; d < files2.size(); ++d) {
-               list2[d] = new FileCell((File)files2.get(d));
-            }
-
-            this.listView.getItems().addAll(files2);
-         }
-
-      });
-      this.listView.getItems().addAll(this.model.files);
-      setConstraints(this.listView, 5, 1, 5, 10);
-      this.getChildren().addAll(new Node[]{this.listView});
-      this.listView.setOnDragEntered(dragEvent -> System.out.println("Drag entered: "));
-      this.listView.setOnDragDone(dragEvent -> {
-         Object source = dragEvent.getSource();
-         EventTarget target = dragEvent.getTarget();
-         System.out.println("Drag item : ");
-      });
-      Button clearList = new Button("Clear list");
-      setConstraints(clearList, 6, 0);
-      this.getChildren().addAll(new Node[]{clearList});
-      clearList.setOnMouseClicked((mouseEvent) -> {
-         this.listView.getItems().clear();
-      });
       this.gridPaneTime = new GridPane();
       this.buttonLine = new Button[timelineSize];
-/*
-      paneLine = new GridPane();
-      Canvas canvas = new Canvas(1000, 100);
-      paneLine.getChildren().add(canvas);
-      getChildren().add(paneLine);
-      GraphicsContext graphicsContext2D = canvas.getGraphicsContext2D();
-      graphicsContext2D.setFill(Color.BLACK);
-      graphicsContext2D.fill();
-      new CanvasPaint(canvas).start();
-      setConstraints(canvas, 0, 20, 16, 20);
-    */  for(int i = 0; i < timelineSize; ++i) {
+      for(int i = 0; i < timelineSize; ++i) {
 
-         this.buttonLine[i] = new Button("" + i);
+         this.buttonLine[i] = new Button("" + i+1);
          GridPane var10000 = this.gridPaneTime;
          setConstraints(this.buttonLine[i], i, 0);
          this.gridPaneTime.getChildren().addAll(new Node[]{this.buttonLine[i]});
@@ -184,17 +144,21 @@ public class RythmPanel extends GridPane {
       this.getChildren().add(tempoText);
       setConstraints(tempoText, 0, 10);
 
+      timelineThread = new TimelineThread(this.timeline);
+      timelineThread.start();
+
       textTimeline = new TextField("Time0");
       this.getChildren().add(textTimeline);
       setConstraints(textTimeline, 1, 10);
+      listFolderFiles = new ListFolderFiles(timelineThread, loopTimer);
+      listFolderFiles.setInitialDirectory(new File("./rythmFiles"));
+      //fileChooser.showOpenDialog(null);
+      listFolderFiles.listFiles();
+      setConstraints(listFolderFiles, 6, 0, 2, 10);
+      getChildren().add(listFolderFiles);
+
       myTimer.start();
    }
-public void init2()
-{
-   timelineThread = new TimelineThread(this.timeline);
-   timelineThread.start();
-
-}
    class MyTimer extends AnimationTimer {
       private Image state = null;
       private Image imageDecline = null;
@@ -217,14 +181,11 @@ public void init2()
          } catch (FileNotFoundException e) {
             e.printStackTrace();
          }
-         // TODO Simplifier et corriger
-         if (i >= 0 && i < timelineSize) {
-            RythmPanel.this.buttonLine[i].setGraphic(new ImageView(state));
-         }
-
          for(int j = 0; j < timelineSize && i != j; ++j) {
             RythmPanel.this.buttonLine[j].setGraphic(new ImageView(imageDecline));
          }
+         RythmPanel.this.buttonLine[i].setGraphic(new ImageView(state));
+
 
       }
    }
@@ -257,11 +218,10 @@ public void init2()
          }
 
          this.init(this.files);
-         init2();
       }
 
       public synchronized void init(List files) {
-         ListView source = RythmPanel.this.listView;
+         ListView source = RythmPanel.this.listFolderFiles;
 
          for(int i = 0; i < Math.min(files.size(), buttonsCount); ++i) {
             File file = (File)files.get(i);
@@ -279,7 +239,7 @@ public void init2()
                }
 
                this.buttons[i].setOnMouseClicked((mouseEvent) -> {
-                     double d = loopTimer.getCurrentTimeOnLineSec()+loopTimer.getCurrentTimeOnLineSec()/2;
+                     double d = loopTimer.getCurrentTimeOnLineSec();
                      timeline.addFileAtTimePC(d/timelineTimeSec(), file);
                      System.out.println(d);
 
@@ -291,7 +251,7 @@ public void init2()
 
       }
    }
-
+/*
    class CanvasPaint extends AnimationTimer
    {
       private Canvas canvas;
@@ -308,4 +268,6 @@ public void init2()
 
       }
    }
+ */
+
 }

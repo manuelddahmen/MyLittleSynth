@@ -24,7 +24,7 @@ public class PlayWave extends Thread {
    public void playWave(AudioInputStream audioInputStream) {
 
 
-      System.out.println(timelineThread.timeline.toString());
+      //System.out.println(timelineThread.timeline.toString());
 
       isRunning = true;
 

@@ -24,7 +24,6 @@ public class TimelineThread extends Thread {
                 if (next.timeOnTimelinePC*timeline.getDuration() > t - 0.3 && next.timeOnTimelinePC*timeline.getDuration() < t + 0.3) {
                     try {
 
-                        timeline.queue(next);
 
                         timeline.setTextTimeOnTimeline(next.wave);
                         PlayWave playWave = new PlayWave(next, AudioSystem.getAudioInputStream(
@@ -32,6 +31,8 @@ public class TimelineThread extends Thread {
                         playWave.start();
 
                         timeline.hasPlayed(millis);
+                        timeline.queue(next);
+
                     } catch (UnsupportedAudioFileException | IOException  e) {
                         e.printStackTrace();
                     }
