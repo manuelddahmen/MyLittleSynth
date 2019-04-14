@@ -47,14 +47,14 @@ public class RythmPanel extends GridPane {
    private ListFolderFiles listFolderFiles;
    PlayList playList;
    double timelineTimeSec(){return  60./tempo; }
-   private int size = 8;
-   private int columnCount = 4;
+   int size = 8;
+   int columnCount = 4;
    private int timelineSize =  16;
-   private int buttonsCount = size*columnCount;
+   int buttonsCount = size*columnCount;
    private TitledPane container;
    private ResourceBundle resourceBundle;
-   private RythmPanel.Model model;
-   private Timeline timeline = new Timeline(this);
+   RythmModel model;
+   Timeline timeline = new Timeline(this);
    private GridPane gridPaneTime;
    private Button[] buttonLine;
    private TextField tempoText;
@@ -78,8 +78,7 @@ public class RythmPanel extends GridPane {
 
    public RythmPanel(TitledPane container, App app) {
       this.container = container;
-      this.model = new RythmPanel.Model();
-      this.model.modelFromDirectory("rythmFiles");
+      this.model = new RythmModel(this, new File("rythmFiles"));
       this.app = app;
       this.init();
    }
@@ -91,14 +90,7 @@ public class RythmPanel extends GridPane {
 
 
 
-      for(int i = 0; i < size; ++i) {
-         for(int j = 0; j < columnCount; ++j) {
-            Node[] nodes = new Node[columnCount];
-            nodes[j] = this.model.buttons[i * columnCount + j];
-            setConstraints(nodes[j], j, i);
-            this.getChildren().addAll(new Node[]{nodes[j]});
-         }
-      }
+
 
       this.gridPaneTime = new GridPane();
       this.buttonLine = new Button[timelineSize];
@@ -168,7 +160,7 @@ public class RythmPanel extends GridPane {
       textTimeline = new TextField("Time0");
       this.getChildren().add(textTimeline);
       setConstraints(textTimeline, 1, 10);
-      listFolderFiles = new ListFolderFiles(timelineThread, loopTimer);
+      listFolderFiles = new ListFolderFiles(timelineThread, loopTimer, this);
       listFolderFiles.setInitialDirectory(new File("./rythmFiles"));
       //fileChooser.showOpenDialog(null);
       listFolderFiles.listFiles();
@@ -207,85 +199,4 @@ public class RythmPanel extends GridPane {
 
       }
    }
-
-   public class Model {
-      private List files = new ArrayList(buttonsCount);
-      private Button[] buttons = new Button[buttonsCount];
-
-      public void modelFromDirectory(String directory) {
-         String[] fileArray = (new File(directory)).list();
-         int var3 = fileArray.length;
-
-         int var4;
-         for(var4 = 0; var4 < var3; ++var4) {
-            String s = fileArray[var4];
-            this.files.add(new File(directory + "/" + s));
-         }
-
-         int i = 0;
-         Button[] var9 = this.buttons;
-         var4 = var9.length;
-
-         for(int var10 = 0; var10 < var4; ++var10) {
-             if(this.files.size()>i) {
-                 Button var10000 = var9[var10];
-                 String filename = ((File) this.files.get(i)).toString();
-                 this.buttons[i] = new Button(filename);
-                 ++i;
-             }
-         }
-
-         this.init(this.files);
-      }
-
-      public synchronized void init(List files) {
-         ListView source = RythmPanel.this.listFolderFiles;
-
-         for(int i = 0; i < Math.min(files.size(), buttonsCount); ++i) {
-            File file = (File)files.get(i);
-            if (!file.exists()) {
-               System.out.println("error file not exist");
-               System.exit(-1);
-            }
-
-            if (file.getName().endsWith(".wav")||file.getName().endsWith(".mp3")||file.getName().endsWith(".aiff")) {
-               String name = file.getName().toString();
-               if (this.buttons[i] == null) {
-                  this.buttons[i] = new Button(name);
-               } else {
-                  this.buttons[i].setText(name);
-               }
-
-               this.buttons[i].setOnMouseClicked((mouseEvent) -> {
-                     double d = loopTimer.getCurrentTimeOnLineSec();
-                     timeline.addFileAtTimePC(d/timelineTimeSec(), file);
-                     System.out.println(d);
-
-               });
-            }
-
-            Button var10000 = this.buttons[i];
-         }
-
-      }
-   }
-/*
-   class CanvasPaint extends AnimationTimer
-   {
-      private Canvas canvas;
-      public CanvasPaint(Canvas canvas)
-      {
-         CanvasPaint.this.canvas  = canvas;
-      }
-      @Override
-      public void handle(long now) {
-         double duration = timeline.getDuration();
-         GraphicsContext graphicsContext2D = canvas.getGraphicsContext2D();
-         graphicsContext2D.setFill(Color.BLACK);
-         graphicsContext2D.fill();
-
-      }
-   }
- */
-
 }

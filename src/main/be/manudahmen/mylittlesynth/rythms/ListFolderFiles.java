@@ -1,6 +1,4 @@
 package be.manudahmen.mylittlesynth.rythms;
-
-
 import javafx.event.EventHandler;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
@@ -15,14 +13,16 @@ public class ListFolderFiles extends ListView {
     private RythmPanel panel;
 
 
-    public ListFolderFiles(TimelineThread timelineThread, LoopTimer loopTimer)
+    public ListFolderFiles(TimelineThread timelineThread, LoopTimer loopTimer, RythmPanel panel)
     {
         this.timelineThread = timelineThread;
         this.loopTimer = loopTimer;
+        this.panel = panel;
     }
 
     public void listFiles(File folder) {
         if (folder.isDirectory()) {
+            panel.model = new RythmModel(panel, currentDirectory);
             getItems().clear();
             getItems().add(".");
             getItems().add("..");
@@ -50,6 +50,7 @@ public class ListFolderFiles extends ListView {
                     if (new File(pathname).isDirectory()) {
                         currentDirectory = new File(pathname);
                         listFiles();
+
                         return;
                     }
                     if (file.endsWith(".wav")||file.endsWith(".mp3")||file.endsWith(".aiff")) {
@@ -64,6 +65,7 @@ public class ListFolderFiles extends ListView {
     }
     public void listFiles()
     {
+
         listFiles(currentDirectory);
     }
     public void setInitialDirectory(File file) {

@@ -25,7 +25,7 @@ public class Timeline {
 
        this.panel = rythmPanel;
    }
-   synchronized void addFileAtTimePC(
+   public synchronized void addFileAtTimePC(
            Double timePC, File file) {
 
       this.times.add(new Model(timePC, file));

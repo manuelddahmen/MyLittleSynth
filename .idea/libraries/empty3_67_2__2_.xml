@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="empty3-67.2 (2)">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/empty3-67.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javalayer.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/montemedia-0.7.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/tritonus_mp3-0.3.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/tritonus_share-0.3.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/xuggler-3.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
