@@ -98,7 +98,7 @@ public class RythmPanel extends GridPane {
 
          this.buttonLine[i] = new Button("" + i+1);
          GridPane var10000 = this.gridPaneTime;
-         setConstraints(this.buttonLine[i], i, 0);
+          setConstraints(this.buttonLine[i], i, 0);
          this.gridPaneTime.getChildren().addAll(new Node[]{this.buttonLine[i]});
          this.gridPaneTime.setOnMouseClicked((mouseEvent) -> {
          });
@@ -194,7 +194,7 @@ public class RythmPanel extends GridPane {
          for(int j = 0; j < timelineSize && i != j; ++j) {
             RythmPanel.this.buttonLine[j].setGraphic(new ImageView(imageDecline));
          }
-         RythmPanel.this.buttonLine[i].setGraphic(new ImageView(state));
+         RythmPanel.this.buttonLine[i<0?0:(i>=timelineSize?timelineSize-1:i)].setGraphic(new ImageView(state));
 
 
       }
