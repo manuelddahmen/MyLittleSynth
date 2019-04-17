@@ -53,7 +53,7 @@ public class ListFolderFiles extends ListView {
 
                         return;
                     }
-                    if (file.endsWith(".wav")||file.endsWith(".mp3")||file.endsWith(".aiff")) {
+                    if (file.endsWith(".wav")||file.endsWith(".mp3")||file.endsWith(".aif")||file.endsWith(".mp4")) {
                         double d = loopTimer.getCurrentTimeOnLineSec();
                         timelineThread.timeline.addFileAtTimePC(d / timelineThread.timeline.getDuration(), new File(pathname));
                         System.out.println(d);

@@ -87,8 +87,8 @@ public class Player extends Thread {
       short amplitude;
       if (this.getCurrentNotes().size() > 0) {
          amplitude = (short)((int)(this.total * this.volume / 100.0D));
-         this.audioViewer.sendDouble((double)amplitude * 1.0D);
-         this.audioViewer.sendDouble((double)amplitude * 1.0D);
+         //this.audioViewer.sendDouble((double)amplitude * 1.0D);
+         //this.audioViewer.sendDouble((double)amplitude * 1.0D);
          this.playBufferMono(amplitude);
          ++this.position;
       } else {

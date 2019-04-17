@@ -147,12 +147,14 @@ public class RythmPanel extends GridPane {
       playList.setOnMouseClicked(new EventHandler<MouseEvent>() {
          @Override
          public void handle(MouseEvent event) {
-            Object selectedItem = playList.getSelectionModel().getSelectedItem();
-            Text item = (Text) selectedItem;
-            String position = item.getText().split("/")[1];
             try {
+               Object selectedItem = playList.getSelectionModel().getSelectedItem();
+               Text item = (Text) selectedItem;
+               String position = item.getText().split("/")[1];
                   timeline.deleteAt(Double.parseDouble(position));
-            }catch(Exception ex)
+            }catch (NullPointerException exception)
+            {}
+            catch(Exception exception)
                {}
 
          }
