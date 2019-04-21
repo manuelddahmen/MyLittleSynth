@@ -7,19 +7,21 @@ import javafx.scene.text.Text;
 
 public class PlayListRepeat extends ListView {
     private int lastRepeat = 100;
-    private Timeline timeline;
+    private Timeline[] timeline;
+    private int loop;
 
-   PlayListRepeat(Timeline timeline){
+    PlayListRepeat(Timeline[] timeline){
         this.timeline = timeline;
         editableProperty().setValue(true);
         editableProperty().setValue(true);
         setOnEditCommit(new EventHandler<EditEvent>() {
             @Override
             public void handle(EditEvent event) {
-                timeline.times.get(event.getIndex() - 1)
+                timeline[loop].times.get(event.getIndex() - 1)
                         .reminingTimes = Integer.parseInt(
-                        (String)timeline.getRythmPanel().
-                                playList2.getItems().get(event.getIndex()-1));
+                        (String)timeline[loop].getRythmPanel().
+                                playList2
+                                .getItems().get(event.getIndex()-1));
             }
         });
     }
@@ -31,7 +33,7 @@ public class PlayListRepeat extends ListView {
             public void run() {
                 getItems().clear();
                 getItems().add(new Text("remining loops"));
-                timeline.times.forEach(model1 ->
+                timeline[loop].times.forEach(model1 ->
                         {
                             getItems().add(model1.reminingTimes);
                         }
@@ -42,4 +44,11 @@ public class PlayListRepeat extends ListView {
     }
 
 
+    public void setTimeline(Timeline[] timeline) {
+        this.timeline = timeline;
+    }
+
+    public void setLoop(int loop) {
+        this.loop = loop;
+    }
 }

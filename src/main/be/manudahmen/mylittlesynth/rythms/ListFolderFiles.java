@@ -7,22 +7,24 @@ import java.io.File;
 import java.util.List;
 
 public class ListFolderFiles extends ListView {
-    private File currentDirectory;
-    private TimelineThread timelineThread;
+    private File[] currentDirectory;
     private LoopTimer loopTimer;
     private RythmPanel panel;
+    private Timeline[] timeline;
+    private int loop;
 
 
-    public ListFolderFiles(TimelineThread timelineThread, LoopTimer loopTimer, RythmPanel panel)
+    public ListFolderFiles(Timeline[] timeline, LoopTimer loopTimer, RythmPanel panel)
     {
-        this.timelineThread = timelineThread;
+        this.timeline = timeline;
         this.loopTimer = loopTimer;
         this.panel = panel;
+        currentDirectory = new File[panel.size];
     }
 
     public void listFiles(File folder) {
         if (folder.isDirectory()) {
-            panel.model = new RythmModel(panel, currentDirectory);
+            panel.model[panel.loop] = new RythmModel(panel, currentDirectory[loop]);
             getItems().clear();
             getItems().add(".");
             getItems().add("..");
@@ -36,26 +38,34 @@ public class ListFolderFiles extends ListView {
 
                 @Override
                 public void handle(MouseEvent event) {
-                    String file = getSelectionModel().getSelectedItem().toString();
+                    String file;
+                    try{
+                        file = getSelectionModel().getSelectedItem().toString();
+                    }
+                    catch (NullPointerException ex)
+                    {
+                        System.out.print("NullPointerException");
+                        return;
+                    }
                     if (file.equals(".")) {
                         listFiles();
                         return;
                     } else if (file.equals("..")) {
-                        currentDirectory = (new File(currentDirectory.getAbsolutePath() + File.separator + ".."));
+                        currentDirectory[loop] = (new File(currentDirectory[loop].getAbsolutePath() + File.separator + ".."));
                         listFiles();
                         return;
                     }
 
-                    String pathname = currentDirectory.getAbsolutePath() + File.separator + file;
+                    String pathname = currentDirectory[loop].getAbsolutePath() + File.separator + file;
                     if (new File(pathname).isDirectory()) {
-                        currentDirectory = new File(pathname);
+                        currentDirectory[loop] = new File(pathname);
                         listFiles();
 
                         return;
                     }
                     if (file.endsWith(".wav")||file.endsWith(".mp3")||file.endsWith(".aif")||file.endsWith(".mp4")) {
                         double d = loopTimer.getCurrentTimeOnLineSec();
-                        timelineThread.timeline.addFileAtTimePC(d / timelineThread.timeline.getDuration(), new File(pathname));
+                        timeline[loop].addFileAtTimePC(d / timeline[loop].getDuration(), new File(pathname));
                         System.out.println(d);
 
                     }
@@ -66,9 +76,18 @@ public class ListFolderFiles extends ListView {
     public void listFiles()
     {
 
-        listFiles(currentDirectory);
+        listFiles(currentDirectory[loop]);
     }
     public void setInitialDirectory(File file) {
-        this.currentDirectory = file;
+        for(int i=0; i<panel.size; i++)
+            this.currentDirectory[i] = file;
+    }
+
+    public void setTimeline(Timeline timelineThread) {
+        this.timeline = timeline;
+    }
+
+    public void setLoop(int loop) {
+        this.loop = loop;
     }
 }

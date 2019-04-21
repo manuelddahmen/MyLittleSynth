@@ -12,48 +12,86 @@ import java.io.IOException;
 
 public class TimelineThread extends Thread {
     public static final int ENDS = 0;
-    public Timeline timeline;
+    public Timeline[] timeline;
     private double TINCR = 0.001;
+    private boolean pause = false;
 
-    public TimelineThread(Timeline tImeline) {
+    public int getLoop() {
+        return loop;
+    }
+
+    public void setLoop(int loop) {
+        this.loop = loop;
+    }
+
+    private int loop;
+
+    public TimelineThread(Timeline[] tImeline) {
         this.timeline = tImeline;
 
     }
 
     public void run() {
+        pause = false;
         double t = 0;
         int millis = 100;
         while (isRunning()) {
-            t = timeline.getRythmPanel().loopTimer.getCurrentTimeOnLineSec();
-            Timeline.Model next = timeline.next();
-
-            if (next != null) {
-                if (next.timeOnTimelinePC*timeline.getDuration() > t - 0.3 && next.timeOnTimelinePC*timeline.getDuration() < t + 0.3) {
-
-
-                    Media hit = new Media(next.wave.toURI().toString());
-                    MediaPlayer mediaPlayer = new MediaPlayer(hit);
-                    mediaPlayer.play();
-                    timeline.hasPlayed(millis);
-                    next.reminingTimes--;
-                    boolean notOk = true;
-                    if(next.reminingTimes<=0)
-                        Platform.runLater(new Runnable() {
-                                              @Override
-                                              public void run() {
-                                                  timeline.remove(next);
-
-                                              }
-                                          }
-
-                        );
-                    else
-                        timeline.queue(next);
-                    timeline.getRythmPanel().textTimeline.setText(""+t);
-
+            while(pause)
+            {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
+            try {
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                t = timeline[loop].
+                        getRythmPanel().
+                        loopTimer[
+                        timeline[loop].
+                                getRythmPanel().
+                                loop].
+                        getCurrentTimeOnLineSec();
+                Timeline.Model next = timeline[loop].next();
 
+                if (next != null) {
+                    if (next.timeOnTimelinePC * timeline[loop].getDuration() > t - 0.3 && next.timeOnTimelinePC * timeline[loop].getDuration() < t + 0.3) {
+
+
+                        Media hit = new Media(next.wave.toURI().toString());
+                        MediaPlayer mediaPlayer = new MediaPlayer(hit);
+                        mediaPlayer.play();
+                        timeline[loop].hasPlayed(millis);
+                        if(next.decreasing)
+                            next.reminingTimes--;
+
+                        boolean notOk = true;
+                        if (next.reminingTimes <= 0)
+                            Platform.runLater(new Runnable() {
+                                                  @Override
+                                                  public void run() {
+                                                      timeline[loop].remove(next);
+
+                                                  }
+                                              }
+
+                            );
+                        else
+                            timeline[loop].queue(next);
+                        timeline[loop].getRythmPanel().textTimeline.setText("" + ((int)t*timeline[loop].getDuration()*100));
+
+                    }
+                }
+            }
+             catch (NullPointerException ex)
+             {
+                 System.out.println("Null");
+             }
         }
     }
 
@@ -61,4 +99,7 @@ public class TimelineThread extends Thread {
         return true;
     }
 
+    public void pause() {
+        pause = true;
+    }
 }

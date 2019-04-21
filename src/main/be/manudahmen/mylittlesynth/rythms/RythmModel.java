@@ -49,7 +49,6 @@ public class RythmModel  {
             String s = fileArray[var4];
             files.add(new File(directory + "/" + s));
         }
-        ListView source = panel.playList;
 
         for(int i = 0; i < Math.min(files.size(), panel.buttonsCount); ++i) {
             File file = (File)files.get(i);
@@ -62,8 +61,8 @@ public class RythmModel  {
                 this.buttons[i].setText(name);
 
                 this.buttons[i].setOnMouseClicked((mouseEvent) -> {
-                    double d = panel.loopTimer.getCurrentTimeOnLineSec();
-                    panel.timeline.addFileAtTimePC(d/panel.timelineTimeSec(), file);
+                    double d = panel.loopTimer[panel.loop].getCurrentTimeOnLineSec();
+                    panel.timeline[panel.loop].addFileAtTimePC(d/panel.timelineTimeSec(), file);
                     System.out.println(d);
 
                 });

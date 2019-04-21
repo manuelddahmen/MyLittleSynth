@@ -1,7 +1,9 @@
 package be.manudahmen.mylittlesynth.rythms;
 
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.scene.control.ListView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 
 public class PlayList extends ListView {
@@ -10,7 +12,14 @@ public class PlayList extends ListView {
 
    PlayList(Timeline timeline){
         this.timeline = timeline;
+       setOnMouseClicked(new EventHandler<MouseEvent>() {
 
+           @Override
+           public void handle(MouseEvent event) {
+               getSelectionModel().getSelectedItem();
+
+           }
+       });
     }
 
     public void display()
@@ -22,7 +31,7 @@ public class PlayList extends ListView {
                 getItems().add(new Text("position/name"));
                 timeline.times.forEach(model1 ->
                         {
-                            getItems().add(new Text(model1.wave.getName()+"/"+(float)(timeline.getDuration()*model1.timeOnTimelinePC)));
+                            getItems().add(new Text(model1.wave.getName()+"/"+(float)(model1.timeOnTimelinePC)));
                         }
                 );
             }
@@ -31,4 +40,7 @@ public class PlayList extends ListView {
     }
 
 
+    public void setTimeline(Timeline timeline) {
+        this.timeline = timeline;
+    }
 }

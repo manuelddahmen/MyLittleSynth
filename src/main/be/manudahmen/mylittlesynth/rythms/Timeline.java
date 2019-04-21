@@ -1,5 +1,6 @@
 package be.manudahmen.mylittlesynth.rythms;
 
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +8,8 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class Timeline {
+    private int nbrLoops;
+    private boolean decresing;
     private PlayList playList;
     List<Model> times = Collections.synchronizedList(new ArrayList<Model>());
     private RythmPanel panel;
@@ -103,7 +106,9 @@ public class Timeline {
     }
 
     class Model {
-        public int reminingTimes;
+        boolean decreasing;
+        int nbrLoops;
+        int reminingTimes;
         double timeOnTimelinePC;
         File wave;
 
@@ -111,7 +116,8 @@ public class Timeline {
             this.timeOnTimelinePC = time;
             this.wave = file;
             this.reminingTimes = lastReminingLoops;
-
+            this.decreasing = Timeline.this.decresing;
+            this.nbrLoops = Timeline.this.nbrLoops;
 
         }
 
@@ -127,7 +133,23 @@ public class Timeline {
     {
         String modelString= "";
         for(int i = 0; i< times.size(); i++)
-            modelString += "||"+(times.get(i).timeOnTimelinePC*getDuration()) + " "+ times.get(i).wave.getName()+"||";
+            modelString += "||"+(times.get(i).timeOnTimelinePC) + " "+ times.get(i).wave.getName()+"||";
         return "timeline (duration:'"+getDuration()+modelString+ "  )";
+    }
+
+    public int getNbrLoops() {
+        return nbrLoops;
+    }
+
+    public void setNbrLoops(int nbrLoops) {
+        this.nbrLoops = nbrLoops;
+    }
+
+    public boolean isDecresing() {
+        return decresing;
+    }
+
+    public void setDecresing(boolean decresing) {
+        this.decresing = decresing;
     }
 }
