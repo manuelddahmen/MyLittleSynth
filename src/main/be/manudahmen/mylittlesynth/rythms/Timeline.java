@@ -10,6 +10,8 @@ public class Timeline {
     private PlayList playList;
     List<Model> times = Collections.synchronizedList(new ArrayList<Model>());
     private RythmPanel panel;
+    private int lastReminingLoops = 20;
+    private PlayListRepeat playList2;
 
     public Timeline(PlayList playList)
     {
@@ -36,7 +38,9 @@ public class Timeline {
               return -1;
       });
        this.playList = panel.playList;
+       this.playList2 = panel.playList2;
        playList.display();
+       playList2.display();
       System.out.println("add "+this.toString());
    }
     public double getDuration() {
@@ -49,6 +53,8 @@ public class Timeline {
 
     public void remove(Model model) {
         this.times.remove(model);
+        playList.display();
+        playList2.display();
     }
 
     public void queue(Model model) {
@@ -97,12 +103,23 @@ public class Timeline {
     }
 
     class Model {
+        public int reminingTimes;
         double timeOnTimelinePC;
         File wave;
 
         public Model(Double time, File file) {
             this.timeOnTimelinePC = time;
             this.wave = file;
+            this.reminingTimes = lastReminingLoops;
+
+
+        }
+
+        public String toString()
+        {
+            return
+                    wave.getName()+"|"+((int)timeOnTimelinePC*100)
+                            +"|"+reminingTimes+" loops";
         }
     }
 

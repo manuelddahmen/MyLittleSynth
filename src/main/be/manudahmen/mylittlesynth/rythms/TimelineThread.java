@@ -1,5 +1,6 @@
 package be.manudahmen.mylittlesynth.rythms;
 
+import javafx.application.Platform;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
@@ -25,6 +26,7 @@ public class TimelineThread extends Thread {
         while (isRunning()) {
             t = timeline.getRythmPanel().loopTimer.getCurrentTimeOnLineSec();
             Timeline.Model next = timeline.next();
+
             if (next != null) {
                 if (next.timeOnTimelinePC*timeline.getDuration() > t - 0.3 && next.timeOnTimelinePC*timeline.getDuration() < t + 0.3) {
 
@@ -33,7 +35,21 @@ public class TimelineThread extends Thread {
                     MediaPlayer mediaPlayer = new MediaPlayer(hit);
                     mediaPlayer.play();
                     timeline.hasPlayed(millis);
-                    timeline.queue(next);
+                    next.reminingTimes--;
+                    boolean notOk = true;
+                    if(next.reminingTimes<=0)
+                        Platform.runLater(new Runnable() {
+                                              @Override
+                                              public void run() {
+                                                  timeline.remove(next);
+
+                                              }
+                                          }
+
+                        );
+                    else
+                        timeline.queue(next);
+                    timeline.getRythmPanel().textTimeline.setText(""+t);
 
                 }
             }

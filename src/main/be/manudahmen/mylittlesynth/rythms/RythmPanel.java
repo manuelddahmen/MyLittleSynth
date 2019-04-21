@@ -46,6 +46,8 @@ public class RythmPanel extends GridPane {
    private GridPane paneLine;
    private ListFolderFiles listFolderFiles;
    PlayList playList;
+   PlayListRepeat playList2;
+
    double timelineTimeSec(){return  60./tempo; }
    int size = 8;
    int columnCount = 4;
@@ -91,7 +93,6 @@ public class RythmPanel extends GridPane {
 
 
 
-
       this.gridPaneTime = new GridPane();
       this.buttonLine = new Button[timelineSize];
       for(int i = 0; i < timelineSize; ++i) {
@@ -103,38 +104,32 @@ public class RythmPanel extends GridPane {
          this.gridPaneTime.setOnMouseClicked((mouseEvent) -> {
          });
       }
-      setConstraints(this.gridPaneTime, 5, 0);
-      this.getChildren().addAll(new Node[]{this.gridPaneTime});
+      //setConstraints(this.gridPaneTime, 5, 0);
+      //this.getChildren().addAll(new Node[]{this.gridPaneTime});
       Slider slider = new Slider(0.1D, 20.0D, 1.0D);
       setConstraints(slider, 6, 0);
       this.getChildren().addAll(new Node[]{slider});
       slider.setValueChanging(true);
       RythmPanel.MyTimer myTimer = new RythmPanel.MyTimer();
       tempoText = new TextField("100");
-      tempoText.setOnAction(new EventHandler<ActionEvent>() {
-                               @Override
-                               public void handle(ActionEvent event) {
-                                  try {
-                                     tempo = Integer.parseInt(tempoText.getText());
-                                     System.out.println("Tempo: " + tempo);
-                                  } catch (Exception ex) {
+      tempoText.setOnAction(event -> {
+         try {
+            tempo = Integer.parseInt(tempoText.getText());
+            System.out.println("Tempo: " + tempo);
+         } catch (Exception ex) {
 
-                                  }
-                               }
-                            });
-      tempoText.onScrollProperty().set(new EventHandler<ScrollEvent>() {
-        @Override
-         public void handle(ScrollEvent event) {
-           int sign = 0;
-           if (event.getX() > 0) {
-              sign = 1;
-           } else if (event.getX() <= 0) {
-              sign = -1;
-           }
-            tempo = (int)(tempo+sign);
-            tempoText.setText(""+tempo);
          }
       });
+      tempoText.onScrollProperty().set(event -> {
+         int sign = 0;
+         if (event.getDeltaY()> 0) {
+            sign = 1;
+         } else if (event.getDeltaY()<= 0) {
+            sign = -1;
+         }
+          tempo = (int)(tempo+sign);
+          tempoText.setText(""+tempo);
+       });
       this.getChildren().add(tempoText);
       setConstraints(tempoText, 0, 10);
 
@@ -143,6 +138,7 @@ public class RythmPanel extends GridPane {
 
       playList = new PlayList(timeline);
       setConstraints(playList, 8,  0, 2, 10);
+      //this.addColumn(8,new Node[]{playList});
       getChildren().add(playList);
       playList.setOnMouseClicked(new EventHandler<MouseEvent>() {
          @Override
@@ -159,7 +155,26 @@ public class RythmPanel extends GridPane {
 
          }
       });
-      textTimeline = new TextField("Time0");
+      playList2 = new PlayListRepeat(timeline);
+      setConstraints(playList2, 10,  0, 2, 10);
+      getChildren().add(playList2);
+      //this.addColumn(10,playList);
+      playList2.setOnMouseClicked(new EventHandler<MouseEvent>() {
+         @Override
+         public void handle(MouseEvent event) {
+            try {
+               Object selectedItem = playList2.getSelectionModel().getSelectedItem();
+               Text item = (Text) selectedItem;
+               String position = item.getText().split("/")[1];
+               timeline.deleteAt(Double.parseDouble(position));
+            }catch (NullPointerException exception)
+            {}
+            catch(Exception exception)
+            {}
+
+         }
+      });
+      textTimeline = new TextField("time");
       this.getChildren().add(textTimeline);
       setConstraints(textTimeline, 1, 10);
       listFolderFiles = new ListFolderFiles(timelineThread, loopTimer, this);
@@ -168,6 +183,7 @@ public class RythmPanel extends GridPane {
       listFolderFiles.listFiles();
       setConstraints(listFolderFiles, 6, 0, 2, 10);
       getChildren().add(listFolderFiles);
+      //this.addColumn(2,listFolderFiles);
 
       myTimer.start();
    }
