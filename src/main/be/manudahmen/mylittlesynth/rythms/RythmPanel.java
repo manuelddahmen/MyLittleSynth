@@ -74,6 +74,8 @@ public class RythmPanel extends GridPane {
       loopTimer[loop] = new LoopTimer(this);
       for(int i=0; i<size; i++)
          timeline[i]=new Timeline(this);
+      XmlTimeline xmlTimeline = new XmlTimeline();
+      xmlTimeline.setAudioSamples(timeline);
       this.setGridLinesVisible(true);
 
 
@@ -111,7 +113,8 @@ public class RythmPanel extends GridPane {
    tempoText = new TextField("" + tempo[loop]);
    tempoText.setOnAction(event -> {
       try {
-         tempo[loop] = Integer.parseInt(tempoText.getText());
+         double tempoValueCandidate = Double.parseDouble(tempoText.getText());
+         tempo[loop] =tempoValueCandidate>0 ? tempoValueCandidate : 1;
          System.out.println("Tempo: " + tempo[loop]);
       } catch (Exception ex) {
 
@@ -214,8 +217,14 @@ public class RythmPanel extends GridPane {
       TextField loopText = new TextField("Loaded loop #"+loop);
       this.getChildren().add(loopText);
       setConstraints(loopText, 0, 9);
-
-   this.loop = loop;
+   
+      Button saveButton = new Button("save");
+      this.getChildren().add(saveButton);
+      setConstraints(loopText, 1, 9);
+      Button loadButton = new Button("load");
+      this.getChildren().add(loadButton);
+      setConstraints(loopText, 1, 9);
+      this.loop = loop;
    loadLoop(loop);
    }
 
