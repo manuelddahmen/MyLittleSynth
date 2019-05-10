@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>be.manudahmen</groupId>
   <artifactId>mylittlesynth</artifactId>
-  <version>67.2</version>
+  <version>70</version>
   <name>MyLittleSynth</name>
   <description>Some sound curves and more</description>
 

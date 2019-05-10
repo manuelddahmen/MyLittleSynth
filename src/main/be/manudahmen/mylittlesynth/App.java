@@ -217,7 +217,7 @@ public class App extends Application {
       vBox = new VBox();
       RythmPanel rythmPanel = new RythmPanel(titledPanes[1], this);
       vBox.getChildren().addAll(new Node[]{rythmPanel});
-      vBox.getChildren().add(rythmPanel.getGridPaneTime());
+      vBox.getChildren().add(rythmPanel.getCanvasTimelineProgress());
       titledPanes[1].setContent(vBox);
       Accordion accordion = new Accordion();
       accordion.getPanes().addAll(titledPanes);
