@@ -40,7 +40,6 @@ public class RythmPanel extends GridPane {
     RythmModel[] model;
     Timeline[] timeline = new Timeline[size];
     private LoopProgress gridPaneTime;
-    private Button[] buttonLine;
     private Button[] buttons = new Button[size];
     private TimelineThread[] timelineThread = new TimelineThread[size];
     private MyTimer[] myTimer = new MyTimer[size];
@@ -271,10 +270,6 @@ public class RythmPanel extends GridPane {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-            for (int j = 0; j < timelineSize[loop] && i != j; ++j) {
-                RythmPanel.this.buttonLine[j].setGraphic(new ImageView(imageDecline));
-            }
-            RythmPanel.this.buttonLine[i < 0 ? 0 : (i >= timelineSize[loop] ? timelineSize[loop] - 1 : i)].setGraphic(new ImageView(state));
             
             
         }

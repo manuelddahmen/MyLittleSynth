@@ -9,8 +9,11 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
 
 public class TimelineThread extends Thread {
+    private HashMap<URI, Media> samples = new HashMap<>();
     public static final int ENDS = 0;
     public Timeline[] timeline;
     private double TINCR = 0.001;
@@ -61,24 +64,21 @@ public class TimelineThread extends Thread {
 
                 if (next != null) {
                     if (next.timeOnTimelinePC * timeline[loop].getDuration() > t - 0.3 && next.timeOnTimelinePC * timeline[loop].getDuration() < t + 0.3) {
-
-
-                        Media hit = new Media(next.wave.toURI().toString());
-                        MediaPlayer mediaPlayer = new MediaPlayer(hit);
+                        Media sample = null;
+                        URI uri = next.wave.toURI();
+                        if(samples.containsKey(uri))
+                            sample = samples.get(uri);
+                        else {
+                            sample = new Media(next.wave.toURI().toString());
+                        }
+                        MediaPlayer mediaPlayer = new MediaPlayer(sample);
                         mediaPlayer.play();
-                        timeline[loop].hasPlayed(millis);
                         if(next.decreasing)
                             next.reminingTimes--;
 
                         boolean notOk = true;
                         if (next.reminingTimes <= 0)
-                            Platform.runLater(new Runnable() {
-                                                  @Override
-                                                  public void run() {
-                                                      timeline[loop].remove(next);
-
-                                                  }
-                                              }
+                            Platform.runLater(() -> timeline[loop].remove(next)
 
                             );
                         else
