@@ -8,7 +8,7 @@ Extension-Name: mylittlesynth
 Specification-Title: Some sound curves and more
 Implementation-Title: mylittlesynth
 Implementation-Version: 67.2
-Main-Class: be.manudahmen.mylittlesynth.App
+Main-Class: App
 mode: development
 url: null
 

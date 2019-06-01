@@ -1,6 +1,6 @@
 Reprise 04-12-2018 à partir d'un jar de décompilé.
 
-exec:java-Dexec.mainClass="be.manudahmen.mylittlesynth.App"
+exec:java-Dexec.mainClass="App"
 
 -U deploy
 
