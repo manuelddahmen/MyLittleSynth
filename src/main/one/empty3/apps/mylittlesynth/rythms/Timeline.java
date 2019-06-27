@@ -27,22 +27,27 @@ public class Timeline {
     Timeline(RythmPanel rythmPanel) {
         this.panel = rythmPanel;
     }
-    
-    public synchronized void addFileAtTimePC(
-            Double timePC, File file) {
-        
-        this.times.add(new Model(timePC, file));
+
+    private void sortList()
+    {
         this.times.sort((o1, o2) -> {
             if (o1.timeOnTimelinePC > o2.timeOnTimelinePC)
                 return 1;
             else
                 return -1;
         });
+    }
+
+    public synchronized void addFileAtTimePC(
+            Double timePC, File file) {
+        
+        this.times.add(new Model(timePC, file));
+        sortList();
         this.playList = panel.playList;
         this.playList2 = panel.playList2;
         playList.display();
         playList2.display();
-        System.out.println("add " + this.toString());
+
     }
     
     public double getDuration() {
@@ -55,6 +60,7 @@ public class Timeline {
     
     public void remove(Model model) {
         this.times.remove(model);
+        sortList();
         playList.display();
         playList2.display();
     }

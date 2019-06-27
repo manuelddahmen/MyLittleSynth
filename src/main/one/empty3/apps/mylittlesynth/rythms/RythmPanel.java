@@ -21,7 +21,7 @@ import javafx.scene.text.Text;
 
 public class RythmPanel extends GridPane {
     private final App app;
-    TextField textTimeline;
+    TextField textTimeline = new TextField("Timeline");
     public int loop = 0;
     private int timelineSizeDefault = 16;
     
