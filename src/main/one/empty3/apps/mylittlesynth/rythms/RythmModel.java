@@ -55,7 +55,7 @@ public class RythmModel  {
                 break;
             }
 
-            if (file.getName().endsWith(".wav")||file.getName().endsWith(".mp3")||file.getName().endsWith(".aiff")) {
+            if (file.getName().endsWith(".wav")||file.getName().endsWith(".mp3")||file.getName().endsWith(".aiff")||file.getName().endsWith("mid")) {
                 String name = file.getName().toString();
                 this.buttons[i].setText(name);
 

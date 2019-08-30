@@ -35,7 +35,7 @@ public class PlayListRepeat extends ListView {
                 getItems().add(new Text("remining loops"));
                 timeline[loop].times.forEach(model1 ->
                         {
-                            getItems().add(model1.reminingTimes);
+                            getItems().add(model1.noLoop);
                         }
                 );
             }

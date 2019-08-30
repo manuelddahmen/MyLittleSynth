@@ -19,12 +19,15 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 
+import javax.swing.*;
+
 public class RythmPanel extends GridPane {
     private final App app;
     TextField textTimeline = new TextField("Timeline");
     public int loop = 0;
     private int timelineSizeDefault = 16;
-    
+    private TextField nbrLoops;
+
     double timelineTimeSec() {
         return 60. / tempo[loop];
     }
@@ -41,15 +44,22 @@ public class RythmPanel extends GridPane {
     private LoopProgress gridPaneTime;
     private Button[] buttons = new Button[size];
     private TimelineThread[] timelineThread = new TimelineThread[size];
-    private MyTimer[] myTimer = new MyTimer[size];
     private TextField tempoText;
     LoopTimer[] loopTimer = new LoopTimer[size];
     private GridPane paneLine;
     private ListFolderFiles listFolderFiles;
     PlayList playList;
     PlayListRepeat playList2;
-    
-    
+    private boolean noRepeat;
+
+    public boolean isNoRepeat() {
+        return noRepeat;
+    }
+
+    public void setNoRepeat(boolean noRepeat) {
+        this.noRepeat = noRepeat;
+    }
+
     void setTempo(double tempoCand) {
         this.tempo[loop] = tempo[loop] > 0 ? tempoCand : 1;
     }
@@ -100,8 +110,7 @@ public class RythmPanel extends GridPane {
         setConstraints(slider, 6, 0);
         this.getChildren().addAll(new Node[]{slider});
         slider.setValueChanging(true);
-        myTimer[loop] = new RythmPanel.MyTimer();
-        
+
         tempoText = new TextField("" + tempo[loop]);
         tempoText.setOnAction(event -> {
             try {
@@ -183,23 +192,17 @@ public class RythmPanel extends GridPane {
         getChildren().add(listFolderFiles);
         //this.addColumn(2,listFolderFiles);
         
-        CheckBox desising = new CheckBox("Decreasing");
-        desising.setSelected(false);
+        CheckBox desising = new CheckBox("Loop?");
         desising.setOnKeyReleased(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                timeline[loop].setDecresing(desising.isSelected());
+                timeline[loop].setLoops(desising.isSelected());
             }
         });
+        desising.setSelected(false);
         setConstraints(desising, 9, 10, 1, 1);
         getChildren().add(desising);
-        TextField nbrLoops = new TextField("1");
-        nbrLoops.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                timeline[loop].setNbrLoops(Integer.parseInt(nbrLoops.getText()));
-            }
-        });
+        nbrLoops = new TextField("1");
         setConstraints(nbrLoops, 10, 10, 1, 1);
         getChildren().add(nbrLoops);
         
@@ -235,42 +238,13 @@ public class RythmPanel extends GridPane {
         timelineThread[loop].setLoop(loop);
         listFolderFiles.setTimeline(timeline[loop]);
         loopTimer[loop] = new LoopTimer(this);
-        myTimer[loop] = new MyTimer();
         playList2.setLoop(loop);
         playList2.display();
         playList.display();
         listFolderFiles.listFiles();
     }
-    
-    class MyTimer extends AnimationTimer {
-        private Image state = null;
-        private Image imageDecline = null;
-        
-        MyTimer() {
-            super();
-        }
-        
-        public void handle(long now) {
-            int i = (int) (loopTimer[loop].
-                    getCurrentTimeOnLineSec() /
-                    timeline[loop]
-                            .getDuration()
-                    * timelineSize
-                    [loop]);
-            if (imageDecline == null)
-                try {
-                    imageDecline = new Image(new FileInputStream(new File("resources/decline-button.png")));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            if (state == null)
-                try {
-                    state = new Image(new FileInputStream(new File("resources/button-states.png")));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            
-            
-        }
+
+    public void writeNoLoop(int nbrLoops) {
+        this.nbrLoops.setText(""+String.valueOf(nbrLoops));
     }
 }

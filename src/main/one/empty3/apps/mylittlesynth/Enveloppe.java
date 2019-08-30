@@ -1,7 +1,7 @@
 package one.empty3.apps.mylittlesynth;
 
-import be.manudahmen.empty3.Point3D;
-import be.manudahmen.empty3.core.nurbs.CourbeParametriquePolynomialeBezier;
+import one.empty3.library.Point3D;
+import one.empty3.library.core.nurbs.CourbeParametriquePolynomialeBezier;
 
 public class Enveloppe {
    private double minDurationSec;

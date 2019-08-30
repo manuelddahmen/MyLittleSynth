@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Timeline {
     private int nbrLoops;
@@ -15,7 +16,9 @@ public class Timeline {
     private RythmPanel panel;
     private int lastReminingLoops = 20;
     private PlayListRepeat playList2;
-    
+    private double newTime;
+    private boolean isLoops;
+
     public Timeline(PlayList playList) {
         this.playList = playList;
     }
@@ -31,7 +34,7 @@ public class Timeline {
     private void sortList()
     {
         this.times.sort((o1, o2) -> {
-            if (o1.timeOnTimelinePC > o2.timeOnTimelinePC)
+            if (o1.timeOnTimelinePC >newTime&&o1.timeOnTimelinePC -newTime< o2.timeOnTimelinePC-newTime )
                 return 1;
             else
                 return -1;
@@ -80,9 +83,33 @@ public class Timeline {
         panel.textTimeline.setText(file.getName());
         System.out.println("Samples' list size :" + times.size());
     }
-    
-    public synchronized Model next() {
-        return times.size() > 0 ? times.get(0) : null;
+
+    public synchronized Model next(double timeOnLinePC, Model prev) {
+        if (newTime > timeOnLinePC) {
+            if (isLoops()) {
+
+                nbrLoops++;
+                this.newTime = timeOnLinePC;
+            }
+
+        }
+
+        final Model[] choice = new Model[1];
+
+
+        if (times.size() > 0) {
+            Model model = times.get(0);
+            if (model.noLoop <= nbrLoops)
+
+            {
+                choice[0] = model;
+                newTime = model.getTimeOnTimelinePC();
+                model.noLoop++;
+                getRythmPanel().writeNoLoop(nbrLoops);
+            }
+
+            return choice[0] != null && choice[0] != prev ? choice[0] : null;
+        } else return null;
     }
     
     public synchronized void deleteAt(Double position) {
@@ -102,10 +129,18 @@ public class Timeline {
         }
         playList.display();
     }
-    
+
+    public void setLoops(boolean loops) {
+        this.isLoops = loops;
+    }
+
+    public boolean isLoops() {
+        return isLoops;
+    }
+
     class Model {
         boolean decreasing;
-        int nbrLoops;
+        int noLoop;
         int reminingTimes;
         double timeOnTimelinePC;
         File wave;
@@ -115,7 +150,7 @@ public class Timeline {
             this.wave = file;
             this.reminingTimes = lastReminingLoops;
             this.decreasing = Timeline.this.decresing;
-            this.nbrLoops = Timeline.this.nbrLoops;
+            this.noLoop = 0;
             
         }
         
@@ -131,8 +166,8 @@ public class Timeline {
             return nbrLoops;
         }
         
-        public void setNbrLoops(int nbrLoops) {
-            this.nbrLoops = nbrLoops;
+        public void setNbrLoops(int noLoop) {
+            this.noLoop= noLoop;
         }
         
         public int getReminingTimes() {

@@ -1,7 +1,6 @@
 package one.empty3.apps.mylittlesynth;
 
-import
-        one.empty3.apps.mylittlesynth.processor.WaveForm;
+import one.empty3.apps.mylittlesynth.processor.WaveForm;
 import one.empty3.apps.mylittlesynth.rythms.RythmPanel;
 import java.util.HashMap;
 import java.util.Map;
