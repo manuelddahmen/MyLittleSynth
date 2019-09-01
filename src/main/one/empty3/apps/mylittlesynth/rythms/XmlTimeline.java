@@ -23,7 +23,7 @@ public class XmlTimeline {
     public void save() {
         for(int i=0;i<audioSamples.length; i++)
         {
-            System.out.println(audioSamples[i].toString());
+           // System.out.println(audioSamples[i].toString());
         }
 /*        XStream xstream = new XStream();
         xstream.alias("timeline", Timeline.class);

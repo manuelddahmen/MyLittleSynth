@@ -20,7 +20,7 @@ public class PlayListRepeat extends ListView {
                 timeline[loop].models.get(event.getIndex() - 1)
                         .reminingTimes = Integer.parseInt(
                         (String)timeline[loop].getRythmPanel().
-                                playList2
+                                playListRepeat
                                 .getItems().get(event.getIndex()-1));
             }
         });
@@ -32,10 +32,10 @@ public class PlayListRepeat extends ListView {
             @Override
             public void run() {
                 getItems().clear();
-                getItems().add(new Text("Nbr Loops"));
+                getItems().add(new Text("#playing"));
                 timeline[loop].models.forEach(model1 ->
                         {
-                            getItems().add(model1.noLoop);
+                            getItems().add("NoLoop : "+model1.noLoop+" ; NoPlaying : " + model1.noPlaying);
                         }
                 );
             }

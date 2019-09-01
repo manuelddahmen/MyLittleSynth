@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.*;
 
 public class Timeline {
+    public static final double MIN_DELAY = 0.5;
     int track;
     private boolean newLoop = true;
     private int nbrLoops;
@@ -32,7 +33,7 @@ public class Timeline {
         
         this.models.add(new Model(file));
         this.playList = panel.playList;
-        this.playList2 = panel.playList2;
+        this.playList2 = panel.playListRepeat;
         playList.display();
         playList2.display();
 
@@ -78,14 +79,18 @@ public class Timeline {
         if (models.size() > 0 ) {
         for(int m = 0; m<models.size(); m++) {
             Model model = models.get(m);
-                if (model != null )
+                if (model != null && isPlayNow(getT(track), model))
                 {
                     choice = model;
-                    model.noLoop = getRythmPanel().loopTimer[track].getLoop();
+                    model.noLoop = nbrLoops;
+                    break;
                 }
             }
         }
         return choice;
+    }
+    public void deleteAt(int selectedIndex) {
+        models.remove(selectedIndex);
     }
 
     public synchronized void deleteAt(Double position) {
@@ -105,6 +110,28 @@ public class Timeline {
         }
     }
 
+    private boolean isPlayNow(double t, Timeline.Model next) {
+
+        boolean cond1 = Math.abs(next.timeOnTimeline - getT(track)) < MIN_DELAY;
+        boolean cond2 = Math.abs(next.lastPlay - getT(track)) > MIN_DELAY;
+        if(cond1 && cond2)
+        {
+            next.lastPlay = getT(track);
+            return true;
+        }
+        else {
+            return false;
+        }
+
+    }
+
+
+
+    private double getT(int track) {
+        double t;
+        t = panel.loopTimer[track].getCurrentTimeOnLineSec();
+        return t;
+    }
     public void setLoops(boolean loops) {
         this.isLoops = loops;
     }
@@ -113,20 +140,23 @@ public class Timeline {
         return isLoops;
     }
 
+
     class Model {
+        int noPlaying = 0;
         boolean decreasing;
         int noLoop=0;
         int reminingTimes;
         double timeOnTimeline;
         File wave;
         int noTrack =0;
+        double lastPlay = 0;
         
         public Model(File file) {
             this.timeOnTimeline = getRythmPanel().getLoopTimer()[track].getCurrentTimeOnLineSec();
             this.wave = file;
             this.decreasing = Timeline.this.decresing;
-            this.noLoop = 0;
-            this.noTrack = getRythmPanel().loop;
+            this.noLoop = nbrLoops;
+            this.noTrack = track;
             
         }
         

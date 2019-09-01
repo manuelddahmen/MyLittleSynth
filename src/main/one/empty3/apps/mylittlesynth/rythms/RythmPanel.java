@@ -4,25 +4,17 @@ package one.empty3.apps.mylittlesynth.rythms;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.scene.input.MouseButton;
 import one.empty3.apps.mylittlesynth.App;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ResourceBundle;
 
-import javafx.animation.AnimationTimer;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
-
-import javax.swing.*;
 
 public class RythmPanel extends GridPane {
     private final App app;
@@ -50,7 +42,8 @@ public class RythmPanel extends GridPane {
     private GridPane paneLine;
     private ListFolderFiles listFolderFiles;
     PlayList playList;
-    PlayListRepeat playList2;
+    PlayListRepeat playListRepeat;
+    private ListViewModel modelView = new ListViewModel(timeline);
     private boolean noRepeat;
 
     public boolean isNoRepeat() {
@@ -145,34 +138,42 @@ public class RythmPanel extends GridPane {
             @Override
             public void handle(MouseEvent event) {
                 try {
-                    Object selectedItem = playList.getSelectionModel().getSelectedItem();
-                    Text item = (Text) selectedItem;
-                    String position = item.getText().split("/")[1];
-                    timeline[loop].deleteAt(Double.parseDouble(position));
+                    if(event.getButton().equals(MouseButton.SECONDARY)) {
+                        Object selectedItem = playListRepeat.getSelectionModel().getSelectedItem();
+                        Text item = (Text) selectedItem;
+                        String position = item.getText().split("/")[1];
+                        timeline[loop].deleteAt(Double.parseDouble(position));
+                    }
+                    else {
+                        Object selectedItem = playList.getSelectionModel().getSelectedItem();
+                        int selectedIndex = playList.getSelectionModel().getSelectedIndex();
+                        Text item = (Text) selectedItem;
+                        String position = item.getText().split("/")[1];
+                        Timeline.Model model = timeline[loop].models.get(selectedIndex - 1);
+                        modelView.setModel(model);
+                    }
                 } catch (NullPointerException exception) {
                 } catch (Exception exception) {
                 }
                 
             }
         });
-        playList2 = new PlayListRepeat(timeline);
-        setConstraints(playList2, 10, 0, 2, 10);
-        getChildren().add(playList2);
+        playListRepeat = new PlayListRepeat(timeline);
+        setConstraints(playListRepeat, 10, 0, 2, 10);
+        getChildren().add(playListRepeat);
         //this.addColumn(10,playList);
-        playList2.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        playListRepeat.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 try {
-                    Object selectedItem = playList2.getSelectionModel().getSelectedItem();
-                    Text item = (Text) selectedItem;
-                    String position = item.getText().split("/")[1];
-                    timeline[loop].deleteAt(Double.parseDouble(position));
                 } catch (NullPointerException exception) {
                 } catch (Exception exception) {
                 }
                 
             }
         });
+        setConstraints(modelView, 12, 0, 2, 10);
+        getChildren().add(modelView);
         textTimeline = new TextField("time");
         this.getChildren().add(textTimeline);
         setConstraints(textTimeline, 1, 10);
@@ -225,19 +226,15 @@ public class RythmPanel extends GridPane {
                 @Override
                 protected Object call() throws Exception {
                     while(true) {
-                        Thread.sleep(2000);
+                        Thread.sleep(100);
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
                                 writeNoLoop(loopTimer[loop].getLoop());
                                 writeTimeLoop(loop);
                                 playList.display();
+                                playListRepeat.display();
 
-                                try {
-                                    Thread.sleep(100);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
                             }
                         });
                         Platform.runLater(new Runnable() {
@@ -245,11 +242,7 @@ public class RythmPanel extends GridPane {
                             public void run() {
                                 XmlTimeline xmlTimeline = new XmlTimeline(timeline);
                                 xmlTimeline.save();
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
+
                             }
                         });
                     }
@@ -274,12 +267,12 @@ public class RythmPanel extends GridPane {
     
     private void setLoop(int loop) {
         playList.setTimeline(timeline[loop]);
-        playList2.setTimeline(timeline);
+        playListRepeat.setTimeline(timeline);
         listFolderFiles.setLoop(loop);
         listFolderFiles.setTimeline(timeline[loop]);
         loopTimer[loop] = new LoopTimer(this, loop);
-        playList2.setLoop(loop);
-        playList2.display();
+        playListRepeat.setLoop(loop);
+        playListRepeat.display();
         playList.display();
         listFolderFiles.listFiles();
     }

@@ -23,10 +23,10 @@ public class TimelineThread extends Thread {
 
 
     class PlayMid extends Thread {
-        private final File midi;
+        private final Timeline.Model midi;
 
-        public PlayMid(File wave) {
-            this.midi = wave;
+        public PlayMid(Timeline.Model mid) {
+            this.midi = mid;
         }
 
         @Override
@@ -44,13 +44,14 @@ public class TimelineThread extends Thread {
 //                    MidiSystem.getSynthesizer().loadAllInstruments(soundbank);
 //                }
                 // Create sequence, the File must contain MIDI file data.
-                Sequence sequence = MidiSystem.getSequence(midi);
+                Sequence sequence = MidiSystem.getSequence(midi.wave);
                 sequencer.setSequence(sequence); // load it into sequencer
+                midi.noPlaying++;
                 sequencer.start();  // start the playback
+                midi.noPlaying--;
             } catch (MidiUnavailableException | InvalidMidiDataException | IOException ex) {
                 ex.printStackTrace();
             }
-
         }
     }
 
@@ -101,6 +102,9 @@ public class TimelineThread extends Thread {
 
     private int loop;
 
+
+
+    Timeline.Model current;
     public void run() {
         pause = false;
         double t = 0;
@@ -118,17 +122,27 @@ public class TimelineThread extends Thread {
                 }
                 next[track] = timeline[track].next();
 
-                if (next[track] == null || !isPlayNow(getT(track), next[track])) {
+                if (next[track] == null ) {
                     continue;
                 }
 
 
-                if (next[track].wave.getName().endsWith("mid")) {
-                    new PlayMid(next[track].wave).start();
+                current = next[track];
+                if (current.wave.getName().endsWith("mid")) {
+                    new PlayMid(current).start();
                 } else {
                     Media media = null;
-                    media = new Media(next[track].wave.toURI().toString());
-                    new MediaPlayer(media).play();
+                    media = new Media(current.wave.toURI().toString());
+                    MediaPlayer mediaPlayer = new MediaPlayer(media);
+                    current.noPlaying ++;
+                    mediaPlayer.play();
+                    mediaPlayer.setOnEndOfMedia(new Runnable() {
+                        @Override
+                        public void run() {
+                            current.noPlaying--;
+
+                        }
+                    });
                 }
 
                 prev[track] = next[track];
@@ -142,22 +156,11 @@ public class TimelineThread extends Thread {
         }
     }
 
-    private boolean isPlayNow(double t, Timeline.Model next) {
-        return Math.abs(next.timeOnTimeline - t) < 0.5;
-    }
-
     public TimelineThread(RythmPanel panel) {
         this.panel = panel;
         timeline = panel.timeline;
 
     }
-
-    private double getT(int track) {
-        double t;
-        t = panel.loopTimer[track].getCurrentTimeOnLineSec();
-        return t;
-    }
-
     private boolean isRunning() {
         return true;
     }
