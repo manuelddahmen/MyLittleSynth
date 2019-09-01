@@ -1,6 +1,9 @@
 package one.empty3.apps.mylittlesynth.rythms;
 
 
+import javafx.application.Platform;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import one.empty3.apps.mylittlesynth.App;
 
 import java.io.File;
@@ -27,25 +30,23 @@ public class RythmPanel extends GridPane {
     public int loop = 0;
     private int timelineSizeDefault = 16;
     private TextField nbrLoops;
-
-    double timelineTimeSec() {
-        return 60. / tempo[loop];
+    private double time0timiLoop[] = new double[timelineSizeDefault];
+    private int[] loops = new int[timelineSizeDefault];
+    double timelineTimeSec(int track) {
+        return 60. / tempo[track];
     }
     
     static int size = 8;
-    private double[] tempo = new double[size];
+    private double[] tempo = new double[timelineSizeDefault];
     int columnCount = 4;
-    private int[] timelineSize = new int[size];
     int buttonsCount = size * columnCount;
-    private TitledPane container;
-    private ResourceBundle resourceBundle;
     RythmModel[] model;
     Timeline[] timeline = new Timeline[size];
     private LoopProgress gridPaneTime;
     private Button[] buttons = new Button[size];
-    private TimelineThread[] timelineThread = new TimelineThread[size];
+    private TimelineThread timelineThread;
     private TextField tempoText;
-    LoopTimer[] loopTimer = new LoopTimer[size];
+    LoopTimer[] loopTimer = new LoopTimer[timelineSizeDefault];
     private GridPane paneLine;
     private ListFolderFiles listFolderFiles;
     PlayList playList;
@@ -70,7 +71,6 @@ public class RythmPanel extends GridPane {
     }
     
     public RythmPanel(TitledPane container, App app) {
-        this.container = container;
         this.model = new RythmModel[size];
         for (int i = 0; i < size; i++)
             this.model[i] = new RythmModel(this, new File("rythmFiles"));
@@ -80,35 +80,31 @@ public class RythmPanel extends GridPane {
     
     public void init() {
         // Init components;
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < size; i++) {
             tempo[i] = 20;
-        loopTimer[loop] = new LoopTimer(this);
-        for (int i = 0; i < size; i++)
-            timeline[i] = new Timeline(this);
-        XmlTimeline xmlTimeline = new XmlTimeline();
-        xmlTimeline.setAudioSamples(timeline);
-        this.setGridLinesVisible(true);
+            loopTimer[i] = new LoopTimer(this, i);
+            timeline[i] = new Timeline(this, i);
+        }this.setGridLinesVisible(true);
         
         
         for (int j = 0; j < size / columnCount; j++)
             for (int i = 0; i < columnCount; i++) {
-                buttons[j * columnCount + i] = new Button("Loop #" + (j * columnCount + i));
+                buttons[j * columnCount + i] = new Button("Loop°" + (j * columnCount + i));
                 setConstraints(buttons[j * columnCount + i], i, j);
                 buttons[j * columnCount + i].setOnMouseClicked(event -> {
                     String name = ((Button) event.getSource()).getText();
-                    int loop2 = Integer.parseInt(name.split("#")[1]);
+                    int loop2 = Integer.parseInt(name.split("°")[1]);
                     loadLoop(loop2);
                 });
             }
         getChildren().addAll(buttons);
-        timelineSize[loop] = timelineSizeDefault;
         LoopProgress progress = new LoopProgress(this);
         this.gridPaneTime = progress;
         setConstraints(progress, 0, 0);
         this.getChildren().addAll(progress);
         Slider slider = new Slider(0.1D, 20.0D, 1.0D);
         setConstraints(slider, 6, 0);
-        this.getChildren().addAll(new Node[]{slider});
+        this.getChildren().addAll(slider);
         slider.setValueChanging(true);
 
         tempoText = new TextField("" + tempo[loop]);
@@ -117,7 +113,8 @@ public class RythmPanel extends GridPane {
                 double tempoValueCandidate = Double.parseDouble(tempoText.getText());
                 tempo[loop] = tempoValueCandidate > 0 ? tempoValueCandidate : 1;
                 System.out.println("Tempo: " + tempo[loop]);
-            } catch (Exception ex) {
+            }
+            catch (Exception ignored) {
             
             }
         });
@@ -138,12 +135,7 @@ public class RythmPanel extends GridPane {
         // Init loops
         
         
-        for (int i = 0; i < size; i++) {
-            timelineThread[i] = new TimelineThread(this.timeline);
-            timelineThread[i].start();
-            timelineThread[i].setLoop(i);
-        }
-        
+
         
         playList = new PlayList(timeline[loop]);
         setConstraints(playList, 8, 0, 2, 10);
@@ -192,21 +184,21 @@ public class RythmPanel extends GridPane {
         getChildren().add(listFolderFiles);
         //this.addColumn(2,listFolderFiles);
         
-        CheckBox desising = new CheckBox("Loop?");
-        desising.setOnKeyReleased(new EventHandler<KeyEvent>() {
+        CheckBox loopCheckBox = new CheckBox("Loop?");
+        loopCheckBox.setOnKeyReleased(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                timeline[loop].setLoops(desising.isSelected());
+                timeline[loop].setLoops(loopCheckBox.isSelected());
             }
         });
-        desising.setSelected(false);
-        setConstraints(desising, 9, 10, 1, 1);
-        getChildren().add(desising);
+        loopCheckBox.setSelected(true);
+        setConstraints(loopCheckBox, 9, 10, 1, 1);
+        getChildren().add(loopCheckBox);
         nbrLoops = new TextField("1");
         setConstraints(nbrLoops, 10, 10, 1, 1);
         getChildren().add(nbrLoops);
         
-        TextField loopText = new TextField("Loaded loop #" + loop);
+        TextField loopText = new TextField("Loaded loop°" + loop);
         this.getChildren().add(loopText);
         setConstraints(loopText, 0, 9);
         
@@ -218,26 +210,74 @@ public class RythmPanel extends GridPane {
         setConstraints(loopText, 1, 9);
         this.loop = loop;
         loadLoop(loop);
+
+        timelineThread= new TimelineThread(this);
+        timelineThread.start();
+
+        Service<Void> fileSaveService = new Service<Void>(){
+            @Override
+            protected Task<Void> createTask() {
+                return new MyDrawingTask();
+            }
+
+            class MyDrawingTask extends Task{
+
+                @Override
+                protected Object call() throws Exception {
+                    while(true) {
+                        Thread.sleep(2000);
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                writeNoLoop(loopTimer[loop].getLoop());
+                                writeTimeLoop(loop);
+                                playList.display();
+
+                                try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                XmlTimeline xmlTimeline = new XmlTimeline(timeline);
+                                xmlTimeline.save();
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+
+                }
+            }
+
+        };
+        fileSaveService.start();
     }
-    
+
+
     private void loadLoop(int loop) {
         if (loop >= 0 && loop < size) {
             setLoop(loop);
             this.loop = loop;
-            
-            TextField loopText = new TextField("Loaded loop #" + loop);
+            TextField loopText = new TextField("Loaded loop°" + loop);
             this.getChildren().add(loopText);
             setConstraints(loopText, 0, 9);
-        }
+            tempoText.setText("" + tempo[loop]);        }
     }
     
     private void setLoop(int loop) {
         playList.setTimeline(timeline[loop]);
         playList2.setTimeline(timeline);
         listFolderFiles.setLoop(loop);
-        timelineThread[loop].setLoop(loop);
         listFolderFiles.setTimeline(timeline[loop]);
-        loopTimer[loop] = new LoopTimer(this);
+        loopTimer[loop] = new LoopTimer(this, loop);
         playList2.setLoop(loop);
         playList2.display();
         playList.display();
@@ -245,6 +285,22 @@ public class RythmPanel extends GridPane {
     }
 
     public void writeNoLoop(int nbrLoops) {
-        this.nbrLoops.setText(""+String.valueOf(nbrLoops));
+        loops[loop] = nbrLoops;
+        this.nbrLoops.setText(""+nbrLoops);
     }
+
+    public double getTimeNowLoopSec(int track) {
+        return loopTimer[track].getCurrentTimeOnLineSec();
+    }
+
+    public void writeTimeLoop(int track) {
+        double newTime = getLoopTimer()[track].getCurrentTimeOnLineSec();
+        textTimeline.setText(String.valueOf(newTime));
+
+    }
+
+    public LoopTimer[] getLoopTimer() {
+        return loopTimer;
+    }
+
 }

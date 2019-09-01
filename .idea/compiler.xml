@@ -6,17 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="mylittlesynth" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="mylittlesynth" target="1.8" />
       <module name="MyLittleSynth" target="1.8" />
-      <module name="mylittlesynth-revive" target="1.8" />
-      <module name="mylittlesynth-revive_main" target="1.8" />
-      <module name="mylittlesynth-revive_test" target="1.8" />
-      <module name="MyLittleSynth.main" target="1.8" />
-      <module name="MyLittleSynth.test" target="1.8" />
       <module name="MyLittleSynth_main" target="1.8" />
       <module name="MyLittleSynth_test" target="1.8" />
     </bytecodeTargetLevel>

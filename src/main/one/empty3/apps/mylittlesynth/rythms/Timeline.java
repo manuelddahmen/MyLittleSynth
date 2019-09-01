@@ -2,50 +2,35 @@ package one.empty3.apps.mylittlesynth.rythms;
 
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.function.Consumer;
+import java.util.*;
 
 public class Timeline {
+    int track;
+    private boolean newLoop = true;
     private int nbrLoops;
     private boolean decresing;
     private PlayList playList;
-    List<Model> times = Collections.synchronizedList(new ArrayList<Model>());
+    LinkedList<Model> models = new LinkedList<Model>();
     private RythmPanel panel;
-    private int lastReminingLoops = 20;
     private PlayListRepeat playList2;
     private double newTime;
     private boolean isLoops;
+    private int currentItem;
 
-    public Timeline(PlayList playList) {
-        this.playList = playList;
+    public List<Model> getModels() {
+        return models;
     }
     
-    public List<Model> getTimes() {
-        return times;
-    }
-    
-    Timeline(RythmPanel rythmPanel) {
+    Timeline(RythmPanel rythmPanel, int track) {
         this.panel = rythmPanel;
+        this.track = track;
     }
 
-    private void sortList()
-    {
-        this.times.sort((o1, o2) -> {
-            if (o1.timeOnTimelinePC >newTime&&o1.timeOnTimelinePC -newTime< o2.timeOnTimelinePC-newTime )
-                return 1;
-            else
-                return -1;
-        });
-    }
 
     public synchronized void addFileAtTimePC(
             Double timePC, File file) {
         
-        this.times.add(new Model(timePC, file));
-        sortList();
+        this.models.add(new Model(file));
         this.playList = panel.playList;
         this.playList2 = panel.playList2;
         playList.display();
@@ -54,16 +39,15 @@ public class Timeline {
     }
     
     public double getDuration() {
-        return panel.timelineTimeSec();
+        return panel.timelineTimeSec(track);
     }
     
     public void add(Model model) {
-        this.times.add(model);
+        this.models.add(model);
     }
     
     public void remove(Model model) {
-        this.times.remove(model);
-        sortList();
+        this.models.remove(model);
         playList.display();
         playList2.display();
     }
@@ -81,45 +65,37 @@ public class Timeline {
     
     public void setTextTimeOnTimeline(File file) {
         panel.textTimeline.setText(file.getName());
-        System.out.println("Samples' list size :" + times.size());
+        System.out.println("Samples' list size :" + models.size());
     }
 
-    public synchronized Model next(double timeOnLinePC, Model prev) {
-        if (newTime > timeOnLinePC) {
-            if (isLoops()) {
-
-                nbrLoops++;
-                this.newTime = timeOnLinePC;
-            }
-
+    public synchronized Model next() {
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-
-        final Model[] choice = new Model[1];
-
-
-        if (times.size() > 0) {
-            Model model = times.get(0);
-            if (model.noLoop <= nbrLoops)
-
-            {
-                choice[0] = model;
-                newTime = model.getTimeOnTimelinePC();
-                model.noLoop++;
-                getRythmPanel().writeNoLoop(nbrLoops);
+        Model choice = null;
+        if (models.size() > 0 ) {
+        for(int m = 0; m<models.size(); m++) {
+            Model model = models.get(m);
+                if (model != null )
+                {
+                    choice = model;
+                    model.noLoop = getRythmPanel().loopTimer[track].getLoop();
+                }
             }
-
-            return choice[0] != null && choice[0] != prev ? choice[0] : null;
-        } else return null;
+        }
+        return choice;
     }
-    
+
     public synchronized void deleteAt(Double position) {
         boolean error = true;
         while (error) {
             try {
                 {
-                    times.forEach(model -> {
-                        if (model.timeOnTimelinePC == position)
-                            times.remove(model);
+                    models.forEach(model -> {
+                        if (model.timeOnTimeline == position)
+                            models.remove(model);
                     });
                 }
                 error = false;
@@ -127,7 +103,6 @@ public class Timeline {
             
             }
         }
-        playList.display();
     }
 
     public void setLoops(boolean loops) {
@@ -140,17 +115,18 @@ public class Timeline {
 
     class Model {
         boolean decreasing;
-        int noLoop;
+        int noLoop=0;
         int reminingTimes;
-        double timeOnTimelinePC;
+        double timeOnTimeline;
         File wave;
+        int noTrack =0;
         
-        public Model(Double time, File file) {
-            this.timeOnTimelinePC = time;
+        public Model(File file) {
+            this.timeOnTimeline = getRythmPanel().getLoopTimer()[track].getCurrentTimeOnLineSec();
             this.wave = file;
-            this.reminingTimes = lastReminingLoops;
             this.decreasing = Timeline.this.decresing;
             this.noLoop = 0;
+            this.noTrack = getRythmPanel().loop;
             
         }
         
@@ -161,14 +137,7 @@ public class Timeline {
         public void setDecreasing(boolean decreasing) {
             this.decreasing = decreasing;
         }
-        
-        public int getNbrLoops() {
-            return nbrLoops;
-        }
-        
-        public void setNbrLoops(int noLoop) {
-            this.noLoop= noLoop;
-        }
+
         
         public int getReminingTimes() {
             return reminingTimes;
@@ -179,11 +148,11 @@ public class Timeline {
         }
         
         public double getTimeOnTimelinePC() {
-            return timeOnTimelinePC;
+            return timeOnTimeline;
         }
         
         public void setTimeOnTimelinePC(double timeOnTimelinePC) {
-            this.timeOnTimelinePC = timeOnTimelinePC;
+            this.timeOnTimeline = timeOnTimelinePC;
         }
         
         public File getWave() {
@@ -196,15 +165,15 @@ public class Timeline {
         
         public String toString() {
             return
-                    wave.getName() + "|" + ((int) timeOnTimelinePC * 100)
+                    wave.getName() + "|" + ((int) timeOnTimeline)
                             + "|" + reminingTimes + " loops";
         }
     }
     
     public String toString() {
         String modelString = "";
-        for (int i = 0; i < times.size(); i++)
-            modelString += "||" + (times.get(i).timeOnTimelinePC) + " " + times.get(i).wave.getName() + "||";
+        for (int i = 0; i < models.size(); i++)
+            modelString += "||" + (models.get(i).timeOnTimeline) + " " + models.get(i).wave.getName() + "||";
         return "timeline (duration:'" + getDuration() + modelString + "  )";
     }
     

@@ -61,7 +61,7 @@ public class RythmModel  {
 
                 this.buttons[i].setOnMouseClicked((mouseEvent) -> {
                     double d = panel.loopTimer[panel.loop].getCurrentTimeOnLineSec();
-                    panel.timeline[panel.loop].addFileAtTimePC(d/panel.timelineTimeSec(), file);
+                    panel.timeline[panel.loop].addFileAtTimePC(d/panel.timelineTimeSec(panel.loop), file);
                     System.out.println(d);
 
                 });

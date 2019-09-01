@@ -6,35 +6,21 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
 import javax.sound.midi.*;
+import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 
 public class TimelineThread extends Thread {
 
 
-    class PlayMusic extends Thread {
-        private final Media sample;
+    private RythmPanel panel;
 
-        public PlayMusic(Media sample) {
-            this.sample = sample;
-        }
-
-        @Override
-        public void run() {
-            super.run();
-            if (sample != null) {
-                MediaPlayer mediaPlayer = new MediaPlayer(sample);
-                mediaPlayer.play();
-                mediaPlayer.dispose();
-            }
-
-        }
-    }
 
     class PlayMid extends Thread {
         private final File midi;
@@ -53,8 +39,10 @@ public class TimelineThread extends Thread {
                     return;
                 }
                 sequencer.open(); // Open device
-                //Soundbank soundbank = getSoundbank(new File(".\\midibanks\\CityPiano.sfz"));
-                //MidiSystem.getSynthesizer().loadAllInstruments(soundbank);
+//                Soundbank soundbank = getSoundbank(new File(".\\midibanks\\KawaiUprightPiano-20190703.sf2"));
+//                if(soundbank!=null) {
+//                    MidiSystem.getSynthesizer().loadAllInstruments(soundbank);
+//                }
                 // Create sequence, the File must contain MIDI file data.
                 Sequence sequence = MidiSystem.getSequence(midi);
                 sequencer.setSequence(sequence); // load it into sequencer
@@ -69,26 +57,34 @@ public class TimelineThread extends Thread {
 
     public static Soundbank getSoundbank(File file)
             throws InvalidMidiDataException, IOException {
-        try {
-            AudioInputStream ais = AudioSystem.getAudioInputStream(file);
-            ais.close();
-            ModelByteBufferWavetable osc = new ModelByteBufferWavetable(
-                    new ModelByteBuffer(file, 0, file.length()), -4800);
-            ModelPerformer performer = new ModelPerformer();
-            performer.getOscillators().add(osc);
-            SimpleSoundbank sbk = new SimpleSoundbank();
-            SimpleInstrument ins = new SimpleInstrument();
-            ins.add(performer);
-            sbk.addInstrument(ins);
-            return sbk;
-        } catch (IOException e) {
-            return null;
-        } catch (UnsupportedAudioFileException e) {
-            e.printStackTrace();
-            return null;
-        }
+        if (file.exists()) {
+            try {
+                AudioFileFormat.Type[] audioFileTypes = AudioSystem.getAudioFileTypes();
+                for (AudioFileFormat.Type t : audioFileTypes) {
+                    System.out.println("Extension : " + t.getExtension());
+                }
+
+                AudioInputStream ais = AudioSystem.getAudioInputStream(file);
+                ais.close();
+                ModelByteBufferWavetable osc = new ModelByteBufferWavetable(
+                        new ModelByteBuffer(file, 0, file.length()), -4800);
+                ModelPerformer performer = new ModelPerformer();
+                performer.getOscillators().add(osc);
+                SimpleSoundbank sbk = new SimpleSoundbank();
+                SimpleInstrument ins = new SimpleInstrument();
+                ins.add(performer);
+                sbk.addInstrument(ins);
+                return sbk;
+            } catch (IOException e) {
+                return null;
+            } catch (UnsupportedAudioFileException e) {
+                e.printStackTrace();
+                return null;
+            }
+        } else return null;
 
     }
+
     private HashMap<URI, Media> samples = new HashMap<>();
     public static final int ENDS = 0;
     public Timeline[] timeline;
@@ -105,82 +101,60 @@ public class TimelineThread extends Thread {
 
     private int loop;
 
-    public TimelineThread(Timeline[] tImeline) {
-        this.timeline = tImeline;
-
-    }
-
     public void run() {
         pause = false;
         double t = 0;
-        int millis = 100;
+        int loop = timeline.length;
+        Timeline.Model[] prev = new Timeline.Model[loop];
+        Timeline.Model[] next = new Timeline.Model[loop];
         while (isRunning()) {
-            while (pause) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            for (int track = 0; track < timeline.length; track++) {
+                while (pause) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-            t = getT();
-            Timeline.Model prev = null;
-            Timeline.Model next = timeline[loop].next(t, prev);
+                next[track] = timeline[track].next();
 
-            while (next == null) {
+                if (next[track] == null || !isPlayNow(getT(track), next[track])) {
+                    continue;
+                }
+
+
+                if (next[track].wave.getName().endsWith("mid")) {
+                    new PlayMid(next[track].wave).start();
+                } else {
+                    Media media = null;
+                    media = new Media(next[track].wave.toURI().toString());
+                    new MediaPlayer(media).play();
+                }
+
+                prev[track] = next[track];
+
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                next = timeline[loop].next(t, prev);
-            }
-
-            if (next != null) {
-
-                Media sample = null;
-                new PlayMusic(sample).start();
-                URI uri = next.wave.toURI();
-                if (next.wave.getName().endsWith("mid")) {
-                    new PlayMid(next.wave).start();
-                } else {
-                    if (samples.containsKey(uri))
-                        sample = samples.get(uri);
-                    else {
-                        sample = new Media(next.wave.toURI().toString());
-                    }
-                }
-                if (next.decreasing)
-                    next.reminingTimes--;
-
-
-                else
-                    timeline[loop].queue(next);
-                timeline[loop].getRythmPanel().textTimeline.setText("" + ((int) t * timeline[loop].getDuration() * 100));
-
-                prev = next;
-            }
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }
 
-    private double isPlayNow(double t, Timeline.Model next) {
-        return next.timeOnTimelinePC * timeline[loop].getDuration();
+    private boolean isPlayNow(double t, Timeline.Model next) {
+        return Math.abs(next.timeOnTimeline - t) < 0.5;
     }
 
-    private double getT() {
+    public TimelineThread(RythmPanel panel) {
+        this.panel = panel;
+        timeline = panel.timeline;
+
+    }
+
+    private double getT(int track) {
         double t;
-        t = timeline[loop].
-                getRythmPanel().
-                loopTimer[
-                timeline[loop].
-                        getRythmPanel().
-                        loop].
-                getCurrentTimeOnLineSec();
+        t = panel.loopTimer[track].getCurrentTimeOnLineSec();
         return t;
     }
 

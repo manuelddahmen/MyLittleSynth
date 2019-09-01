@@ -30,7 +30,7 @@ public class LoopProgress extends Canvas {
             int size = RythmPanel.size;
             for(int i = 0; i< size; i++)
             {
-                double v = i * panel.loopTimer[panel.loop].getCurrentTimeOnLineSec() / panel.timelineTimeSec();
+                double v = i * panel.loopTimer[panel.loop].getCurrentTimeOnLineSec() / panel.timelineTimeSec(panel.loop);
                 if(v>1.0*i/size&&v<1.0*(i+1)/size) {
                     double left = 1.0 * i / size * width;
                     double right = 1.0 * i / size * height;

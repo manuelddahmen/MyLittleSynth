@@ -29,9 +29,9 @@ public class PlayList extends ListView {
             public void run() {
                 getItems().clear();
                 getItems().add(new Text("position/name"));
-                timeline.times.forEach(model1 ->
+                timeline.models.forEach(model1 ->
                         {
-                            getItems().add(new Text(model1.wave.getName()+"/"+model1.timeOnTimelinePC));
+                            getItems().add(new Text(model1.wave.getName()+"/"+model1.timeOnTimeline));
                         }
                 );
             }

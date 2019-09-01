@@ -4,16 +4,41 @@ import one.empty3.apps.mylittlesynth.Timer;
 
 public class LoopTimer extends Timer {
     private final RythmPanel panel;
+    private final int track;
+    private double lastTimeSec;
+    private int loop;
 
-    public LoopTimer(RythmPanel rythmPanel)
+    public LoopTimer(RythmPanel rythmPanel, int track)
     {
         super();
         this.panel = rythmPanel;
+        this.track = track;
     }
-    // TODO Je crois que le problème vient de cette classe avec des long de grandes tailles, le calcul en double et le reste en double en 0.0 et la durée de la loop
     public double getCurrentTimeOnLineSec() {
-        return panel.isNoRepeat()?
-                getTotalTimeElapsedSec()
-        :Math.IEEEremainder(getTotalTimeElapsedSec(), panel.timelineTimeSec());
+        double ieeEremainder = Math.IEEEremainder(getTotalTimeElapsedNanoSec() / 1000000000.0, panel.timelineTimeSec(track))+panel.timelineTimeSec(track)/2.0;
+        if(ieeEremainder<lastTimeSec)
+            loop++;
+        this.lastTimeSec = ieeEremainder;
+        return ieeEremainder;
+    }
+    public double getLastTimeSec()
+    {
+        return lastTimeSec;
+    }
+
+    public void setLastTimeSec(double lastTimeSec) {
+        this.lastTimeSec = lastTimeSec;
+    }
+
+    public RythmPanel getPanel() {
+        return panel;
+    }
+
+    public int getLoop() {
+        return loop;
+    }
+
+    public void setLoop(int loop) {
+        this.loop = loop;
     }
 }

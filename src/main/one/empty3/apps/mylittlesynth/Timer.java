@@ -21,16 +21,16 @@ public class Timer {
    }
 
    public double getTotalTimeElapsedSec() {
-      return getTotalTimeElapsedMillisSec()/1000.;
+      return getTotalTimeElapsedNanoSec()/1000000000.;
    }
 
-   public long getTotalTimeElapsedMillisSec() {
-      return System.currentTimeMillis() - this.timeStartSystemNanoSec;
+   public long getTotalTimeElapsedNanosSec() {
+      return System.nanoTime() - this.timeStartSystemNanoSec;
    }
 
    public void stop() {
 
-         this.definitiveTimeMilli = this.getTotalTimeElapsedMillisSec();
+         this.definitiveTimeMilli = this.getTotalTimeElapsedNanoSec()/1000000;
       this.definitiveTimeNano = this.getTotalTimeElapsedNanoSec();
    }
 

@@ -17,7 +17,7 @@ public class PlayListRepeat extends ListView {
         setOnEditCommit(new EventHandler<EditEvent>() {
             @Override
             public void handle(EditEvent event) {
-                timeline[loop].times.get(event.getIndex() - 1)
+                timeline[loop].models.get(event.getIndex() - 1)
                         .reminingTimes = Integer.parseInt(
                         (String)timeline[loop].getRythmPanel().
                                 playList2
@@ -32,8 +32,8 @@ public class PlayListRepeat extends ListView {
             @Override
             public void run() {
                 getItems().clear();
-                getItems().add(new Text("remining loops"));
-                timeline[loop].times.forEach(model1 ->
+                getItems().add(new Text("Nbr Loops"));
+                timeline[loop].models.forEach(model1 ->
                         {
                             getItems().add(model1.noLoop);
                         }
