@@ -1,5 +1,5 @@
 package one.empty3.apps.mylittlesynth;
-
+/*
 import one.empty3.library.Point3D;
 import one.empty3.library.core.nurbs.CourbeParametriquePolynomialeBezier;
 
@@ -64,3 +64,4 @@ public class Enveloppe {
 
    }
 }
+*/

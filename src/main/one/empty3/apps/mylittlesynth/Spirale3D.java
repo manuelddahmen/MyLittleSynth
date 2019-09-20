@@ -1,5 +1,5 @@
 package one.empty3.apps.mylittlesynth;
-
+/*
 import one.empty3.library.Point3D;
 import one.empty3.library.core.nurbs.ParametricCurve;
 
@@ -34,3 +34,4 @@ public class Spirale3D extends ParametricCurve {
       return this.getPoint3D(v).moins(this.getPoint3D(v - this.INCR)).mult(this.INCR);
    }
 }
+*/

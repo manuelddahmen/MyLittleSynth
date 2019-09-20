@@ -15,10 +15,10 @@ public class Player extends Thread {
    private Timer timer;
    private boolean playing;
    private Player that;
-   private AudioViewer audioViewer;
+   //private AudioViewer audioViewer;
    private int octave = 4;
    private String form;
-   private WaveForm waveform;
+   private WaveForm waveform = WaveForm.SIN;
    private double volume;
    private long position;
    private boolean recording;
@@ -29,29 +29,29 @@ public class Player extends Thread {
    double facteurAmpl;
    Short a;
    byte[] nextBuffer;
+   private short[] amplitude = new short[1024];
 
    public List<NoteState> getNoteStates() {
       return this.noteStates;
    }
 
-   public Player(App app, AudioViewer audioViewer) {
+   public Player(App app/*, AudioViewer audioViewer*/) {
       this.waveform = WaveForm.SIN;
       this.volume = 100.0D;
       this.playingBuffer = false;
       this.loopPlayingBuffer = false;
       this.timerRecording = new NoteTimer();
       this.total = 0.0D;
-      this.facteurAmpl = 0.0D;
+      this.facteurAmpl = 30000D;
       this.a = Short.valueOf((short)0);
       this.nextBuffer = new byte[4];
       this.app = app;
       this.currentNotes = Collections.synchronizedList(new ArrayList());
       this.noteStates = Collections.synchronizedList(new ArrayList());
       this.timer = new Timer();
-      this.audioViewer = audioViewer;
+      //this.audioViewer = audioViewer;
       this.that = this;
       this.playing = true;
-      this.position = 0L;
    }
 
    public void addNote(Note note) {
@@ -60,57 +60,58 @@ public class Player extends Thread {
 
    public void playCurrentNotes() {
       this.total = 0.0D;
-      this.getCurrentNotes().forEach((note1) -> {
-         Note note = (Note)note1;
-         double noteTimeSec = (double)note.getTimer().getTotalTimeElapsedNanoSec() / 1.0E9D;
-         double f2pi = (double)this.app.getSoundProductionSystem().calculateNoteFrequency((float)note.getTone()) * 2.0D * 3.141592653589793D;
-         double f2piT = f2pi * noteTimeSec;
-         this.facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
-         double ampl = 30000.0D * this.facteurAmpl;
-         switch(note.getWaveform()) {
-         case SIN:
-            this.total += Math.sin(f2piT) * ampl;
-            break;
-         case RECT:
-            this.total += Math.signum(Math.sin(f2piT)) * ampl;
-         case SAWTOOTH:
-            this.total += (1.0D - f2piT / 2.0D * 3.141592653589793D) * ampl;
-         case TRI:
-            this.total += 1.0D - Math.abs(f2piT / 2.0D * 3.141592653589793D) * ampl;
-         default:
-            this.total += Math.sin(f2piT) * ampl;
-         }
+      if(getCurrentNotes().size()>0) {
+          for (int t = 0; t < amplitude.length; t++) {
+              this.getCurrentNotes().forEach((note1) -> {
+                  Note note = (Note) note1;
+                  note.setNoteTimeSamples(note.getNoteTimeSamples() + 1);
+                  double noteTimeSec = note.getNoteTimeSamples() / app.getSoundProductionSystem().sampleRate;
+                  double f2pi = (double) this.app.getSoundProductionSystem().calculateNoteFrequency((float) note.getTone()) * 2.0D * 3.141592653589793D;
+                  double f2piT = f2pi * noteTimeSec;
+                  //this.facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
+                  double ampl = Short.MAX_VALUE;
+                  switch (note.getWaveform()) {
+                      case SIN:
+                          this.total += Math.sin(f2piT) * ampl;
+                          break;
+                      case RECT:
+                          this.total += Math.signum(Math.sin(f2piT)) * ampl;
+                      case SAWTOOTH:
+                          this.total += (1.0D - f2piT / 2.0D * 3.141592653589793D) * ampl;
+                      case TRI:
+                          this.total += 1.0D - Math.abs(f2piT / 2.0D * 3.141592653589793D) * ampl;
+                      default:
+                          this.total += Math.sin(f2piT) * ampl;
+                  }
+              });
+              this.total /= this.currentNotes.size() > 0 ? (double) this.currentNotes.size() : 1.0D;
+              if (this.getCurrentNotes().size() > 0) {
+                  amplitude[t] = (short) ((int) (this.total * this.volume / 100.0D));
 
-         this.audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe().getBrutVolume(noteTimeSec));
-      });
-      this.total /= this.currentNotes.size() > 0 ? (double)this.currentNotes.size() : 1.0D;
-      short amplitude;
-      if (this.getCurrentNotes().size() > 0) {
-         amplitude = (short)((int)(this.total * this.volume / 100.0D));
-         //this.audioViewer.sendDouble((double)amplitude * 1.0D);
-         //this.audioViewer.sendDouble((double)amplitude * 1.0D);
-         this.playBufferMono(amplitude);
-         ++this.position;
-      } else {
-         amplitude = 0;
-         //this.audioViewer.sendDouble(0.0D);
-         //this.audioViewer.sendDouble(0.0D);
+                  //this.audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe().getBrutVolume(noteTimeSec));
+              }
+              //this.audioViewer.sendDouble((double)amplitude * 1.0D);
+              //this.audioViewer.sendDouble((double)amplitude * 1.0D);
+              this.playBufferMono(amplitude);
+              position += (long) (1 / app.getSoundProductionSystem().sampleRate);
+          }
       }
-
    }
 
-   public void playBufferMono(short amplitude) {
-      this.nextBuffer[0] = (byte)(amplitude & 255);
-      this.nextBuffer[1] = (byte)(amplitude >> 8);
-      this.nextBuffer[2] = (byte)(amplitude & 255);
-      this.nextBuffer[3] = (byte)(amplitude >> 8);
-
-      try {
-         this.app.getSoundProductionSystem().getLine().write(this.nextBuffer, 0, 4);
-         this.app.getSoundProductionSystem().writeWaveBuffer(this.nextBuffer);
-      } catch (Exception var4) {
-         var4.printStackTrace();
-      }
+   private void playBufferMono(short[] amplitude) {
+       nextBuffer = new byte[amplitude.length * 4];
+       for (int t = 0; t < amplitude.length; t++) {
+           this.nextBuffer[4 * t + 0] = (byte) (amplitude[t] & 255);
+           this.nextBuffer[4 * t + 1] = (byte) (amplitude[t] >> 8);
+           this.nextBuffer[4 * t + 2] = (byte) (amplitude[t] & 255);
+           this.nextBuffer[4 * t + 3] = (byte) (amplitude[t] >> 8);
+       }
+       try {
+           this.app.getSoundProductionSystem().getLine().write(this.nextBuffer, 0, 4 * amplitude.length);
+           this.app.getSoundProductionSystem().writeWaveBuffer(this.nextBuffer);
+       } catch (Exception var4) {
+           var4.printStackTrace();
+       }
 
    }
 
@@ -130,7 +131,7 @@ public class Player extends Thread {
    }
 
    public Note addNote(int tone, long minDurationSec) {
-      Note note = new Note(getApp().noteMap, (double)minDurationSec, tone, this.waveform, new Enveloppe((double)minDurationSec));
+      Note note = new Note(getApp().noteMap, (double)minDurationSec, tone, this.waveform/*, new Enveloppe((double)minDurationSec)*/);
       Platform.runLater(() -> {
          this.getCurrentNotes().add(note);
          System.out.println("After added " + this.getCurrentNotes().size());

@@ -136,6 +136,7 @@ public class TimelineThread extends Thread {
                     MediaPlayer mediaPlayer = new MediaPlayer(media);
                     current.noPlaying ++;
                     mediaPlayer.play();
+                    mediaPlayer.setVolume(timeline[track].volume);
                     mediaPlayer.setOnEndOfMedia(new Runnable() {
                         @Override
                         public void run() {

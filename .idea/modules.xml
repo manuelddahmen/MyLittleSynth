@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/MyLittleSynth_main.iml" filepath="$PROJECT_DIR$/.idea/modules/MyLittleSynth_main.iml" group="MyLittleSynth" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/MyLittleSynth_test.iml" filepath="$PROJECT_DIR$/.idea/modules/MyLittleSynth_test.iml" group="MyLittleSynth" />
+      <module fileurl="file://$PROJECT_DIR$/mylittlesynth.iml" filepath="$PROJECT_DIR$/mylittlesynth.iml" />
     </modules>
   </component>
 </project>

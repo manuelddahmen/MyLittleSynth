@@ -4,6 +4,7 @@ package one.empty3.apps.mylittlesynth.rythms;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseButton;
 import one.empty3.apps.mylittlesynth.App;
 
@@ -184,7 +185,15 @@ public class RythmPanel extends GridPane {
         setConstraints(listFolderFiles, 6, 0, 2, 10);
         getChildren().add(listFolderFiles);
         //this.addColumn(2,listFolderFiles);
-        
+        Slider volumeTrack = new Slider(0.0, 1.0, 1.0);
+        setConstraints(volumeTrack, 6, 10, 2, 1);
+        getChildren().add(volumeTrack);
+        volumeTrack.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                timeline[loop].volume = slider.getValue();
+            }
+        });
         CheckBox loopCheckBox = new CheckBox("Loop?");
         loopCheckBox.setOnKeyReleased(new EventHandler<KeyEvent>() {
             @Override

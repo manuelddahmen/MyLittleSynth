@@ -8,19 +8,19 @@ public class Note {
    private final Map instantiator;
    private int tone;
    private WaveForm waveform;
-   private Enveloppe enveloppe;
+   //private Enveloppe enveloppe;
    private Timer timer;
    private double minDurationSec;
    private boolean finish;
    private long position;
    private long definitivePosition;
-
-   public Note(Map instantiator, double minDurationSec, int tone, WaveForm waveform, Enveloppe enveloppe) {
+   private long noteTimeSamples = 0;
+   public Note(Map instantiator, double minDurationSec, int tone, WaveForm waveform/*, Enveloppe enveloppe*/) {
       this.instantiator = instantiator;
       this.minDurationSec = minDurationSec;
       this.tone = tone;
       this.waveform = waveform;
-      this.enveloppe = enveloppe;
+      //this.enveloppe = enveloppe;
       this.position = 0L;
       this.init();
    }
@@ -48,14 +48,14 @@ public class Note {
    public void setWaveform(WaveForm waveform) {
       this.waveform = waveform;
    }
-
+/*
    public Enveloppe getEnveloppe() {
       return this.enveloppe;
    }
 
    public void setEnveloppe(Enveloppe enveloppe) {
       this.enveloppe = enveloppe;
-   }
+   }*/
 
    public void setTimer(Timer timer) {
       this.timer = timer;
@@ -63,7 +63,7 @@ public class Note {
 
    public void init() {
       this.timer = new Timer();
-      this.enveloppe.setTimer(this.timer);
+     // this.enveloppe.setTimer(this.timer);
    }
 
    public Timer getTimer() {
@@ -115,5 +115,13 @@ public class Note {
 
    public void setDefinitivePosition(long definitivePosition) {
       this.definitivePosition = definitivePosition;
+   }
+
+   public long getNoteTimeSamples() {
+      return noteTimeSamples;
+   }
+
+   public void setNoteTimeSamples(long noteTimeSamples) {
+      this.noteTimeSamples = noteTimeSamples;
    }
 }

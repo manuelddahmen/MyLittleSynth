@@ -19,7 +19,7 @@ public class App extends Application {
     private SoundProductionSystem soundProductionSystem;
     private ToggleGroup group;
     private Player player;
-    private AudioViewer audioViewer;
+    //private AudioViewer audioViewer;
     Map noteMap;
     private double minDurationSec = 4.0D;
     private Slider volume;
@@ -81,7 +81,7 @@ public class App extends Application {
         }
         
         for(i = 0; i < 96; ++i) {
-            this.noteMap.put(i, new Note(this.noteMap, this.minDurationSec, i, WaveForm.SIN, new Enveloppe(this.minDurationSec)));
+            this.noteMap.put(i, new Note(this.noteMap, this.minDurationSec, i, WaveForm.SIN/*, new Enveloppe(this.minDurationSec)*/));
         }
         
         KeyCode[] keycode = new KeyCode[]{KeyCode.A, KeyCode.Z, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y, KeyCode.U, KeyCode.I, KeyCode.Q, KeyCode.S, KeyCode.D, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.J, KeyCode.K};
@@ -167,14 +167,14 @@ public class App extends Application {
         roundButton.setOnRotate(rotateEvent -> System.out.println("rotate" + rotateEvent.getAngle()));
         roundButton.setOnRotationFinished(rotateEvent -> System.out.println("rotation finish" + rotateEvent.getAngle()));
         vBox.getChildren().add(roundButton);
-        this.audioViewer = new AudioViewer(44100.0F, 2, canvas);
+        //this.audioViewer = new AudioViewer(44100.0F, 2, canvas);
         Slider zoomSlider = new Slider();
         zoomSlider.setMin(1.0D);
         zoomSlider.setMax(20.0D);
         zoomSlider.setValue(1.0D);
-        this.audioViewer.setZoom(1.0D);
+        //this.audioViewer.setZoom(1.0D);
         zoomSlider.setOnMouseReleased((mouseEvent) -> {
-            this.audioViewer.setZoom(zoomSlider.getValue());
+           // this.audioViewer.setZoom(zoomSlider.getValue());
         });
         vBox.getChildren().add(zoomSlider);
         bp.setLeft(vBox);
@@ -227,13 +227,13 @@ public class App extends Application {
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
             App.this.player.setPlaying(false);
-            App.this.audioViewer.setRunning(false);
+            //App.this.audioViewer.setRunning(false);
             App.this.getSoundProductionSystem().write();
             App.this.getSoundProductionSystem().end();
             App.this.getSoundProductionSystem().setEnded(true);
             System.exit(0);
         });
-        this.player = new Player(this, this.audioViewer);
+        this.player = new Player(this/*, this.audioViewer*/);
         this.player.setRecording(false);
         this.player.setVolume(100.0D);
         this.player.start();
@@ -346,20 +346,18 @@ public class App extends Application {
         System.out.println("Tone:  " + this.getTone(source) + "  Note :" + source.getText() + "  Octave: " + (int)this.slider.getValue() + "\nVolume: " + this.player.getVolume());
         Note note = (Note)this.noteMap.get(this.getTone(source));
         try {
-            note.setEnveloppe(new Enveloppe(this.minDurationSec));
+            //note.setEnveloppe(new Enveloppe(this.minDurationSec));
         }
         catch (NullPointerException ex)
         {
             System.out.println("Error playNote" + note.getTone());
-        }note.setWaveform(this.player.getForm());
-        this.player.playNote(note);
+        }
+            note.setWaveform(this.player.getForm());
+            this.player.playNote(note);
     }
     
     public void stopNote(Button source) {
         Note note = (Note)this.noteMap.get(this.getTone(source));
-        
-        assert note != null;
-        
         System.out.println((double)note.getTimer().getTotalTimeElapsedNanoSec() / 1.0E9D);
         this.player.stopNote(note);
         System.out.println("Key pressed: " + this.player.getCurrentNotes().size());

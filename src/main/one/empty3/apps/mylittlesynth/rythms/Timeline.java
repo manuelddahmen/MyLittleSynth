@@ -17,6 +17,7 @@ public class Timeline {
     private double newTime;
     private boolean isLoops;
     private int currentItem;
+    public double volume = 1.0;
 
     public List<Model> getModels() {
         return models;
@@ -32,11 +33,6 @@ public class Timeline {
             Double timePC, File file) {
         
         this.models.add(new Model(file));
-        this.playList = panel.playList;
-        this.playList2 = panel.playListRepeat;
-        playList.display();
-        playList2.display();
-
     }
     
     public double getDuration() {

@@ -1,7 +1,7 @@
 package one.empty3.apps.mylittlesynth.rythms;
 
 
-import com.thoughtworks.xstream.XStream;
+//import com.thoughtworks.xstream.XStream;
 
 import java.io.File;
 
@@ -32,8 +32,8 @@ public class XmlTimeline {
 */    }
     
     public void load(File loop) {
-        XStream xstream = new XStream();
-        xstream.fromXML(loop);
+       // XStream xstream = new XStream();
+       // xstream.fromXML(loop);
         
         
     }
