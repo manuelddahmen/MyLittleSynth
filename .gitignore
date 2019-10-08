@@ -1,0 +1,5 @@
+/.idea/libraries
+/build/classes/main/one/empty3/apps/mylittlesynth/*.class
+processor
+*.class
+*.log
