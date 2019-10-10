@@ -14,7 +14,7 @@ public class JFrameNew extends JFrame {
         PlayerSwing playerSwing = new PlayerSwing(keyContainer);
         keyContainer.setPlayer(playerSwing);
         pack();
-
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         playerSwing.start();
     }
 
