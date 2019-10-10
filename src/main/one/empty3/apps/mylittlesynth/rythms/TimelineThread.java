@@ -126,32 +126,33 @@ public class TimelineThread extends Thread {
                     continue;
                 }
 
+                if(prev[track]!=next[track] || timeline[track].getModels().size()==1) {
+                    current = next[track];
+                    if (current.wave.getName().endsWith("mid")) {
+                        new PlayMid(current).start();
+                    } else {
+                        Media media = null;
+                        media = new Media(current.wave.toURI().toString());
+                        MediaPlayer mediaPlayer = new MediaPlayer(media);
+                        current.noPlaying++;
+                        mediaPlayer.play();
+                        mediaPlayer.setVolume(timeline[track].volume);
+                        mediaPlayer.setOnEndOfMedia(new Runnable() {
+                            @Override
+                            public void run() {
+                                current.noPlaying--;
 
-                current = next[track];
-                if (current.wave.getName().endsWith("mid")) {
-                    new PlayMid(current).start();
-                } else {
-                    Media media = null;
-                    media = new Media(current.wave.toURI().toString());
-                    MediaPlayer mediaPlayer = new MediaPlayer(media);
-                    current.noPlaying ++;
-                    mediaPlayer.play();
-                    mediaPlayer.setVolume(timeline[track].volume);
-                    mediaPlayer.setOnEndOfMedia(new Runnable() {
-                        @Override
-                        public void run() {
-                            current.noPlaying--;
+                            }
+                        });
+                    }
 
-                        }
-                    });
-                }
+                    prev[track] = next[track];
 
-                prev[track] = next[track];
-
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

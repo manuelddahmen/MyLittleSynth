@@ -3,6 +3,7 @@ package one.empty3.apps.mylittlesynth;
 import javafx.scene.control.Button;
 
 public class RepeatThread extends Thread {
+   private PlayerSwing playerS;
    private Player player = null;
 
    public RepeatThread(Player player) {
@@ -10,6 +11,11 @@ public class RepeatThread extends Thread {
       long timeStart = System.nanoTime() - player.getTimerRecording().getInitTime();
    }
 
+   public RepeatThread(PlayerSwing player) {
+      this.playerS = player;
+      long timeStart = System.nanoTime() - player.getTimerRecording().getInitTime();
+      //TODO: EXTRACT
+   }
    public void run() {
       while(this.player.isPlayingBuffer()) {
          long current = System.nanoTime() - this.player.getTimerRecording().getInitTime();

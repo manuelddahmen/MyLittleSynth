@@ -65,6 +65,7 @@ public class SoundProductionSystem {
 
    public void writeWaveBuffer(byte[] data) {
       int j = 0;
+      /*
 
       for(int i = this.buffLen; i < this.buffLen + data.length; ++i) {
          this.buffer[i] = data[j++];
@@ -74,7 +75,7 @@ public class SoundProductionSystem {
       if (this.buffLen >= 31752000 || this.isEnded()) {
          this.write();
       }
-
+*/
    }
 
    public void write() {
@@ -162,19 +163,26 @@ public class SoundProductionSystem {
       case 'G':
          tone -= 2;
       }
+       int half = 0;
 
       String toneStr = "";
       if (Character.isDigit(noteAnglaise.charAt(1))) {
          toneStr = toneStr + "" + noteAnglaise.charAt(1);
+      } else {
+
+          if (noteAnglaise.charAt(1) =='#') {
+             half = +1;
+
+         } else if (noteAnglaise.charAt(1) == 'b') {
+             half = -1;
+         }
       }
 
-      if (noteAnglaise.length() > 2 && Character.isDigit(noteAnglaise.charAt(2))) {
+       if (noteAnglaise.length() > 2 && Character.isDigit(noteAnglaise.charAt(2))) {
          toneStr = toneStr + "" + noteAnglaise.charAt(2);
       }
 
-      tone += Integer.parseInt(toneStr) * 12 - 4;
-      tone = (int)((double)tone + (noteAnglaise.charAt(noteAnglaise.length() - 1) == '#' ? 0.5D : 0.0D));
-      tone = (int)((double)tone + (noteAnglaise.charAt(noteAnglaise.length() - 1) == 'b' ? 0.5D : 0.0D));
+      tone += Integer.parseInt(toneStr) * 12 - 4 + half;
       return tone;
    }
 
