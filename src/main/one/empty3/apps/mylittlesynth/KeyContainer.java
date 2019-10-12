@@ -1,6 +1,8 @@
 package one.empty3.apps.mylittlesynth;
 
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.*;
 import javax.swing.*;
 import net.miginfocom.swing.*;
@@ -12,14 +14,27 @@ import one.empty3.apps.mylittlesynth.processor.WaveForm;
 public class KeyContainer extends JPanel {
     private SoundProductionSystem soundProductionSystem;
     private PlayerSwing player;
-
-    public KeyContainer()
+    private Note lastNote = null;
+    private AppNew appNew;
+    private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    public KeyContainer(AppNew appNew)
 
     {
+        this.appNew = appNew;
         initComponents();
         afterInit();
         soundProductionSystem = new SoundProductionSystem();
     }
+
+
+    public PropertyChangeSupport getPropertyChangeSupport() {
+        return propertyChangeSupport;
+    }
+
+    public void setPropertyChangeSupport(PropertyChangeSupport propertyChangeSupport) {
+        this.propertyChangeSupport = propertyChangeSupport;
+    }
+
     public String note(int i)
     {
         String [] array = new String [] {"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
@@ -52,7 +67,10 @@ public class KeyContainer extends JPanel {
     }
 
     private void playNote(int tone) {
-        player.playNote(new Note(null, 5.0, tone, WaveForm.SIN));
+        Note2 note = new Note2(tone,  appNew.getListInstruments().getSelectedInstrumentIndex());
+        propertyChangeSupport.firePropertyChange("playNote", lastNote, note);
+        lastNote = note;
+        //player.playNote(note);
     }
 
     private void initComponents() {

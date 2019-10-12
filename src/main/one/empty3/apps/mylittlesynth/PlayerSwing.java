@@ -1,14 +1,21 @@
 package one.empty3.apps.mylittlesynth;
 
 import one.empty3.apps.mylittlesynth.processor.WaveForm;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javafx.application.Platform;
 
-public class PlayerSwing extends Thread {
-    private final KeyContainer app;
+import javax.sound.midi.*;
+
+public class PlayerSwing extends Thread implements PropertyChangeListener {
+    private final AppNew app;
+    private int channelIndex;
+    private Receiver synthRcvr;
     private List notesRecorded;
     private final List noteStates;
     private List currentNotes;
@@ -30,12 +37,14 @@ public class PlayerSwing extends Thread {
     Short a;
     byte[] nextBuffer;
     private short[] amplitude = new short[1024];
+    private Synthesizer synth;
+    private int lastInst = -1;
 
     public List<NoteState> getNoteStates() {
         return this.noteStates;
     }
 
-    public PlayerSwing(KeyContainer app) {
+    public PlayerSwing(AppNew app) {
         this.waveform = WaveForm.SIN;
         this.volume = 100.0D;
         this.playingBuffer = false;
@@ -52,6 +61,24 @@ public class PlayerSwing extends Thread {
         //this.audioViewer = audioViewer;
         this.that = this;
         this.playing = true;
+
+
+        try {
+            synth = MidiSystem.getSynthesizer();
+
+            synth.open();
+
+            synthRcvr = synth.getReceiver();
+
+            MidiChannel[] channels = synth.getChannels();
+            for (MidiChannel channel : channels) {
+                channelIndex = 0;
+            }
+
+        } catch (MidiUnavailableException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void addNote(Note note) {
@@ -65,8 +92,8 @@ public class PlayerSwing extends Thread {
                 this.getCurrentNotes().forEach((note1) -> {
                     Note note = (Note) note1;
                     note.setNoteTimeSamples(note.getNoteTimeSamples() + 1);
-                    double noteTimeSec = note.getNoteTimeSamples() / app.getSoundProductionSystem().sampleRate;
-                    double f2pi = (double) this.app.getSoundProductionSystem().calculateNoteFrequency((float) note.getTone()) * 2.0D * 3.141592653589793D;
+                    double noteTimeSec = note.getNoteTimeSamples() / app.getKeyContainer().getSoundProductionSystem().sampleRate;
+                    double f2pi = (double) this.app.getKeyContainer().getSoundProductionSystem().calculateNoteFrequency((float) note.getTone()) * 2.0D * 3.141592653589793D;
                     double f2piT = f2pi * noteTimeSec;
                     //this.facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
                     double ampl = Short.MAX_VALUE;
@@ -93,7 +120,7 @@ public class PlayerSwing extends Thread {
                 //this.audioViewer.sendDouble((double)amplitude * 1.0D);
                 //this.audioViewer.sendDouble((double)amplitude * 1.0D);
                 this.playBufferMono(amplitude);
-                position += (long) (1 / app.getSoundProductionSystem().sampleRate);
+                position += (long) (1 / app.getKeyContainer().getSoundProductionSystem().sampleRate);
             }
         }
     }
@@ -107,8 +134,8 @@ public class PlayerSwing extends Thread {
             this.nextBuffer[4 * t + 3] = (byte) (amplitude[t] >> 8);
         }
         try {
-            this.app.getSoundProductionSystem().getLine().write(this.nextBuffer, 0, 4 * amplitude.length);
-            this.app.getSoundProductionSystem().writeWaveBuffer(this.nextBuffer);
+            this.app.getKeyContainer().getSoundProductionSystem().getLine().write(this.nextBuffer, 0, 4 * amplitude.length);
+            this.app.getKeyContainer().getSoundProductionSystem().writeWaveBuffer(this.nextBuffer);
         } catch (Exception var4) {
             var4.printStackTrace();
         }
@@ -199,17 +226,36 @@ public class PlayerSwing extends Thread {
         }
     }
 
-    public void playNote(Note note) {
+    public void playNote(Note2 note) {
         new Thread(){
             @Override
             public void run() {
                 if (!getCurrentNotes().contains(note)) {
-                    note.setWaveform(getForm());
-                    addNote(note);
-                    note.play();
-                    if (isRecording()) {
-                        NoteState noteState = new NoteState(note, timerRecording.getTotalTimeElapsedNanoSec(), true);
-                        timerRecording.add(noteState);
+                    if(note.getInstrument()>=0)
+                    {
+                        try {
+                            ShortMessage myMsg = new ShortMessage();
+                            // Play the note Middle C (60) moderately loud
+                            // (velocity = 93)on channel 4 (zero-based).
+                            myMsg.setMessage(ShortMessage.NOTE_ON, channelIndex, note.getTone(), 93);
+                            Instrument instr;
+                            if(note.getInstrument()!=lastInst) {
+                                synth.loadInstrument(instr = synth.getAvailableInstruments()[note.getInstrument()]);
+                                synth.getChannels()[channelIndex].programChange(instr.getPatch().getProgram());
+                                lastInst = note.getInstrument();
+                            }
+                            synthRcvr.send(myMsg, -1); // -1 means no time stamp
+                        } catch (InvalidMidiDataException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        note.setWaveform(getForm());
+                        addNote(note);
+                        note.play();
+                        if (isRecording()) {
+                            NoteState noteState = new NoteState(note, timerRecording.getTotalTimeElapsedNanoSec(), true);
+                            timerRecording.add(noteState);
+                        }
                     }
                 }
 
@@ -275,7 +321,12 @@ public class PlayerSwing extends Thread {
         return this.notesRecorded;
     }
 
-    public KeyContainer getApp() {
+    public AppNew getApp() {
         return this.app;
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        evt.getNewValue();
     }
 }
