@@ -18,7 +18,7 @@ import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 public class InstrumentChooser extends JPanel {
     private AppNew appNew;
     private Instrument selectedInstrument;
-    private int selectedInstrumentindex =  - 1;
+    private int selectedInstrumentindex =  01;
     public InstrumentChooser()
     {
         initComponents();

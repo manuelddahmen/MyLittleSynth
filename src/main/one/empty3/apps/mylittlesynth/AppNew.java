@@ -18,6 +18,8 @@ import net.miginfocom.swing.*;
 public class AppNew extends JFrame implements PropertyChangeListener{
     private final PlayerSwing playerSwing;
     private KeyContainer keyContainer;
+    private Rec recordind = new Rec();
+
 
     public AppNew() {
         initComponents();
@@ -101,7 +103,7 @@ public class AppNew extends JFrame implements PropertyChangeListener{
         {
             Note2 newValue = (Note2) evt.getNewValue();
             playerSwing.playNote(newValue);
-
+            recordind.addNote(newValue);
         }
     }
 
