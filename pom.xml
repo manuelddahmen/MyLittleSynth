@@ -10,9 +10,8 @@
 
     <distributionManagement>
         <repository>
-            <id>demoniakmachine.com</id>
-            <name>demoniakmachine.com</name>
-            <url>ftp://ftp.demoniakmachine.com/m2</url>
+            <id>if2</id>
+            <url>ftp://ftp.empty3.one/downloads/maven</url>
         </repository>
     </distributionManagement>
     <build>
@@ -127,8 +126,8 @@
     <dependencies>
 
         <dependency>
-            <groupId>be.manudahmen</groupId>
-            <artifactId>empty3</artifactId>
+            <groupId>one.empty3</groupId>
+            <artifactId>empty3-library-3e</artifactId>
             <version>68</version>
         </dependency>
 
