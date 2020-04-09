@@ -136,6 +136,12 @@
     <artifactId>miglayout</artifactId>
     <version>3.7.4</version>
 </dependency>
+<!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-layout -->
+<dependency>
+    <groupId>org.netbeans.api</groupId>
+    <artifactId>org-jdesktop-layout</artifactId>
+    <version>RELEASE731</version>
+</dependency>
 
     </dependencies>
 
