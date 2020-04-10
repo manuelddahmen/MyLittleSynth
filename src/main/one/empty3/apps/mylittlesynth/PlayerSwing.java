@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 
 import javafx.application.Platform;
-import org.jfugue.midi.MidiParser;
 
 import javax.sound.midi.*;
 
