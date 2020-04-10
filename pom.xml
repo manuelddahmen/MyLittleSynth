@@ -142,13 +142,14 @@
     <artifactId>org-jdesktop-layout</artifactId>
     <version>RELEASE731</version>
 <!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-layout -->
+</dependency>
 <dependency>
     <groupId>org.netbeans.api</groupId>
     <artifactId>org-jdesktop-layout</artifactId>
     <version>RELEASE802</version>
 </dependency>
 
-</dependency>
+
 
     </dependencies>
 
