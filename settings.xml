@@ -5,6 +5,10 @@
   <profiles>
 <profile>
 <id>empty3</id>
+  <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+
   <repositories>
     <repository>
       <id>myrepo</id>
