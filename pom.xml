@@ -176,23 +176,17 @@
     <version>3.7.4</version>
 </dependency>
 <!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-layout -->
-<dependency>
-    <groupId>org.netbeans.api</groupId>
-    <artifactId>org-jdesktop-layout</artifactId>
-    <version>RELEASE731</version>
-<!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-layout -->
-</dependency>
 
 
 
 
 
-<!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-beansbinding -->
-<dependency>
-    <groupId>org.netbeans.api</groupId>
-    <artifactId>org-jdesktop-beansbinding</artifactId>
-    <version>RELEASE82</version>
-</dependency>
+
+
+
+<!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-beansbinding -->    <artifactId>org-jdesktop-beansbinding</artifactId>
+
+
 
 
     </dependencies>
