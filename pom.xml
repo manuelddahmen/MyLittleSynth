@@ -184,7 +184,8 @@
 
 
 
-<!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-beansbinding -->    <artifactId>org-jdesktop-beansbinding</artifactId>
+<!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-beansbinding -->   
+	    
 
 
 
