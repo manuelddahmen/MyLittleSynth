@@ -1,6 +1,6 @@
 package one.empty3.apps.mylittlesynth;
 
-import javax.annotation.Resource;
+
 import java.io.*;
 import java.util.Properties;
 import java.util.ResourceBundle;
