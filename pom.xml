@@ -185,6 +185,12 @@
     <version>11</version>
     <type>pom</type>
 </dependency>
+<!-- https://mvnrepository.com/artifact/org.openjfx/javafx-media -->
+<dependency>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-media</artifactId>
+    <version>15-ea+4</version>
+</dependency>
 
 
 
