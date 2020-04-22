@@ -8,12 +8,51 @@
   <name>MyLittleSynth</name>
   <description>Some sound curves and more</description>
 
+    
+	<licenses>
+		<license>
+			<name>Gnu Gpl 3</name>
+			<url>http://www.fsf.org/licenses/gpl</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/manuelddahmen/MyLittleSynth</url>
+		<connection>scm:git:git://github.com/manuelddahmen/MyLittleSynth.git</connection>
+		<developerConnection>scm:git:git://github.com/manuelddahmen/MyLittleSynth.git</developerConnection>
+	</scm>
+
+	<developers>
+		<developer>
+			<email>dathewolf@gmail.com</email>
+			<name>Manuel D Dahmen
+			</name>
+			<url>https://github.com/manuelddahmen</url>
+			<id>manuelddahmen</id>
+		</developer>
+	</developers>
+
+    <url>https://github.com/manuelddahmen/MyLittleSynth</url>
+    
     <distributionManagement>
-        <repository>
+  <snapshotRepository>
+    <id>ossrh</id>
+    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+  </snapshotRepository>
+  <repository>
+    <id>ossrh</id>
+    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+  </repository>
+<!--
+<repository>
             <id>if2</id>
+            <name>empty3.one</name>
             <url>ftp://ftp.empty3.one/downloads/maven</url>
-        </repository>
-    </distributionManagement>
+</repository>
+-->
+
+</distributionManagement>
     <build>
        <defaultGoal>install</defaultGoal>
        <directory>${basedir}/target</directory>
@@ -128,7 +167,7 @@
         <dependency>
             <groupId>one.empty3</groupId>
             <artifactId>empty3-library-3d</artifactId>
-            <version>2020.2</version>
+            <version>2020.2-1-SNAPSHOT</version>
         </dependency>
 <!-- https://mvnrepository.com/artifact/com.miglayout/miglayout -->
 <dependency>
@@ -143,11 +182,10 @@
     <version>RELEASE731</version>
 <!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-layout -->
 </dependency>
-<dependency>
-    <groupId>org.netbeans.api</groupId>
-    <artifactId>org-jdesktop-layout</artifactId>
-    <version>RELEASE802</version>
-</dependency>
+
+
+
+
 
 <!-- https://mvnrepository.com/artifact/org.netbeans.api/org-jdesktop-beansbinding -->
 <dependency>
