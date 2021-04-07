@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>one.empty3</groupId>
   <artifactId>mylittlesynth</artifactId>
-  <version>2020.2</version>
+  <version>2021.4-SNAPSHOT</version>
   <name>MyLittleSynth</name>
   <description>Some sound curves and more</description>
 
@@ -83,9 +83,6 @@
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
                <version>2.12.4</version>
-               <configuration>
-                   <skipTests>true</skipTests>
-               </configuration>
            </plugin>
            <plugin>
                <groupId>org.apache.maven.plugins</groupId>
@@ -94,8 +91,8 @@
                <configuration>
                    <archive>
                        <manifest>
-                           <mainClass>info.emptycanvas.library.gui.NEWMain</mainClass>
-                           <packageName>info.emptycanvas.library.gui</packageName>
+                           <mainClass>App</mainClass>
+                           <packageName>one.empty3.apps.mylittlesynth</packageName>
                            <addClasspath>true</addClasspath>
                        </manifest>
                        <manifestEntries>
@@ -103,6 +100,15 @@
                            <url>${pom.url}</url>
                        </manifestEntries>
                    </archive>
+               </configuration>
+           </plugin>
+           <plugin>
+               <groupId>org.codehaus.mojo</groupId>
+               <artifactId>exec-maven-plugin</artifactId>
+               <version>3.0.0</version>
+               <configuration>
+                   <includeProjectDependencies>true</includeProjectDependencies>
+                   <mainClass>one.empty3.apps.mylittlesynth.App</mainClass>
                </configuration>
            </plugin>
            <plugin>
@@ -121,12 +127,15 @@
 
 
            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-dependency-plugin</artifactId>
+               <version>3.1.2</version>
                <executions>
                </executions>
            </plugin>
 
            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-resources-plugin</artifactId>
                <version>2.6</version>
                <executions>
@@ -178,8 +187,8 @@
           <doctitle>My API for ${project.name} ${project.version}</doctitle> <!-- Used by javadoc:javadoc goal -->
           <windowtitle>My API for ${project.name} ${project.version}</windowtitle> <!-- Used by javadoc:javadoc goal -->
  
-          <testDoctitle>My Test API for ${project.name} ${project.version}</testDoctitle> <!-- Used by javadoc:test-javadoc goal -->
-          <testWindowtitle>My Test API for ${project.name} ${project.version}</testWindowtitle> <!-- Used by javadoc:test-javadoc goal -->
+          <doctitle>My Test API for ${project.name} ${project.version}</doctitle> <!-- Used by javadoc:test-javadoc goal -->
+          <windowtitle>My Test API for ${project.name} ${project.version}</windowtitle> <!-- Used by javadoc:test-javadoc goal -->
  </configuration>
 			
 			</execution>
@@ -196,36 +205,7 @@
         <autoReleaseAfterClose>true</autoReleaseAfterClose>
       </configuration>
     </plugin>
-
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <!-- here the phase you need -->
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/target/</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>runscripts/</directory>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>      <plugin>
+  <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
         <version>1.6</version>
@@ -261,14 +241,6 @@
     </plugin>
        </plugins>
 
-       <extensions>
-           <!-- Enabling the use of FTP -->
-           <extension>
-               <groupId>org.apache.maven.wagon</groupId>
-               <artifactId>wagon-ftp</artifactId>
-               <version>2.12</version>
-           </extension>
-       </extensions>
   </build>
 
     <dependencies>
@@ -276,7 +248,7 @@
         <dependency>
             <groupId>one.empty3</groupId>
             <artifactId>empty3-library-3d</artifactId>
-            <version>2020.2-1-SNAPSHOT</version>
+            <version>2021.1.1</version>
         </dependency>
 <!-- https://mvnrepository.com/artifact/com.miglayout/miglayout -->
 <dependency>

@@ -1,52 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>be.manudahmen</groupId>
+  <groupId>one.empty3</groupId>
   <artifactId>mylittlesynth</artifactId>
-  <version>67.2</version>
+  <version>2021.4-SNAPSHOT</version>
   <name>MyLittleSynth</name>
   <description>Some sound curves and more</description>
+  <url>https://github.com/manuelddahmen/MyLittleSynth</url>
+  <licenses>
+    <license>
+      <name>Gnu Gpl 3</name>
+      <url>http://www.fsf.org/licenses/gpl</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>manuelddahmen</id>
+      <name>Manuel D Dahmen</name>
+      <email>dathewolf@gmail.com</email>
+      <url>https://github.com/manuelddahmen</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/manuelddahmen/MyLittleSynth.git</connection>
+    <developerConnection>scm:git:git://github.com/manuelddahmen/MyLittleSynth.git</developerConnection>
+    <url>https://github.com/manuelddahmen/MyLittleSynth</url>
+  </scm>
   <distributionManagement>
     <repository>
-      <id>demoniakmachine.com</id>
-      <name>demoniakmachine.com</name>
-      <url>ftp://ftp.demoniakmachine.com/m2</url>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
   <dependencies>
     <dependency>
-      <groupId>be.manudahmen</groupId>
-      <artifactId>empty3</artifactId>
-      <version>68</version>
+      <groupId>one.empty3</groupId>
+      <artifactId>empty3-library-3d</artifactId>
+      <version>2021.1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.miglayout</groupId>
+      <artifactId>miglayout</artifactId>
+      <version>3.7.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx</artifactId>
+      <version>11</version>
+      <type>pom</type>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-media</artifactId>
+      <version>15-ea+4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-swing</artifactId>
+      <version>15-ea+4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>15-ea+4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jdesktop</groupId>
+      <artifactId>beansbinding</artifactId>
+      <version>1.2.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
   <repositories>
-    <repository>
-      <id>maven-central</id>
-      <name>Maven Central</name>
-      <url>http://central.maven.org/maven2/</url>
-    </repository>
-    <repository>
-      <id>demoniakmachine</id>
-      <name>dm http</name>
-      <url>https://demoniakmachine.com/m2</url>
-    </repository>
-    <repository>
-      <id>sonatype</id>
-      <name>sonatype</name>
-      <url>https://oss.sonatype.org/content/repositories/releases/</url>
-    </repository>
-    <repository>
-      <id>mvnrepository</id>
-      <name>mnvrepository.com</name>
-      <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/</url>
-    </repository>
-    <repository>
-      <id>xuggle repo</id>
-      <url>http://xuggle.googlecode.com/svn/trunk/repo/share/java/</url>
-    </repository>
     <repository>
       <snapshots>
         <enabled>false</enabled>
@@ -70,11 +107,11 @@
     </pluginRepository>
   </pluginRepositories>
   <build>
-    <sourceDirectory>G:\Apps\IdeaProjects\MyLittleSynth\src\main</sourceDirectory>
-    <scriptSourceDirectory>G:\Apps\IdeaProjects\MyLittleSynth\src\main</scriptSourceDirectory>
-    <testSourceDirectory>G:\Apps\IdeaProjects\MyLittleSynth\src</testSourceDirectory>
-    <outputDirectory>G:\Apps\IdeaProjects\MyLittleSynth\target\classes</outputDirectory>
-    <testOutputDirectory>G:\Apps\IdeaProjects\MyLittleSynth\target\test-classes</testOutputDirectory>
+    <sourceDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth\src\main</sourceDirectory>
+    <scriptSourceDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth\src\main</scriptSourceDirectory>
+    <testSourceDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth\src</testSourceDirectory>
+    <outputDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth\target\classes</outputDirectory>
+    <testOutputDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth\target\test-classes</testOutputDirectory>
     <extensions>
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
@@ -85,9 +122,9 @@
     <defaultGoal>install</defaultGoal>
     <resources>
       <resource>
-        <targetPath>G:\Apps\IdeaProjects\MyLittleSynth/target/classes</targetPath>
+        <targetPath>C:\Users\manue\IdeaProjects\MyLittleSynth/target/classes</targetPath>
         <filtering>false</filtering>
-        <directory>G:\Apps\IdeaProjects\MyLittleSynth\src\main\java</directory>
+        <directory>C:\Users\manue\IdeaProjects\MyLittleSynth\src\main\java</directory>
         <includes>
           <include>**/*.*</include>
         </includes>
@@ -99,11 +136,11 @@
     </resources>
     <testResources>
       <testResource>
-        <directory>G:\Apps\IdeaProjects\MyLittleSynth\src\test\resources</directory>
+        <directory>C:\Users\manue\IdeaProjects\MyLittleSynth\src\test\resources</directory>
       </testResource>
     </testResources>
-    <directory>G:\Apps\IdeaProjects\MyLittleSynth\target</directory>
-    <finalName>mylittlesynth-67.2</finalName>
+    <directory>C:\Users\manue\IdeaProjects\MyLittleSynth\target</directory>
+    <finalName>mylittlesynth-2021.4-SNAPSHOT</finalName>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -120,7 +157,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>2.5.3</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -163,7 +200,7 @@
                 </manifest>
                 <manifestEntries>
                   <mode>development</mode>
-                  <url>${pom.url}</url>
+                  <url>https://github.com/manuelddahmen/MyLittleSynth</url>
                 </manifestEntries>
               </archive>
             </configuration>
@@ -178,7 +215,7 @@
             </manifest>
             <manifestEntries>
               <mode>development</mode>
-              <url>${pom.url}</url>
+              <url>https://github.com/manuelddahmen/MyLittleSynth</url>
             </manifestEntries>
           </archive>
         </configuration>
@@ -223,7 +260,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
+        <version>3.1.2</version>
       </plugin>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
@@ -250,7 +287,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>G:\Apps\IdeaProjects\MyLittleSynth/target/</outputDirectory>
+              <outputDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth/target/</outputDirectory>
               <resources>
                 <resource>
                   <directory>runscripts/</directory>
@@ -260,6 +297,97 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>javadoc</goal>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <doctitle>My API for MyLittleSynth 2021.4-SNAPSHOT</doctitle>
+              <windowtitle>My API for MyLittleSynth 2021.4-SNAPSHOT</windowtitle>
+              <doctitle>My Test API for MyLittleSynth 2021.4-SNAPSHOT</doctitle>
+              <windowtitle>My Test API for MyLittleSynth 2021.4-SNAPSHOT</windowtitle>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.7</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <id>injected-nexus-deploy</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>deploy</goal>
+            </goals>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+            <configuration>
+              <keyname>22EE55E4</keyname>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.github.github</groupId>
+        <artifactId>site-maven-plugin</artifactId>
+        <version>0.12</version>
+        <executions>
+          <execution>
+            <phase>site</phase>
+            <goals>
+              <goal>site</goal>
+            </goals>
+            <configuration>
+              <message>Creating site for 2021.4-SNAPSHOT</message>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <message>Creating site for 2021.4-SNAPSHOT</message>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
@@ -290,15 +418,6 @@
       <plugin>
         <artifactId>maven-deploy-plugin</artifactId>
         <version>2.7</version>
-        <executions>
-          <execution>
-            <id>default-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-site-plugin</artifactId>
@@ -311,7 +430,7 @@
               <goal>site</goal>
             </goals>
             <configuration>
-              <outputDirectory>G:\Apps\IdeaProjects\MyLittleSynth\target\site</outputDirectory>
+              <outputDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth\target\site</outputDirectory>
               <reportPlugins>
                 <reportPlugin>
                   <groupId>org.apache.maven.plugins</groupId>
@@ -327,7 +446,7 @@
               <goal>deploy</goal>
             </goals>
             <configuration>
-              <outputDirectory>G:\Apps\IdeaProjects\MyLittleSynth\target\site</outputDirectory>
+              <outputDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth\target\site</outputDirectory>
               <reportPlugins>
                 <reportPlugin>
                   <groupId>org.apache.maven.plugins</groupId>
@@ -338,7 +457,7 @@
           </execution>
         </executions>
         <configuration>
-          <outputDirectory>G:\Apps\IdeaProjects\MyLittleSynth\target\site</outputDirectory>
+          <outputDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth\target\site</outputDirectory>
           <reportPlugins>
             <reportPlugin>
               <groupId>org.apache.maven.plugins</groupId>
@@ -350,6 +469,6 @@
     </plugins>
   </build>
   <reporting>
-    <outputDirectory>G:\Apps\IdeaProjects\MyLittleSynth\target\site</outputDirectory>
+    <outputDirectory>C:\Users\manue\IdeaProjects\MyLittleSynth\target\site</outputDirectory>
   </reporting>
 </project>

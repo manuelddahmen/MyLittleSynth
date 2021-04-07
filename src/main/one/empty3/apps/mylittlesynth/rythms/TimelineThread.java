@@ -1,19 +1,11 @@
 package one.empty3.apps.mylittlesynth.rythms;
 
-import com.sun.media.sound.*;
-import javafx.application.Platform;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
 import javax.sound.midi.*;
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 
 public class TimelineThread extends Thread {
@@ -56,35 +48,6 @@ public class TimelineThread extends Thread {
     }
 
 
-    public static Soundbank getSoundbank(File file)
-            throws InvalidMidiDataException, IOException {
-        if (file.exists()) {
-            try {
-                AudioFileFormat.Type[] audioFileTypes = AudioSystem.getAudioFileTypes();
-                for (AudioFileFormat.Type t : audioFileTypes) {
-                    System.out.println("Extension : " + t.getExtension());
-                }
-
-                AudioInputStream ais = AudioSystem.getAudioInputStream(file);
-                ais.close();
-                ModelByteBufferWavetable osc = new ModelByteBufferWavetable(
-                        new ModelByteBuffer(file, 0, file.length()), -4800);
-                ModelPerformer performer = new ModelPerformer();
-                performer.getOscillators().add(osc);
-                SimpleSoundbank sbk = new SimpleSoundbank();
-                SimpleInstrument ins = new SimpleInstrument();
-                ins.add(performer);
-                sbk.addInstrument(ins);
-                return sbk;
-            } catch (IOException e) {
-                return null;
-            } catch (UnsupportedAudioFileException e) {
-                e.printStackTrace();
-                return null;
-            }
-        } else return null;
-
-    }
 
     private HashMap<URI, Media> samples = new HashMap<>();
     public static final int ENDS = 0;
