@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: one.empty3.apps.mylittlesynth.App
-
