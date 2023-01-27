@@ -1,7 +1,9 @@
 package one.empty3.apps.mylittlesynth;
 
+import javafx.scene.canvas.Canvas;
 import one.empty3.apps.mylittlesynth.processor.WaveForm;
 import one.empty3.apps.mylittlesynth.rythms.RythmPanel;
+
 import java.util.HashMap;
 import java.util.Map;
 import javafx.application.Application;
@@ -365,7 +367,7 @@ public class App extends Application {
     
     public Button getButton(Integer halfTone) {
         for(int i = 0; i < this.buttons.length; ++i) {
-            if ((new Integer(halfTone)).equals(this.buttonNo[i])) {
+            if ((halfTone).equals(this.buttonNo[i])) {
                 return this.buttons[i];
             }
         }

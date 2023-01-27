@@ -1,5 +1,7 @@
 package one.empty3.apps.mylittlesynth;
 
+import net.miginfocom.swing.MigLayout;
+
 import java.awt.*;
 import java.beans.*;
 import javax.sound.midi.Instrument;
@@ -8,9 +10,6 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-import net.miginfocom.swing.*;
-import org.jdesktop.beansbinding.*;
-import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 
 /**
  * Created by manue on 10-10-19.

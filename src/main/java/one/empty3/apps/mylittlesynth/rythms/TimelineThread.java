@@ -1,8 +1,8 @@
 package one.empty3.apps.mylittlesynth.rythms;
 
+
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-
 import javax.sound.midi.*;
 import java.io.IOException;
 import java.net.URI;
@@ -94,8 +94,7 @@ public class TimelineThread extends Thread {
                     if (current.wave.getName().endsWith("mid")) {
                         new PlayMid(current).start();
                     } else {
-                        Media media = null;
-                        media = new Media(current.wave.toURI().toString());
+                        Media media = new Media(current.wave.toURI().toString());
                         MediaPlayer mediaPlayer = new MediaPlayer(media);
                         current.noPlaying++;
                         mediaPlayer.play();

@@ -4,7 +4,40 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
+    //id 'org.openjfx.javafxplugin' version '0.0.13'
+    //id 'org.beryx.jlink' version '2.9.4'
 }
+
+/*
+javafx {
+    version = "19"
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
+}/*
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher{
+        name = 'hello'
+        jvmArgs = ['-Dlog4j.configurationFile=./log4j2.xml']
+    }
+}*/
+
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources", "src/main/configs", "src/main/java"
+        }
+    }
+}
+/*
+
+jlink {
+    launcher {
+        name = 'hellofx'
+    }
+}
+*/
+
 Properties properties = new Properties()
 try {
     // Other configuration here
@@ -22,6 +55,11 @@ java {
 task runNewAppGui(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     mainClass = "one.empty3.apps.mylittlesynth.AppNew"
+    args "arg1", "arg2"
+}
+task runAppGui(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    mainClass = "one.empty3.apps.mylittlesynth.App"
     args "arg1", "arg2"
 }
 /*
@@ -87,6 +125,16 @@ dependencies {
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.9.0')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.9.0')
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
+    implementation("com.miglayout:miglayout:3.7.4")
+    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.base.jar"))
+    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.controls.jar"))
+    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.fxml.jar"))
+    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.graphics.jar"))
+    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.media.jar"))
+    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.properties"))
+    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.swing.jar"))
+    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.web.jar"))
+    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx-swt.jar"))
 }
 
 test {
@@ -107,7 +155,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 
 task copyTask(type: Copy) {
-    from 'src/main/java/'
+    from 'src/main/java/*.*'
     into 'build/classes/java/main'
 }
 javadoc {
@@ -119,6 +167,7 @@ javadoc {
 java {
     withJavadocJar()
     withSourcesJar()
+
 }
 
 javadoc {
@@ -210,8 +259,6 @@ publishing {
     }
 
 }
-
-
 
 
 /*
