@@ -1,6 +1,6 @@
 plugins {
-    id("application") // enabling the plugin here
-    id("java")
+    id "application" // enabling the plugin here
+    id "java"
     id 'java-library'
     id 'maven-publish'
     id 'signing'

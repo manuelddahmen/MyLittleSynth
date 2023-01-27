@@ -78,7 +78,7 @@ public class KeyContainer extends JPanel {
         // Generated using JFormDesigner non-commercial license
         //======== this ========
         setLayout(new MigLayout(
-            "fill,novisualpadding,hidemode 3",
+            "fill,hidemode 3",
             // columns
             "[fill]" +
             "[fill]" +
