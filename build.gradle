@@ -1,0 +1,267 @@
+plugins {
+    id("application") // enabling the plugin here
+    id("java")
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+Properties properties = new Properties()
+try {
+    // Other configuration here
+    File propertiesFile = new File('../private.properties/gradle.properties')
+    propertiesFile.withInputStream {
+        properties.load(it)
+    }
+} catch (Exception ex) {
+    ex.printStackTrace()
+}
+def load = properties
+java {
+    withSourcesJar()
+}
+task runNewAppGui(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    mainClass = "one.empty3.apps.mylittlesynth.AppNew"
+    args "arg1", "arg2"
+}
+/*
+
+task MorphingAppGui(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    mainClass = "one.empty3.apps.morph.Main"
+    args "arg1", "arg2"
+}
+task OpadGameGui(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    mainClass = "one.empty3.apps.opad.PanelGraphics"
+    args "arg1", "arg2"
+}
+task BoardGameGui(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    mainClass = "one.empty3.apps.newboardgames.WindowDrawing"
+    args "arg1", "arg2"
+}
+*/
+signing {
+    def signingKey = load.get("signing.keyId")
+    def signingPassword = load.get("signing.password")
+
+    useGpgCmd()
+    //useInMemoryPgpKeys(signingKey, signingPassword)
+
+    sign publishing.publications
+    sign configurations.archives
+}
+
+
+repositories {
+    google()
+    mavenCentral()
+    maven {
+        url = uri("https://repo.maven.apache.org/maven2/")
+    }
+    maven {
+        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+    }
+    maven {
+        url = uri("https://repository.sonatype.org/content/groups/public/")
+    }
+    maven {
+        url = uri("https://mvnrepository.com/")
+    }
+    maven {
+        url = uri("https://maven.scijava.org/content/repositories/public/")
+    }
+    maven {
+        url "https://maven.jzy3d.org/releases/"
+    }
+    maven {
+        url "https://www.jetbrains.com/intellij-repository/releases"
+    }
+    flatDir dirs: "${rootDir}/lib"
+}
+
+dependencies {
+    implementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.jdom:2.0.6.1_1")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.9.0')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.9.0')
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
+}
+
+test {
+    // show standard out and standard error of the test JVM(s) on the console
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+}
+
+task sourceJar(type: Jar) {
+    classifier "sources"
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier "javadoc"
+    from javadoc.destinationDir
+}
+
+
+task copyTask(type: Copy) {
+    from 'src/main/java/'
+    into 'build/classes/java/main'
+}
+javadoc {
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+javadoc {
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'one.empty3'
+            artifactId = 'mylittlesynth'
+            version = "2023.1"
+            from components.java
+
+            project.tasks.withType(Sign) {
+                signatures.all {
+
+                }
+            }
+
+            // The pom can be enriched as usual
+            pom {
+                name = 'mylittlesynth'
+                description = 'basic notes and repeated sounds'
+                packaging 'jar'
+                url = "https://github.com/manuelddahmen/mylittlesynth"
+
+                licenses {
+                    license {
+                        name = "Apache version 2"
+                        url = "https://www.apache.org/licenses/LICENSE-2.0"
+                        distribution = "repo"
+                    }
+                }
+
+                scm {
+
+                    url = "https://github.com/manuelddahmen/mylittlesynth"
+                    connection = "scm:git:https://github.com/manuelddahmen/mylittlesynth.git"
+                    developerConnection = "scm:git:https://github.com/manuelddahmen/mylittlesynth.git"
+
+                }
+                developers {
+                    developer {
+                        email = "dathewolf@gmail.com"
+                        name = "Manuel Daniel Dahmen"
+
+                        url = "https://github.com/manuelddahmen"
+                        id = "manuelddahmen"
+                    }
+                }
+
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "JetBrainsSpaceEmpty3"
+            url = "https://maven.pkg.jetbrains.space/empty3/p/mylittlesynth/maven/maven"
+            credentials {
+                // Automation has a special account for authentication in Space
+                // account credentials are accessible via env vars
+                username = load.get("spaceUsername")
+                password = load.get("spacePassword")
+            }
+
+        }
+        maven {
+            name = "OSSRH"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = load.get("ossrhUsername")
+                password = load.get("ossrhPassword")
+            }
+
+        }
+        /*maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/manuelddahmne/empty3")
+            credentials {
+                username = load.get("GITHUB_ACTOR")
+                password = load.get("GITHUB_TOKEN")
+            }
+        }*/
+    }
+
+}
+
+
+
+
+/*
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'empty3-library-generic'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description '3D rendering engine. Plus modeling. Expected glsl textures 3d and 2d rendering'
+                url 'https://github.com/manuelddahmen/empty3'
+
+                licenses {
+                    license {
+                        name = "Gnu Gpl 3"
+                        url = "http://www.fsf.org/licenses/gpl"
+                        distribution = "repo"
+                    }
+                }
+
+                scm {
+
+                    url = "https://github.com/manuelddahmen/empty3"
+                    connection = "scm:git:https://github.com/manuelddahmen/empty3.git"
+                    developerConnection = "scm:git:https://github.com/manuelddahmen/empty3.git"
+
+                }
+                developers {
+                    developer {
+                        email = "dathewolf@gmail.com"
+                        name = "Manuel Daniel Dahmen"
+
+                        url = "https://github.com/manuelddahmen"
+                        id = "manuelddahmen"
+                    }
+                }
+
+            }
+        }
+    }
+}
+*/

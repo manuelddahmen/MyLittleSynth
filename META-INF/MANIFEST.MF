@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Archiver-Version: Plexus Archiver
 Created-By: Apache Maven
 Built-By: Win
-Package: be.manudahmen.mylittlesynth
+Package: bone.empty3.apps.mylittlesynth.AppNew
 Build-Jdk: 1.8.0_171
 Extension-Name: mylittlesynth
 Specification-Title: Some sound curves and more
 Implementation-Title: mylittlesynth
 Implementation-Version: 67.2
-Main-Class: App
+Main-Class: one.empty3.apps.mylittlesynth.AppNew
 mode: development
 url: null
 
