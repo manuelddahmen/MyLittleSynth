@@ -41,6 +41,7 @@ public class AppNew extends JFrame implements PropertyChangeListener{
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        // Generated using JFormDesigner non-commercial license
         ResourceBundle bundle = ResourceBundle.getBundle("one.empty3.apps.mylittlesynth.bundle");
         tabbedPane1 = new JTabbedPane();
         panel1 = new JPanel();
@@ -49,7 +50,7 @@ public class AppNew extends JFrame implements PropertyChangeListener{
         instrumentChooser1 = new InstrumentChooser(this);
 
         //======== this ========
-        Container contentPane = getContentPane();
+        var contentPane = getContentPane();
         contentPane.setLayout(new MigLayout(
             "hidemode 3",
             // columns
@@ -116,12 +117,14 @@ public class AppNew extends JFrame implements PropertyChangeListener{
     }
     private void initComponentsI18n() {
         // JFormDesigner - Component i18n initialization - DO NOT MODIFY  //GEN-BEGIN:initI18n
+        // Generated using JFormDesigner non-commercial license
         ResourceBundle bundle = ResourceBundle.getBundle("one.empty3.apps.mylittlesynth.bundle");
         tabbedPane1.setTitleAt(0, bundle.getString("AppNew.panel1.tab.title"));
         // JFormDesigner - End of component i18n initialization  //GEN-END:initI18n
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    // Generated using JFormDesigner non-commercial license
     private JTabbedPane tabbedPane1;
     private JPanel panel1;
     private JSplitPane splitPane1;

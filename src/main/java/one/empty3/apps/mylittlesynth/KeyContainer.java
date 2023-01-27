@@ -75,6 +75,7 @@ public class KeyContainer extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        // Generated using JFormDesigner non-commercial license
         //======== this ========
         setLayout(new MigLayout(
             "fill,novisualpadding,hidemode 3",
@@ -117,5 +118,6 @@ public class KeyContainer extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    // Generated using JFormDesigner non-commercial license
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
