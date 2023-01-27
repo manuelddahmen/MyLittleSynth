@@ -10,7 +10,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import javax.swing.*;
-import net.miginfocom.swing.*;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * @author Manuel Dahmen

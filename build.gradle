@@ -8,19 +8,9 @@ plugins {
     //id 'org.beryx.jlink' version '2.9.4'
 }
 
-/*
-javafx {
-    version = "19"
-    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
-}/*
-jlink {
-    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    launcher{
-        name = 'hello'
-        jvmArgs = ['-Dlog4j.configurationFile=./log4j2.xml']
-    }
-}*/
-
+tasks.withType(JavaCompile) {
+    options.release = 19
+}
 
 sourceSets {
     main {
@@ -29,14 +19,6 @@ sourceSets {
         }
     }
 }
-/*
-
-jlink {
-    launcher {
-        name = 'hellofx'
-    }
-}
-*/
 
 Properties properties = new Properties()
 try {
@@ -48,6 +30,8 @@ try {
 } catch (Exception ex) {
     ex.printStackTrace()
 }
+applicationDefaultJvmArgs = ["-Djavafx.embed.singleThread=true --module-path lib/javafx-sdk-19.0.2.1/lib --add-modules javafx.fxml,javafx.controls,javafx.graphics,javafx.media"]
+
 def load = properties
 java {
     withSourcesJar()
@@ -62,24 +46,7 @@ task runAppGui(type: JavaExec) {
     mainClass = "one.empty3.apps.mylittlesynth.App"
     args "arg1", "arg2"
 }
-/*
 
-task MorphingAppGui(type: JavaExec) {
-    classpath sourceSets.main.runtimeClasspath
-    mainClass = "one.empty3.apps.morph.Main"
-    args "arg1", "arg2"
-}
-task OpadGameGui(type: JavaExec) {
-    classpath sourceSets.main.runtimeClasspath
-    mainClass = "one.empty3.apps.opad.PanelGraphics"
-    args "arg1", "arg2"
-}
-task BoardGameGui(type: JavaExec) {
-    classpath sourceSets.main.runtimeClasspath
-    mainClass = "one.empty3.apps.newboardgames.WindowDrawing"
-    args "arg1", "arg2"
-}
-*/
 signing {
     def signingKey = load.get("signing.keyId")
     def signingPassword = load.get("signing.password")
@@ -135,6 +102,10 @@ dependencies {
     implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.swing.jar"))
     implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.web.jar"))
     implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx-swt.jar"))
+    implementation(files("lib/miglayout-swing.jar"))
+    implementation("com.miglayout:miglayout-swing:11.0")
+    implementation("com.miglayout:miglayout-javafx:11.0")
+
 }
 
 test {
@@ -311,4 +282,5 @@ uploadArchives {
         }
     }
 }
-*/
+*/ sourceCompatibility = JavaVersion.VERSION_1_9
+targetCompatibility = JavaVersion.VERSION_1_9

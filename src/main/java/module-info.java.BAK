@@ -1,0 +1,14 @@
+/**
+ *
+ */
+/*
+module one.empty3.apps.mylittlesynth {
+    requires javafx.controls;
+    requires javafx.fxml;
+    requires javafx.base;
+    requires javafx.graphics;
+    requires javafx.media;
+    opens one.empty3.apps.mylittlesynth;
+    exports one.empty3.apps.mylittlesynth;
+}
+*/

@@ -1,6 +1,5 @@
 package one.empty3.apps.mylittlesynth;
 
-import javafx.scene.canvas.Canvas;
 import one.empty3.apps.mylittlesynth.processor.WaveForm;
 import one.empty3.apps.mylittlesynth.rythms.RythmPanel;
 
