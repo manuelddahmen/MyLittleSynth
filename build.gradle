@@ -113,20 +113,22 @@ test {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
 }
-
-task sourceJar(type: Jar) {
+/*
+task sourcesJar(type: Jar) {
     classifier "sources"
     from sourceSets.main.allJava
 }
-
+*/
+tasks.findByPath("sourcesJar").doFirst {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier "javadoc"
     from javadoc.destinationDir
 }
 
-
 task copyTask(type: Copy) {
-    from 'src/main/java/*.*'
+    from 'src/main/java/*.properties'
     into 'build/classes/java/main'
 }
 javadoc {
@@ -146,7 +148,6 @@ javadoc {
         options.addBooleanOption('html5', true)
     }
 }
-
 
 publishing {
     publications {
