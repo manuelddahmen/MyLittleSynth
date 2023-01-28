@@ -17,7 +17,7 @@ javafx {
     modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
 }
 
-//mainClassName = 'one.empty3.apps.mylittlesynth.App'
+mainClassName = 'one.empty3.apps.mylittlesynth.App'
 sourceSets {
     main {
         resources {
