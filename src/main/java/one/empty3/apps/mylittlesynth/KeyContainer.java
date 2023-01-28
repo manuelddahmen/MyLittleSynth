@@ -1,11 +1,12 @@
 package one.empty3.apps.mylittlesynth;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import javax.swing.*;
-import net.miginfocom.swing.*;
+import net.miginfocom.swing.MigLayout;
 import one.empty3.apps.mylittlesynth.processor.WaveForm;
 
 /**
@@ -61,7 +62,7 @@ public class KeyContainer extends JPanel {
                             }
                         });
                     }
-                        add(button1, "cell " + i + " " + j);
+                    add(button1, "cell " + i + " " + j);
                 }
         }
     }
@@ -78,7 +79,7 @@ public class KeyContainer extends JPanel {
         // Generated using JFormDesigner non-commercial license
         //======== this ========
         setLayout(new MigLayout(
-            "fill,hidemode 3",
+            "fill",
             // columns
             "[fill]" +
             "[fill]" +
