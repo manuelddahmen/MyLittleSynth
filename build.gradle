@@ -4,7 +4,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
-    //id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
     //id 'org.beryx.jlink' version '2.9.4'
 }
 
@@ -12,6 +12,12 @@ tasks.withType(JavaCompile) {
     options.release = 19
 }
 
+javafx {
+    version = "16"
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
+}
+
+//mainClassName = 'one.empty3.apps.mylittlesynth.App'
 sourceSets {
     main {
         resources {
@@ -32,8 +38,8 @@ try {
 }
 
 compileJava {
-    options.compilerArgs += ["--add-modules", "java.xml.bind"]
-    options.compilerArgs += ["--module-path", "lib/javafx-sdk-19.0.2.1/lib"]
+//    options.compilerArgs += ["--add-modules", "java.xml.bind"]
+    options.compilerArgs += ["--module-path", "C:\\users\\manue\\mylittlesynth\\lib\\javafx-sdk-19.0.2.1\\lib"]//\\javafx.base.jar;C:\\users\\manue\\mylittlesynth\\lib\\javafx-sdk-19.0.2.1\\lib\\javafx.controls.jar;C:\\users\\manue\\mylittlesynth\\lib\\javafx-sdk-19.0.2.1\\lib\\javafx.fxml.jar;C:\\users\\manue\\mylittlesynth\\lib\\javafx-sdk-19.0.2.1\\lib\\javafx.graphics.jar;C:\\users\\manue\\mylittlesynth\\lib\\javafx-sdk-19.0.2.1\\lib\\javafx.media.jar;C:\\users\\manue\\mylittlesynth\\lib\\javafx-sdk-19.0.2.1\\lib\\javafx.swing.jar;C:\\users\\manue\\mylittlesynth\\lib\\javafx-sdk-19.0.2.1\\lib\\javafx.swt.jar;C:\\users\\manue\\mylittlesynth\\lib\\javafx-sdk-19.0.2.1\\lib\\javafx.web.jar"]
     options.compilerArgs += ["--add-modules", "javafx.fxml,javafx.controls,javafx.graphics,javafx.media"]
 }
 def load = properties
@@ -97,15 +103,15 @@ dependencies {
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.9.0')
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
     implementation("com.miglayout:miglayout:3.7.4")
-    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.base.jar"))
-    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.controls.jar"))
-    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.fxml.jar"))
-    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.graphics.jar"))
-    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.media.jar"))
-    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.properties"))
-    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.swing.jar"))
-    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx.web.jar"))
-    implementation(files("lib/javafx-sdk-19.0.2.1/lib/javafx-swt.jar"))
+    implementation(files("lib\\javafx-sdk-19.0.2.1/lib\\javafx.base.jar"))
+    implementation(files("lib\\javafx-sdk-19.0.2.1/lib\\javafx.controls.jar"))
+    implementation(files("lib\\javafx-sdk-19.0.2.1/lib\\javafx.fxml.jar"))
+    implementation(files("lib\\javafx-sdk-19.0.2.1/lib\\javafx.graphics.jar"))
+    implementation(files("lib\\javafx-sdk-19.0.2.1/lib\\javafx.media.jar"))
+    implementation(files("lib\\javafx-sdk-19.0.2.1/lib\\javafx.properties"))
+    implementation(files("lib\\javafx-sdk-19.0.2.1/lib\\javafx.swing.jar"))
+    implementation(files("lib\\javafx-sdk-19.0.2.1/lib\\javafx.web.jar"))
+    implementation(files("lib\\javafx-sdk-19.0.2.1/lib\\javafx-swt.jar"))
     implementation("com.miglayout:miglayout-swing:11.0")
     implementation("com.miglayout:miglayout-javafx:11.0")
     implementation("com.miglayout:miglayout-core:11.0")
