@@ -30,8 +30,12 @@ try {
 } catch (Exception ex) {
     ex.printStackTrace()
 }
-applicationDefaultJvmArgs = ["-Djavafx.embed.singleThread=true --module-path lib/javafx-sdk-19.0.2.1/lib --add-modules javafx.fxml,javafx.controls,javafx.graphics,javafx.media"]
 
+compileJava {
+    options.compilerArgs += ["--add-modules", "java.xml.bind"]
+    options.compilerArgs += ["--module-path", "lib/javafx-sdk-19.0.2.1/lib"]
+    options.compilerArgs += ["--add-modules", "javafx.fxml,javafx.controls,javafx.graphics,javafx.media"]
+}
 def load = properties
 java {
     withSourcesJar()
