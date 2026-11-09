@@ -5,10 +5,57 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.1.0"
     id("maven-publish")
     id("signing")
+    id("org.jreleaser") version"1.24.0"
+    id("org.sonatype.gradle.plugins.scan") version "3.1.3"
 }
 
+
 group = "one.empty3"
-version = "2023.1"
+version = "2026.11"
+def versionName = version
+configurations {
+    desktopCompile
+    androidCompile
+    testCompile
+
+    compileOnly.extendsFrom desktopCompile
+    testImplementation.extendsFrom desktopCompile
+
+    desktop {
+        extendsFrom desktopCompile
+    }
+    android {
+        extendsFrom androidCompile
+    }
+    test {
+        extendsFrom testCompile
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources', 'src/main/java']
+        }
+
+    }
+
+    test {
+        java {
+            srcDirs = ['src/test/java', 'src/main/java', 'src/test/kotlin']
+        }
+        resources {
+            srcDirs = ['src/test/resources', 'src/test/configs', 'src/test/java']
+        }
+
+
+
+    }
+}
+
 
 repositories {
     mavenCentral()
@@ -23,7 +70,6 @@ repositories {
         dirs "${rootDir}/lib", "${rootDir}/lib0", "${rootDir}/javafx-sdk-19.0.2.1/lib"
     }
 }
-
 javafx {
     version = "19.0.2.1"
     modules = ["javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.media", "javafx.swing", "javafx.web", "javafx.base"]
@@ -87,40 +133,50 @@ sourceSets {
 
 Properties properties = new Properties()
 try {
-    File propertiesFile = new File(rootProject.projectDir, '../private.properties/gradle.properties')
-    if (propertiesFile.exists()) {
-        propertiesFile.withInputStream {
-            properties.load(it)
-        }
+    // Other configuration here
+    File propertiesFile = new File(System.getProperty('user.dir') + '/../private.properties/gradle.properties')
+    propertiesFile.withInputStream {
+        properties.load(it)
     }
 } catch (Exception ex) {
     ex.printStackTrace()
 }
 
+
+Properties propertiesReleaseConfig = new Properties()
+try {
+    // Other configuration here
+    File propertiesFile = new File(System.getProperty('user.home') + '/.jreleaser/config.properties')
+    propertiesFile.withInputStream {
+        propertiesReleaseConfig.load(it)
+    }
+} catch (Exception ex) {
+    ex.printStackTrace()
+}
+def load = properties
 task runNewAppGui(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    modularity.inferModulePath.set(true)
-    mainModule = "one_empty3_apps_mylittlesynth"
     mainClass = "one.empty3.apps.mylittlesynth.AppNew"
     args "arg1", "arg2"
 }
 
 task runAppGui(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    modularity.inferModulePath.set(true)
-    mainModule = "one_empty3_apps_mylittlesynth"
     mainClass = "one.empty3.apps.mylittlesynth.App"
     args "arg1", "arg2"
 }
 
 signing {
-    required { gradle.taskGraph.hasTask("publish") && properties.containsKey("signing.keyId") }
-    def signingKey = properties.get("signing.keyId")
-    if (signingKey != null) {
+    try {
+        def signingKey = load.get("signing.keyId")
+        def signingPassword = load.get("signing.password")
         useGpgCmd()
-        sign publishing.publications
+    } catch (Exception e) {
+        // Ignorer les erreurs de signature si les clés ne sont pas disponibles
+        logger.warn("Signature configuration is not complete, skipping signing: ${e.message}")
     }
 }
+
 
 tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -182,3 +238,129 @@ publishing {
         }
     }
 }
+
+jreleaser {
+    signing {
+
+        active = 'ALWAYS'
+        armored = true
+        mode = 'FILE'
+        publicKey = load.get('signing.publicKeyPath')
+        passphrase = load.get('signing.passphrase')
+        def secretKeyPath = load.get('signing.secretKey')
+        if (secretKeyPath) {
+            File skFile = new File(secretKeyPath as String)
+            secretKey = skFile.isAbsolute() ? secretKeyPath : new File(System.getProperty('user.home'), secretKeyPath).absolutePath
+        }
+    }
+    release {
+        github {
+            token = load.get('release.github.token')
+        }
+    }
+    project {
+        name = 'mylittlesynth'
+        java.artifactId = 'mylittlesynth'
+        java.groupId = 'one.empty3'
+        java.version = versionName
+        version = versionName
+        license = 'Apache-2.0'
+        authors = ['Manuel D DAHMEN']
+        description = '3D rendering engine. Plus modelling. Expected glsl-like textures 3d and rendering' +
+                '3D primitives, and a lot of scenes\' samples to test.' +
+                '+ Game Jogl reworked, Calculator (numbers and vectors). Java code parser implementation starts (<=1.2)'
+        copyright = "Author : Manuel D. Dahmen, License: Apache-2"
+        icon {
+            // Publicly available URL. PNG format is preferred.
+            //
+            url = 'https://empty3.one/favicon.ico'
+            // Marks this icon as the primary one.
+            // Only a single icon may be set as primary.
+            //
+            primary = true
+            // Image width in pixels.
+            //
+            width = 47
+            // Image height in pixels.
+            //
+            height = 47
+        }
+    }
+
+    deploy {
+        maven {
+            // Enable or disable all configured deployers.
+            // Supported values are [`NEVER`, `ALWAYS`, `RELEASE`, `SNAPSHOT`].
+            // Defaults to `ALWAYS`.
+            //
+            active = 'ALWAYS'
+            pomchecker {
+                // Defines the tool version to use.
+                //
+                version = '1.11.0'
+
+                // Fail the release if pomchecker outputs a warning.
+                // Defaults to `true`.
+                //
+                failOnWarning = false
+
+                // Fail the release if pomchecker outputs an error.
+                // Defaults to `true`.
+                //
+                failOnError = false
+            }
+            mavenCentral {
+                app {
+                    active = 'ALWAYS'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    gitRootSearch = false
+                    username = propertiesReleaseConfig.get('JRELEASER_MAVENCENTRAL_USERNAME')
+                    password = propertiesReleaseConfig.get('JRELEASER_MAVENCENTRAL_PASSWORD')
+                    authorization = 'BASIC'
+                    // Password for login into the MAVENCENTRAL service.
+                    //
+                    // List of directories where staged artifacts can be found.
+                    stagingRepository('build/staging-deploy')
+
+                    // Defines the connection timeout in seconds.
+                    // Defaults to `20`.
+                    //
+                    connectTimeout = 20
+
+                    // Defines the read timeout in seconds.
+                    // Defaults to `60`.
+                    //
+                    readTimeout = 60
+
+
+                    // Registered publication namespace.
+                    // Defaults to `${project.java.groupId}`.
+                    //
+                    namespace = 'one.empty3'
+
+                    // Deployment identifier used for publication.
+                    //
+                    deploymentId = 'd54226c8-5abd-4679-bc76-451c3ae38bfb'//27d4cb92-0141-4a3f-b2e1-38c801bfafb0'
+
+                    // Time to wait between state transition checks, in seconds.
+                    // Defaults to `10`.
+                    //
+                    retryDelay = 10
+
+                    // Maximum number of attempts to verify state transition.
+                    // Defaults to `60`.
+                    //
+                    maxRetries = 120
+                }
+            }
+        }
+    }
+    upload {
+        // Enable or disable all configured uploaders.
+        // Supported values are [`NEVER`, `ALWAYS`, `RELEASE`, `SNAPSHOT`].
+        // Defaults to `ALWAYS`.
+        //
+        active = 'ALWAYS'
+    }
+}
+
