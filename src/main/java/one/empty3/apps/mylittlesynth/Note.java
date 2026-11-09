@@ -7,6 +7,7 @@ import java.util.Map;
 public class Note {
    private final Map instantiator;
    private int tone;
+   private float frequency;
    private WaveForm waveform;
    //private Enveloppe enveloppe;
    private Timer timer;
@@ -19,6 +20,7 @@ public class Note {
       this.instantiator = instantiator;
       this.minDurationSec = minDurationSec;
       this.tone = tone;
+      this.frequency = SoundProductionSystem.getFrequency(tone);
       this.waveform = waveform;
       //this.enveloppe = enveloppe;
       this.position = 0L;
@@ -39,6 +41,11 @@ public class Note {
 
    public void setTone(int tone) {
       this.tone = tone;
+      this.frequency = SoundProductionSystem.getFrequency(tone);
+   }
+
+   public float getFrequency() {
+      return this.frequency;
    }
 
    public WaveForm getWaveform() {
@@ -71,16 +78,11 @@ public class Note {
    }
 
    public boolean isFinish() {
-
-      boolean isFinshed = this.timer.getDefinitiveTimeNano() > this.timer.getTotalTimeElapsedNanoSec();
-
-      if(isFinshed)
-      {
-         this.instantiator.remove(this);
-
+      boolean isFinished = this.timer != null && this.timer.getDefinitiveTimeNano() > this.timer.getTotalTimeElapsedNanoSec();
+      if (isFinished && this.instantiator != null) {
+         this.instantiator.remove(this.tone);
       }
-      return isFinshed;
-
+      return isFinished;
    }
 
    public long getPosition() {

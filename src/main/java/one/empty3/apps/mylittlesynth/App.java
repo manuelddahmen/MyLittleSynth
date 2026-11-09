@@ -344,24 +344,25 @@ public class App extends Application {
     }
     
     public void playNote(Button source) {
-        System.out.println("Tone:  " + this.getTone(source) + "  Note :" + source.getText() + "  Octave: " + (int)this.slider.getValue() + "\nVolume: " + this.player.getVolume());
-        Note note = (Note)this.noteMap.get(this.getTone(source));
-        try {
-            //note.setEnveloppe(new Enveloppe(this.minDurationSec));
+        int tone = this.getTone(source);
+        System.out.println("Tone:  " + tone + "  Note :" + source.getText() + "  Octave: " + (int)this.slider.getValue() + "\nVolume: " + this.player.getVolume());
+        Note note = (Note)this.noteMap.get(tone);
+        if (note == null) {
+            note = new Note(this.noteMap, this.minDurationSec, tone, this.player.getForm());
+            this.noteMap.put(tone, note);
         }
-        catch (NullPointerException ex)
-        {
-            System.out.println("Error playNote" + note.getTone());
-        }
-            note.setWaveform(this.player.getForm());
-            this.player.playNote(note);
+        note.setWaveform(this.player.getForm());
+        this.player.playNote(note);
     }
     
     public void stopNote(Button source) {
-        Note note = (Note)this.noteMap.get(this.getTone(source));
-        System.out.println((double)note.getTimer().getTotalTimeElapsedNanoSec() / 1.0E9D);
-        this.player.stopNote(note);
-        System.out.println("Key pressed: " + this.player.getCurrentNotes().size());
+        int tone = this.getTone(source);
+        Note note = (Note)this.noteMap.get(tone);
+        if (note != null) {
+            System.out.println((double)note.getTimer().getTotalTimeElapsedNanoSec() / 1.0E9D);
+            this.player.stopNote(note);
+            System.out.println("Key pressed: " + this.player.getCurrentNotes().size());
+        }
     }
     
     public Button getButton(Integer halfTone) {

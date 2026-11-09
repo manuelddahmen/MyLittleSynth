@@ -20,43 +20,60 @@ public class PlayWave extends Thread {
    }
 
    public void playWave(AudioInputStream audioInputStream) {
-
-
-      //System.out.println(timelineThread.timeline.toString());
-
+      if (audioInputStream == null) {
+         isRunning = false;
+         return;
+      }
       isRunning = true;
-
+      SourceDataLine sourceLine = null;
       try {
-         SourceDataLine sourceLine = AudioSystem.getSourceDataLine(audioInputStream.getFormat());
+         sourceLine = AudioSystem.getSourceDataLine(audioInputStream.getFormat());
          sourceLine.open();
          sourceLine.start();
          int nBytesRead = 0;
          byte[] abData = new byte[BUFFER_SIZE_WAV];
 
-         while(nBytesRead != -1) {
+         while(isRunning && nBytesRead != -1) {
             try {
                nBytesRead = audioInputStream.read(abData, 0, abData.length);
             } catch (IOException ex) {
                ex.printStackTrace();
+               break;
             }
 
-            if (nBytesRead >= 0) {
+            if (nBytesRead > 0) {
                sourceLine.write(abData, 0, nBytesRead);
             }
          }
 
-         sourceLine.drain();
-         sourceLine.close();
+         if (sourceLine.isOpen()) {
+            sourceLine.drain();
+         }
       } catch (LineUnavailableException var8) {
          System.out.println("matching line is not available due to resource restrictions");
       } catch (SecurityException var9) {
          System.out.println("if a matching line is not available due to security restrictions");
       } catch (IllegalArgumentException var10) {
          System.out.println("if the system does not support at least one line matching the specified Line.Info object through any installed mixer");
+      } catch (Exception e) {
+         e.printStackTrace();
+      } finally {
+         if (sourceLine != null) {
+            try {
+               sourceLine.stop();
+               sourceLine.close();
+            } catch (Exception ignored) {}
+         }
+         try {
+            audioInputStream.close();
+         } catch (IOException ignored) {}
+         isRunning = false;
       }
 
-      isRunning = false;
+   }
 
+   public void stopPlaying() {
+      this.isRunning = false;
    }
 
    public void run() {

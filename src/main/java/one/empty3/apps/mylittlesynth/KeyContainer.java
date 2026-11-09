@@ -19,12 +19,11 @@ public class KeyContainer extends JPanel {
     private AppNew appNew;
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     public KeyContainer(AppNew appNew)
-
     {
         this.appNew = appNew;
+        this.soundProductionSystem = new SoundProductionSystem();
         initComponents();
         afterInit();
-        soundProductionSystem = new SoundProductionSystem();
     }
 
 
@@ -56,7 +55,7 @@ public class KeyContainer extends JPanel {
                             @Override
                             public void actionPerformed(ActionEvent e) {
                                 String []  s = ((JButton)e.getSource()).getText().split(":");
-                                int tone = new SoundProductionSystem().equiv(s[0]+s[1]);
+                                int tone = SoundProductionSystem.equiv(s[0]+s[1]);
                                 System.out.println("Note: "+s[0]+"\nOctave:"+s[1]+"\nTone:"+tone);
                                 playNote(tone);
                             }

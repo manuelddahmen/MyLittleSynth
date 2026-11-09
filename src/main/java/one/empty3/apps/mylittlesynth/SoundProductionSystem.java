@@ -33,6 +33,21 @@ public class SoundProductionSystem {
    double sampleRate;
    long durationInSample = 44100*60*5;
 
+   private static final float[] FREQ_TABLE = new float[256];
+
+   static {
+      for (int i = -128; i <= 127; i++) {
+         FREQ_TABLE[i + 128] = (float) (440.0D * Math.pow(2.0D, (double) i / 12.0D));
+      }
+   }
+
+   public static float getFrequency(int tone) {
+      if (tone >= -128 && tone <= 127) {
+         return FREQ_TABLE[tone + 128];
+      }
+      return (float) (440.0D * Math.pow(2.0D, (double) tone / 12.0D));
+   }
+
    public SourceDataLine getLine() {
       return this.sdl;
    }
@@ -121,23 +136,37 @@ public class SoundProductionSystem {
    }
 
    public float calculateNoteFrequency(float halfTone) {
-      return (float)(440.0D * Math.pow(2.0D, 0.08333333333333333D * (double)halfTone));
+      int roundTone = Math.round(halfTone);
+      if (Math.abs(halfTone - (float) roundTone) < 1e-4f && roundTone >= -128 && roundTone <= 127) {
+         return FREQ_TABLE[roundTone + 128];
+      }
+      return (float) (440.0D * Math.pow(2.0D, 0.08333333333333333D * (double) halfTone));
    }
 
    public void end() {
-      this.sdl.drain();
-      this.sdl.stop();
-
-      try {
-         this.audioInputStream.close();
-      } catch (IOException var2) {
-         var2.printStackTrace();
+      if (this.sdl != null) {
+         try {
+            this.sdl.drain();
+            this.sdl.stop();
+            this.sdl.close();
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
       }
 
+      if (this.audioInputStream != null) {
+         try {
+            this.audioInputStream.close();
+         } catch (IOException var2) {
+            var2.printStackTrace();
+         }
+      }
    }
 
-   public int equiv(String noteAnglaise) {
-      assert noteAnglaise != null;
+   public static int equiv(String noteAnglaise) {
+      if (noteAnglaise == null || noteAnglaise.isEmpty()) {
+         return 0;
+      }
 
       int tone = 0;
       noteAnglaise = noteAnglaise.toUpperCase();
@@ -162,27 +191,27 @@ public class SoundProductionSystem {
          break;
       case 'G':
          tone -= 2;
+         break;
       }
-       int half = 0;
+      int half = 0;
 
       String toneStr = "";
-      if (Character.isDigit(noteAnglaise.charAt(1))) {
-         toneStr = toneStr + "" + noteAnglaise.charAt(1);
-      } else {
-
-          if (noteAnglaise.charAt(1) =='#') {
-             half = +1;
-
-         } else if (noteAnglaise.charAt(1) == 'b') {
-             half = -1;
+      if (noteAnglaise.length() > 1) {
+         if (Character.isDigit(noteAnglaise.charAt(1))) {
+            toneStr = toneStr + noteAnglaise.charAt(1);
+         } else if (noteAnglaise.charAt(1) == '#') {
+            half = 1;
+         } else if (noteAnglaise.charAt(1) == 'B' || noteAnglaise.charAt(1) == 'b') {
+            half = -1;
          }
       }
 
-       if (noteAnglaise.length() > 2 && Character.isDigit(noteAnglaise.charAt(2))) {
-         toneStr = toneStr + "" + noteAnglaise.charAt(2);
+      if (noteAnglaise.length() > 2 && Character.isDigit(noteAnglaise.charAt(2))) {
+         toneStr = toneStr + noteAnglaise.charAt(2);
       }
 
-      tone += Integer.parseInt(toneStr) * 12 - 4 + half;
+      int oct = toneStr.isEmpty() ? 0 : Integer.parseInt(toneStr);
+      tone += oct * 12 - 4 + half;
       return tone;
    }
 

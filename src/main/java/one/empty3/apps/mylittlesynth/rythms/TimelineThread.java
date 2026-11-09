@@ -120,13 +120,23 @@ public class TimelineThread extends Thread {
         }
     }
 
+    private volatile boolean running = true;
+
     public TimelineThread(RythmPanel panel) {
         this.panel = panel;
         timeline = panel.timeline;
-
     }
-    private boolean isRunning() {
-        return true;
+
+    public boolean isRunning() {
+        return this.running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
+    public void stopRunning() {
+        this.running = false;
     }
 
     public void pause() {

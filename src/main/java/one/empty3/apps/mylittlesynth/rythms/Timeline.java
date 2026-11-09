@@ -90,20 +90,10 @@ public class Timeline {
     }
 
     public synchronized void deleteAt(Double position) {
-        boolean error = true;
-        while (error) {
-            try {
-                {
-                    models.forEach(model -> {
-                        if (model.timeOnTimeline == position)
-                            models.remove(model);
-                    });
-                }
-                error = false;
-            } catch (ConcurrentModificationException ex) {
-            
-            }
+        if (position == null) {
+            return;
         }
+        models.removeIf(model -> model != null && Math.abs(model.timeOnTimeline - position) < 0.001);
     }
 
     private boolean isPlayNow(double t, Timeline.Model next) {

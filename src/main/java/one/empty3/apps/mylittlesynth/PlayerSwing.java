@@ -85,43 +85,70 @@ public class PlayerSwing extends Thread implements PropertyChangeListener {
     }
 
     public void playCurrentNotes() {
-        this.total = 0.0D;
-        if(getCurrentNotes().size()>0) {
-            for (int t = 0; t < amplitude.length; t++) {
-                this.getCurrentNotes().forEach((note1) -> {
-                    Note note = (Note) note1;
-                    note.setNoteTimeSamples(note.getNoteTimeSamples() + 1);
-                    double noteTimeSec = note.getNoteTimeSamples() / app.getKeyContainer().getSoundProductionSystem().sampleRate;
-                    double f2pi = (double) this.app.getKeyContainer().getSoundProductionSystem().calculateNoteFrequency((float) note.getTone()) * 2.0D * 3.141592653589793D;
-                    double f2piT = f2pi * noteTimeSec;
-                    //this.facteurAmpl = note.getEnveloppe().getVolume(noteTimeSec);
-                    double ampl = Short.MAX_VALUE;
-                    switch (note.getWaveform()) {
-                        case SIN:
-                            this.total += Math.sin(f2piT) * ampl;
-                            break;
-                        case RECT:
-                            this.total += Math.signum(Math.sin(f2piT)) * ampl;
-                        case SAWTOOTH:
-                            this.total += (1.0D - f2piT / 2.0D * 3.141592653589793D) * ampl;
-                        case TRI:
-                            this.total += 1.0D - Math.abs(f2piT / 2.0D * 3.141592653589793D) * ampl;
-                        default:
-                            this.total += Math.sin(f2piT) * ampl;
-                    }
-                });
-                this.total /= this.currentNotes.size() > 0 ? (double) this.currentNotes.size() : 1.0D;
-                if (this.getCurrentNotes().size() > 0) {
-                    amplitude[t] = (short) ((int) (this.total * this.volume / 100.0D));
-
-                    //this.audioViewer.sendEnvelopeVolume(note.getTone(), note.getEnveloppe().getBrutVolume(noteTimeSec));
-                }
-                //this.audioViewer.sendDouble((double)amplitude * 1.0D);
-                //this.audioViewer.sendDouble((double)amplitude * 1.0D);
-                this.playBufferMono(amplitude);
-                position += (long) (1 / app.getKeyContainer().getSoundProductionSystem().sampleRate);
+        List<Note> activeNotes;
+        synchronized (this.currentNotes) {
+            if (this.currentNotes.isEmpty()) {
+                return;
             }
+            activeNotes = new ArrayList<>(this.currentNotes);
         }
+
+        double sampleRate = 44100.0D;
+        if (this.app != null && this.app.getKeyContainer() != null && this.app.getKeyContainer().getSoundProductionSystem() != null) {
+            sampleRate = this.app.getKeyContainer().getSoundProductionSystem().sampleRate;
+        }
+        if (sampleRate <= 0) {
+            sampleRate = 44100.0D;
+        }
+        double ampl = Short.MAX_VALUE;
+
+        for (int t = 0; t < amplitude.length; t++) {
+            double sampleSum = 0.0D;
+            for (Note note : activeNotes) {
+                note.setNoteTimeSamples(note.getNoteTimeSamples() + 1);
+                double noteTimeSec = (double) note.getNoteTimeSamples() / sampleRate;
+                double freq = SoundProductionSystem.getFrequency(note.getTone());
+                double cycles = freq * noteTimeSec;
+                double phase = cycles - Math.floor(cycles);
+                double noteSample;
+
+                WaveForm wf = note.getWaveform();
+                if (wf == null) {
+                    wf = WaveForm.SIN;
+                }
+
+                switch (wf) {
+                    case SIN:
+                        noteSample = Math.sin(2.0D * Math.PI * phase) * ampl;
+                        break;
+                    case RECT:
+                        noteSample = (phase < 0.5D ? 1.0D : -1.0D) * ampl;
+                        break;
+                    case SAWTOOTH:
+                        noteSample = (2.0D * phase - 1.0D) * ampl;
+                        break;
+                    case TRI:
+                        noteSample = (4.0D * Math.abs(phase - 0.5D) - 1.0D) * ampl;
+                        break;
+                    default:
+                        noteSample = Math.sin(2.0D * Math.PI * phase) * ampl;
+                        break;
+                }
+                sampleSum += noteSample;
+            }
+
+            sampleSum /= (double) activeNotes.size();
+            double scaled = sampleSum * (this.volume / 100.0D);
+            if (scaled > Short.MAX_VALUE) {
+                scaled = Short.MAX_VALUE;
+            } else if (scaled < Short.MIN_VALUE) {
+                scaled = Short.MIN_VALUE;
+            }
+            amplitude[t] = (short) ((int) scaled);
+        }
+
+        this.playBufferMono(amplitude);
+        position += amplitude.length;
     }
 
     private void playBufferMono(short[] amplitude) {
@@ -133,8 +160,10 @@ public class PlayerSwing extends Thread implements PropertyChangeListener {
             this.nextBuffer[4 * t + 3] = (byte) (amplitude[t] >> 8);
         }
         try {
-            this.app.getKeyContainer().getSoundProductionSystem().getLine().write(this.nextBuffer, 0, 4 * amplitude.length);
-            this.app.getKeyContainer().getSoundProductionSystem().writeWaveBuffer(this.nextBuffer);
+            if (this.app != null && this.app.getKeyContainer() != null && this.app.getKeyContainer().getSoundProductionSystem() != null) {
+                this.app.getKeyContainer().getSoundProductionSystem().getLine().write(this.nextBuffer, 0, 4 * amplitude.length);
+                this.app.getKeyContainer().getSoundProductionSystem().writeWaveBuffer(this.nextBuffer);
+            }
         } catch (Exception var4) {
             var4.printStackTrace();
         }
@@ -143,7 +172,14 @@ public class PlayerSwing extends Thread implements PropertyChangeListener {
 
     public void run() {
         while(this.isPlaying()) {
-            this.playCurrentNotes();
+            if (this.currentNotes.isEmpty()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ignored) {
+                }
+            } else {
+                this.playCurrentNotes();
+            }
         }
 
     }
@@ -166,16 +202,18 @@ public class PlayerSwing extends Thread implements PropertyChangeListener {
     }
 
     public void stopNote(int tone) {
-        this.getCurrentNotes().forEach((note1) -> {
-            Note note = (Note) note1;
-            if (note.getTone() == tone) {
-                Platform.runLater(() -> {
-                    this.getCurrentNotes().remove(note);
-                    System.out.println("After removed " + this.getCurrentNotes().size());
-                });
+        List<Note> toStop = new ArrayList<>();
+        synchronized (this.currentNotes) {
+            for (Object note1 : this.currentNotes) {
+                Note note = (Note) note1;
+                if (note.getTone() == tone) {
+                    toStop.add(note);
+                }
             }
-
-        });
+        }
+        for (Note n : toStop) {
+            this.stopNote(n);
+        }
     }
 
     public List getCurrentNotes() {

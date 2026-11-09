@@ -22,56 +22,71 @@ public class ListFolderFiles extends ListView {
     }
 
     public void listFiles(File folder) {
-        if (folder.isDirectory()) {
-            panel.model[panel.loop] = new RythmModel(panel, currentDirectory[loop]);
+        if (folder != null && folder.exists() && folder.isDirectory()) {
+            if (panel != null && panel.model != null && loop >= 0 && loop < panel.model.length) {
+                File dir = (currentDirectory != null && loop < currentDirectory.length && currentDirectory[loop] != null) ? currentDirectory[loop] : folder;
+                panel.model[panel.loop] = new RythmModel(panel, dir);
+            }
             getItems().clear();
             getItems().add(".");
             getItems().add("..");
             File[] files = folder.listFiles();
-            for (int i = 0; i < files.length; i++) {
-                File file = files[i];
-                getItems().add(file.getName());
+            if (files != null) {
+                for (File file : files) {
+                    if (file != null) {
+                        getItems().add(file.getName());
+                    }
+                }
             }
             setOnMouseClicked(event -> {
-                String file;
-                try{
-                    file = getSelectionModel().getSelectedItem().toString();
-                }
-                catch (NullPointerException ex)
-                {
-                    System.out.print("NullPointerException");
+                Object selected = getSelectionModel().getSelectedItem();
+                if (selected == null) {
                     return;
                 }
+                String file = selected.toString();
                 if (file.equals(".")) {
                     listFiles();
                     return;
                 } else if (file.equals("..")) {
-                    currentDirectory[loop] = (new File(currentDirectory[loop].getAbsolutePath() + File.separator + ".."));
+                    if (currentDirectory != null && loop >= 0 && loop < currentDirectory.length && currentDirectory[loop] != null) {
+                        currentDirectory[loop] = (new File(currentDirectory[loop].getAbsolutePath() + File.separator + ".."));
+                    }
                     listFiles();
                     return;
                 }
 
-                String pathname = currentDirectory[loop].getAbsolutePath() + File.separator + file;
-                if (new File(pathname).isDirectory()) {
-                    currentDirectory[loop] = new File(pathname);
-                    listFiles();
+                if (currentDirectory != null && loop >= 0 && loop < currentDirectory.length && currentDirectory[loop] != null) {
+                    String pathname = currentDirectory[loop].getAbsolutePath() + File.separator + file;
+                    File targetFile = new File(pathname);
+                    if (targetFile.exists() && targetFile.isDirectory()) {
+                        currentDirectory[loop] = targetFile;
+                        listFiles();
+                        return;
+                    }
 
-                    return;
-                }
-
-                if (file.endsWith(".wav")||file.endsWith(".mp3")||file.endsWith(".aif")||file.endsWith(".m4a")||file.endsWith("mid")) {
-                    double d = loopTimer.getCurrentTimeOnLineSec();
-                    timeline[loop].addFileAtTimePC(d / timeline[loop].getDuration(), new File(pathname));
-                    System.out.println(d);
-
+                    if (file.endsWith(".wav") || file.endsWith(".mp3") || file.endsWith(".aif") || file.endsWith(".m4a") || file.endsWith(".mid") || file.endsWith("mid")) {
+                        if (loopTimer != null && timeline != null && loop >= 0 && loop < timeline.length && timeline[loop] != null) {
+                            double d = loopTimer.getCurrentTimeOnLineSec();
+                            double dur = timeline[loop].getDuration();
+                            if (dur > 0) {
+                                timeline[loop].addFileAtTimePC(d / dur, targetFile);
+                            }
+                            System.out.println(d);
+                        }
+                    }
                 }
             });
+        } else {
+            getItems().clear();
+            getItems().add(".");
+            getItems().add("..");
         }
     }
     public void listFiles()
     {
-
-        listFiles(currentDirectory[loop]);
+        if (currentDirectory != null && loop >= 0 && loop < currentDirectory.length && currentDirectory[loop] != null) {
+            listFiles(currentDirectory[loop]);
+        }
     }
     public void setInitialDirectory(File file) {
         for(int i=0; i<panel.size; i++)
