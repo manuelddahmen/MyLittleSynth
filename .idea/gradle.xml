@@ -10,6 +10,7 @@
             <option value="$PROJECT_DIR$" />
           </set>
         </option>
+        <option name="myGradleHome" value="D:\gradle-9.7.1" />
       </GradleProjectSettings>
     </option>
   </component>

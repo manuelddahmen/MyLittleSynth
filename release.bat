@@ -5,6 +5,8 @@ rem call ./gradlew clean
 call ./gradlew clean
 rem call ./gradlew -x test publish
 call ./gradlew -x test publish
+call ./gradlew --stop
+call Remove-Item -Recurse -Force .\build\jreleaser
 rem call ./gradlew -x test jreleaserFullRelease
 call ./gradlew -x test jreleaserFullRelease
 REM call 7z.exe a "./build/staging-deploy/one.zip" "./build/staging-deploy/one/"

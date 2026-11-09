@@ -11,12 +11,10 @@ module one_empty3_apps_mylittlesynth {
     requires com.miglayout.core;
 
     requires org.controlsfx.controls;
-    requires com.dlsc.formsfx;
     requires net.synedra.validatorfx;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
-    requires com.almasb.fxgl.all;
 
     opens one.empty3.apps.mylittlesynth to javafx.fxml;
     exports one.empty3.apps.mylittlesynth;
