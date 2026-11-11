@@ -52,7 +52,7 @@ public class App extends Application {
         BorderPane bp2 = new BorderPane();
         bp.setTop(pane[0]);
         bp.setCenter(pane[1]);
-        String[] notes = new String[]{"do", "re", "mi", "fa", "sol", "la", "si", "do", "do#", "re#", "--", "fa#", "sol#", "la#", "--", "do#"};
+        String[] notes = new String[]{"do#", "re#", "--", "fa#", "sol#", "la#", "--", "do#", "do", "re", "mi", "fa", "sol", "la", "si", "do"};
         Canvas canvas = new Canvas(640.0D, 480.0D);
         canvas.setLayoutX(640.0D);
         canvas.setLayoutY(480.0D);
@@ -74,11 +74,20 @@ public class App extends Application {
         int i;
         for(i = 0; i < this.buttons.length; ++i) {
             this.buttons[i] = new Button(notes[i]);
-            this.buttons[i].setLayoutX((double)(100 + i * 90));
-            this.buttons[i].setLayoutY((double)(150 + (i >= 8 ? 60 : 0)));
             this.buttons[i].setId("Button" + i);
             this.buttons[i].arm();
-            pane[i < 8 ? 0 : 1].getChildren().add(this.buttons[i]);
+            if (i < 8) {
+                if (notes[i].equals("--")) {
+                    this.buttons[i].setStyle("-fx-background-color: transparent; -fx-text-fill: transparent; -fx-border-color: transparent;");
+                    this.buttons[i].setDisable(true);
+                } else {
+                    this.buttons[i].setStyle("-fx-background-color: linear-gradient(to bottom, #333333, #1a1a1a); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 10 16; -fx-cursor: hand;");
+                }
+                pane[0].getChildren().add(this.buttons[i]);
+            } else {
+                this.buttons[i].setStyle("-fx-background-color: linear-gradient(to bottom, #ffffff, #e0e0e0); -fx-text-fill: #1a1a1a; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 14 20; -fx-border-color: #bbbbbb; -fx-cursor: hand;");
+                pane[1].getChildren().add(this.buttons[i]);
+            }
         }
         
         for(i = 0; i < 96; ++i) {
@@ -104,49 +113,24 @@ public class App extends Application {
             this.buttonNo[i] = this.getTone(this.buttons[i]);
         }
         
-        VBox vBox = new VBox();
+        VBox vBox = new VBox(8);
+        vBox.setPadding(new Insets(10));
         this.group = new ToggleGroup();
-        RadioButton radioButton = new RadioButton();
-        radioButton.setText("Sine");
-        radioButton.setToggleGroup(this.group);
-        radioButton.setUserData(WaveForm.SIN);
-        radioButton.setSelected(true);
-        radioButton.setOnAction((event) -> {
-            RadioButton source = (RadioButton)event.getSource();
-            String value = source.getText();
-            this.setForm((WaveForm)source.getUserData());
-        });
-        vBox.getChildren().add(radioButton);
-        radioButton = new RadioButton();
-        radioButton.setText("Square");
-        radioButton.setUserData(WaveForm.RECT);
-        radioButton.setToggleGroup(this.group);
-        radioButton.setOnAction((event) -> {
-            RadioButton source = (RadioButton)event.getSource();
-            String value = source.getText();
-            this.setForm((WaveForm)source.getUserData());
-        });
-        vBox.getChildren().add(radioButton);
-        radioButton = new RadioButton();
-        radioButton.setText("Triangle");
-        radioButton.setToggleGroup(this.group);
-        radioButton.setUserData(WaveForm.TRI);
-        radioButton.setOnAction((event) -> {
-            RadioButton source = (RadioButton)event.getSource();
-            String value = source.getText();
-            this.setForm((WaveForm)source.getUserData());
-        });
-        vBox.getChildren().add(radioButton);
-        radioButton = new RadioButton();
-        radioButton.setText("Sawtooth");
-        radioButton.setUserData(WaveForm.SAWTOOTH);
-        radioButton.setToggleGroup(this.group);
-        radioButton.setOnAction((event) -> {
-            RadioButton source = (RadioButton)event.getSource();
-            String value = source.getText();
-            this.setForm((WaveForm)source.getUserData());
-        });
-        vBox.getChildren().add(radioButton);
+        WaveForm[] waveforms = {WaveForm.SIN, WaveForm.RECT, WaveForm.TRI, WaveForm.SAWTOOTH, WaveForm.PULSE, WaveForm.NOISE, WaveForm.ORGAN};
+        String[] wfNames = {"Sine", "Square", "Triangle", "Sawtooth", "Pulse", "Noise", "Organ"};
+        for (int w = 0; w < waveforms.length; w++) {
+            RadioButton rb = new RadioButton(wfNames[w]);
+            rb.setToggleGroup(this.group);
+            rb.setUserData(waveforms[w]);
+            if (w == 0) rb.setSelected(true);
+            rb.setOnAction((event) -> {
+                RadioButton source = (RadioButton)event.getSource();
+                this.setForm((WaveForm)source.getUserData());
+            });
+            vBox.getChildren().add(rb);
+        }
+        vBox.getChildren().add(new Label("Octave:"));
+        vBox.getChildren().add(this.slider);
         boolean recording = false;
         Button record = new Button("REC SAMPLE");
         vBox.getChildren().add(record);
@@ -179,7 +163,7 @@ public class App extends Application {
         });
         vBox.getChildren().add(zoomSlider);
         bp.setLeft(vBox);
-        bp.setRight(this.slider);
+        // bp.setRight(this.slider); (moved closer to vBox)
         bp.setBottom(pane1);
         bp2.setTop(bp);
         bp2.setCenter(canvas);

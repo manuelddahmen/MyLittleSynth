@@ -101,6 +101,15 @@ public class Player extends Thread {
                case TRI:
                   noteSample = (4.0D * Math.abs(phase - 0.5D) - 1.0D) * ampl;
                   break;
+               case PULSE:
+                  noteSample = (phase < 0.25D ? 1.0D : -1.0D) * ampl;
+                  break;
+               case NOISE:
+                  noteSample = (Math.random() * 2.0D - 1.0D) * ampl;
+                  break;
+               case ORGAN:
+                  noteSample = (Math.sin(2.0D * Math.PI * phase) * 0.5D + Math.sin(4.0D * Math.PI * phase) * 0.25D + Math.sin(6.0D * Math.PI * phase) * 0.125D) * ampl;
+                  break;
                default:
                   noteSample = Math.sin(2.0D * Math.PI * phase) * ampl;
                   break;
