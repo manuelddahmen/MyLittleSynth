@@ -68,10 +68,11 @@ sourceSets {
 
     test {
         java {
-            srcDirs = ['src/test/java', 'src/main/java', 'src/test/kotlin']
+            srcDirs = ['src/test/java', 'src/test/kotlin']
             exclude '**/AndroidAudioOutput.kt', '**/AndroidMidiInput.kt'
         }
         kotlin {
+            srcDirs = ['src/test/java', 'src/test/kotlin']
             exclude '**/AndroidAudioOutput.kt', '**/AndroidMidiInput.kt'
         }
         resources {

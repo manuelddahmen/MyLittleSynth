@@ -7,7 +7,6 @@ public enum WaveForm {
     TRI,
     PULSE,
     NOISE,
-    ORGAN
     ORGAN,
     SAMPLER
 }
