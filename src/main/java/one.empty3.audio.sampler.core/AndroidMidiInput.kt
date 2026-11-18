@@ -1,5 +1,4 @@
-
-package one.empty3.audio.sampler.midi
+package one.empty3.audio.sampler.core
 
 import android.media.midi.MidiReceiver
 

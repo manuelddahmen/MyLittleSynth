@@ -1,7 +1,6 @@
-
 package one.empty3.audio.sampler.core
 
-class AdsrEnvelope(
+class AdsrEnvelope @JvmOverloads constructor(
     var attack: Float = 0.01f,
     var decay: Float = 0.15f,
     var sustain: Float = 0.75f,

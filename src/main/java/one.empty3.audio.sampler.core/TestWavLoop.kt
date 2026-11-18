@@ -1,12 +1,59 @@
-sampler.loopRegion = LoopRegion(
-    startFrame = 12000,
-    endFrame = 48000,
-    enabled = true
-)
+package one.empty3.audio.sampler.core
 
-sampler.noteOn(60, 1.0f)
+import java.io.FileInputStream
 
-// La boucle continue pendant la note.
-sampler.noteOff(60)
+fun main() {
+    val input = FileInputStream("piano.wav")
 
-// La voix sort de la boucle et joue son Release.
+    val sample = WavReader.read(
+        input = input,
+        rootMidi = 60
+    )
+
+    input.close()
+
+    val sampler = Sampler(
+        sample = sample,
+        outputSampleRate = 44100,
+        polyphony = 16
+    )
+
+    sampler.masterVolume = 0.8f
+
+    val output = DesktopAudioOutput(
+        sampler = sampler,
+        sampleRate = 44100
+    )
+
+    output.start()
+
+    // Jouer un Do central
+    sampler.noteOn(60, 1.0f)
+
+    // Jouer un Mi
+    sampler.noteOn(64, 0.8f)
+
+    // Jouer un Sol
+    sampler.noteOn(67, 0.8f)
+
+    // Relâcher les notes
+    sampler.noteOff(60)
+    sampler.noteOff(64)
+    sampler.noteOff(67)
+
+    // Arrêter la sortie
+    output.stop()
+
+    sampler.loopRegion = LoopRegion(
+        startFrame = 12000,
+        endFrame = 48000,
+        enabled = true
+    )
+
+    sampler.noteOn(60, 1.0f)
+
+    // La boucle continue pendant la note.
+    sampler.noteOff(60)
+
+    // La voix sort de la boucle et joue son Release.
+}

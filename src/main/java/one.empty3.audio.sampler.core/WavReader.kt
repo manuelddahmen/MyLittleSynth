@@ -1,5 +1,4 @@
-
-package one.empty3.audio.sampler.io
+package one.empty3.audio.sampler.core
 
 import one.empty3.audio.sampler.core.SampleData
 import java.io.ByteArrayOutputStream
@@ -9,6 +8,8 @@ import java.nio.ByteOrder
 
 object WavReader {
 
+    @JvmStatic
+    @JvmOverloads
     fun read(
         input: InputStream,
         rootMidi: Int = 60
@@ -26,6 +27,8 @@ object WavReader {
         return decode(out.toByteArray(), rootMidi)
     }
 
+    @JvmStatic
+    @JvmOverloads
     fun decode(
         bytes: ByteArray,
         rootMidi: Int = 60

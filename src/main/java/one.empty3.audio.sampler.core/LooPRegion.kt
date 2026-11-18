@@ -1,6 +1,6 @@
-package one.empty3.apps.mylittlesynth
+package one.empty3.audio.sampler.core
 
-data class LoopRegion(
+data class LoopRegion @JvmOverloads constructor(
     val startFrame: Int,
     val endFrame: Int,
     val enabled: Boolean = true

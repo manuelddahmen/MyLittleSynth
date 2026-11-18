@@ -54,6 +54,11 @@ sourceSets {
     main {
         java {
             srcDirs = ['src/main/java']
+            exclude '**/AndroidAudioOutput.kt', '**/AndroidMidiInput.kt'
+        }
+        kotlin {
+            srcDirs = ['src/main/java']
+            exclude '**/AndroidAudioOutput.kt', '**/AndroidMidiInput.kt'
         }
         resources {
             srcDirs = ['src/main/resources', 'src/main/java']
@@ -64,6 +69,10 @@ sourceSets {
     test {
         java {
             srcDirs = ['src/test/java', 'src/main/java', 'src/test/kotlin']
+            exclude '**/AndroidAudioOutput.kt', '**/AndroidMidiInput.kt'
+        }
+        kotlin {
+            exclude '**/AndroidAudioOutput.kt', '**/AndroidMidiInput.kt'
         }
         resources {
             srcDirs = ['src/test/resources', 'src/test/configs', 'src/test/java']

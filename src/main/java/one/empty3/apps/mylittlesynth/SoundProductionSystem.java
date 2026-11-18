@@ -210,9 +210,41 @@ public class SoundProductionSystem {
          toneStr = toneStr + noteAnglaise.charAt(2);
       }
 
+      if (half == 0 && noteAnglaise.length() > 2) {
+         char lastChar = noteAnglaise.charAt(noteAnglaise.length() - 1);
+         if (lastChar == '#') {
+            half = 1;
+         } else if (lastChar == 'B' || lastChar == 'b') {
+            half = -1;
+         }
+      }
+
       int oct = toneStr.isEmpty() ? 0 : Integer.parseInt(toneStr);
       tone += oct * 12 - 4 + half;
       return tone;
+   }
+
+   public static int equivToMidi(int tone) {
+      return tone + 25;
+   }
+
+   public static int midiToEquiv(int midiNote) {
+      return midiNote - 25;
+   }
+
+   public static int noteToMidi(String noteAnglaise) {
+      if (noteAnglaise == null || noteAnglaise.isEmpty()) {
+         return 60;
+      }
+      return equivToMidi(equiv(noteAnglaise));
+   }
+
+   public static String midiToNoteName(int midiNote) {
+      String[] en = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+      String[] fr = {"do", "do#", "re", "re#", "mi", "fa", "fa#", "sol", "sol#", "la", "la#", "si"};
+      int semitone = Math.floorMod(midiNote, 12);
+      int octave = (midiNote / 12) - 1;
+      return en[semitone] + octave + " (" + fr[semitone] + " " + octave + ")";
    }
 
    public byte[] getBuffer() {

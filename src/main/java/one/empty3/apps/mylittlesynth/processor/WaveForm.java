@@ -8,4 +8,6 @@ public enum WaveForm {
     PULSE,
     NOISE,
     ORGAN
+    ORGAN,
+    SAMPLER
 }

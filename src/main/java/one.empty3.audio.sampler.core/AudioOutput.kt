@@ -1,5 +1,4 @@
-
-package one.empty3.audio.sampler.output
+package one.empty3.audio.sampler.core
 
 interface AudioOutput {
     fun start()

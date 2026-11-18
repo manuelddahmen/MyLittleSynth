@@ -1,5 +1,4 @@
-
-package one.empty3.audio.sampler.midi
+package one.empty3.audio.sampler.core
 
 import javax.sound.midi.MidiSystem
 import javax.sound.midi.Receiver

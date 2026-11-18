@@ -75,18 +75,22 @@ public class Player extends Thread {
 
       for (int t = 0; t < amplitude.length; t++) {
          double sampleSum = 0.0D;
+         int synthNoteCount = 0;
          for (Note note : activeNotes) {
+            WaveForm wf = note.getWaveform();
+            if (wf == null) {
+               wf = WaveForm.SIN;
+            }
+            if (wf == WaveForm.SAMPLER) {
+               continue;
+            }
+            synthNoteCount++;
             note.setNoteTimeSamples(note.getNoteTimeSamples() + 1);
             double noteTimeSec = (double) note.getNoteTimeSamples() / sampleRate;
             double freq = (double) this.app.getSoundProductionSystem().calculateNoteFrequency((float) note.getTone());
             double cycles = freq * noteTimeSec;
             double phase = cycles - Math.floor(cycles);
             double noteSample;
-
-            WaveForm wf = note.getWaveform();
-            if (wf == null) {
-               wf = WaveForm.SIN;
-            }
 
             switch (wf) {
                case SIN:
@@ -117,7 +121,14 @@ public class Player extends Thread {
             sampleSum += noteSample;
          }
 
-         sampleSum /= (double) activeNotes.size();
+         if (synthNoteCount == 0) {
+            try {
+               Thread.sleep(10);
+            } catch (InterruptedException ignored) {
+            }
+            return;
+         }
+         sampleSum /= (double) synthNoteCount;
          double scaled = sampleSum * (this.volume / 100.0D);
          if (scaled > Short.MAX_VALUE) {
             scaled = Short.MAX_VALUE;
@@ -231,6 +242,10 @@ public class Player extends Thread {
          if (this.getCurrentNotes().contains(note)) {
             note.stop();
             notes.remove(note);
+            if (this.app != null && this.app.getSampler() != null) {
+               int midiNote = SoundProductionSystem.equivToMidi(note.getTone());
+               this.app.getSampler().noteOff(midiNote);
+            }
             if (this.isRecording()) {
                NoteState noteState = new NoteState(note, this.timerRecording.getTotalTimeElapsedNanoSec(), false);
                this.timerRecording.add(noteState);
@@ -246,6 +261,11 @@ public class Player extends Thread {
             note.setWaveform(this.getForm());
             this.addNote(note);
             note.play();
+            if (note.getWaveform() == WaveForm.SAMPLER && this.app != null && this.app.getSampler() != null) {
+               int midiNote = SoundProductionSystem.equivToMidi(note.getTone());
+               float vel = (float) Math.max(0.0D, Math.min(1.0D, this.volume / 100.0D));
+               this.app.getSampler().noteOn(midiNote, vel);
+            }
             if (this.isRecording()) {
                NoteState noteState = new NoteState(note, this.timerRecording.getTotalTimeElapsedNanoSec(), true);
                this.timerRecording.add(noteState);

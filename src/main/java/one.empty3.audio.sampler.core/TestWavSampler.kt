@@ -1,40 +1,46 @@
-val input = java.io.FileInputStream("piano.wav")
+package one.empty3.audio.sampler.core
 
-val sample = WavReader.read(
-    input = input,
-    rootMidi = 60
-)
+import java.io.FileInputStream
 
-input.close()
+fun main() {
+    val input = FileInputStream("piano.wav")
 
-val sampler = Sampler(
-    sample = sample,
-    outputSampleRate = 44100,
-    polyphony = 16
-)
+    val sample = WavReader.read(
+        input = input,
+        rootMidi = 60
+    )
 
-sampler.masterVolume = 0.8f
+    input.close()
 
-val output = DesktopAudioOutput(
-    sampler = sampler,
-    sampleRate = 44100
-)
+    val sampler = Sampler(
+        sample = sample,
+        outputSampleRate = 44100,
+        polyphony = 16
+    )
 
-output.start()
+    sampler.masterVolume = 0.8f
 
-// Jouer un Do central
-sampler.noteOn(60, 1.0f)
+    val output = DesktopAudioOutput(
+        sampler = sampler,
+        sampleRate = 44100
+    )
 
-// Jouer un Mi
-sampler.noteOn(64, 0.8f)
+    output.start()
 
-// Jouer un Sol
-sampler.noteOn(67, 0.8f)
+    // Jouer un Do central
+    sampler.noteOn(60, 1.0f)
 
-// Relâcher les notes
-sampler.noteOff(60)
-sampler.noteOff(64)
-sampler.noteOff(67)
+    // Jouer un Mi
+    sampler.noteOn(64, 0.8f)
 
-// Arrêter la sortie
-output.stop()
+    // Jouer un Sol
+    sampler.noteOn(67, 0.8f)
+
+    // Relâcher les notes
+    sampler.noteOff(60)
+    sampler.noteOff(64)
+    sampler.noteOff(67)
+
+    // Arrêter la sortie
+    output.stop()
+}

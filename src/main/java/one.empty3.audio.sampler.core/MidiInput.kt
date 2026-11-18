@@ -1,5 +1,4 @@
-
-package one.empty3.audio.sampler.midi
+package one.empty3.audio.sampler.core
 
 fun interface MidiMessageListener {
     fun onMessage(

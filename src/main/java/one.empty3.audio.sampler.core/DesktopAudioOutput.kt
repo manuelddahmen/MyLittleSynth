@@ -1,10 +1,9 @@
-
-package one.empty3.audio.sampler.output
+package one.empty3.audio.sampler.core
 
 import one.empty3.audio.sampler.core.Sampler
 import javax.sound.sampled.*
 
-class DesktopAudioOutput(
+class DesktopAudioOutput @JvmOverloads constructor(
     private val sampler: Sampler,
     private val sampleRate: Int = 44100,
     private val blockFrames: Int = 256

@@ -1,4 +1,3 @@
-
 package one.empty3.audio.sampler.core
 
 import kotlin.math.pow
