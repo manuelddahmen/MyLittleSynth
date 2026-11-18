@@ -17,6 +17,7 @@ module one_empty3_apps_mylittlesynth {
     requires eu.hansolo.tilesfx;
 
     opens one.empty3.apps.mylittlesynth to javafx.fxml;
+
     exports one.empty3.apps.mylittlesynth;
     exports one.empty3.apps.mylittlesynth.rythms;
     exports one.empty3.apps.mylittlesynth.microphone;

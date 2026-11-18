@@ -11,7 +11,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version("2.4.21")
 }
 
-def JAVA_VERSION = 25
+def JAVA_VERSION = 21
 group = "one.empty3"
 version = "2026.11"
 def versionName = version
@@ -168,12 +168,20 @@ def load = properties
 task runNewAppGui(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = "one.empty3.apps.mylittlesynth.AppNew"
+    jvmArgs = [
+        '--module-path', classpath.asPath,
+        '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web,javafx.base'
+    ]
     args "arg1", "arg2"
 }
 
 task runAppGui(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = "one.empty3.apps.mylittlesynth.App"
+    jvmArgs = [
+        '--module-path', classpath.asPath,
+        '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web,javafx.base'
+    ]
     args "arg1", "arg2"
 }
 
