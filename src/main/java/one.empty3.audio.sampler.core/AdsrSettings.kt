@@ -1,7 +1,7 @@
 
 package one.empty3.audio.sampler.core
 
-data class AdsrSettings(
+data class AdsrSettings @JvmOverloads constructor(
     val attack: Float = 0.01f,
     val decay: Float = 0.15f,
     val sustain: Float = 0.8f,

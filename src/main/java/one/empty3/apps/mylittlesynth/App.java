@@ -2,16 +2,23 @@ package one.empty3.apps.mylittlesynth;
 
 import one.empty3.apps.mylittlesynth.processor.WaveForm;
 import one.empty3.apps.mylittlesynth.rythms.RythmPanel;
+import one.empty3.audio.sampler.core.AdsrSettings;
 import one.empty3.audio.sampler.core.DesktopAudioOutput;
 import one.empty3.audio.sampler.core.SampleData;
 import one.empty3.audio.sampler.core.Sampler;
+import one.empty3.audio.sampler.core.SamplerInstrument;
+import one.empty3.audio.sampler.dsp.FourierEngine;
+import one.empty3.audio.sampler.dsp.analyzer.SignalAnalyzer;
+import one.empty3.audio.sampler.dsp.model.SpectralModel;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.scene.*;
 import javafx.scene.canvas.*;
@@ -34,7 +41,16 @@ public class App extends Application {
     private String[] baseButtonTexts;
 
     private Stage primaryStage;
+    private Accordion accordion;
+    private TitledPane synthTitledPane;
+    private TitledPane fourierTitledPane;
+    private FourierPanel fourierPanel;
     private Canvas waveformCanvas;
+    private CheckBox showSpectrumCheck;
+    private SampleData lastVisualSample;
+    private SpectralModel lastVisualSpectrum;
+    private String lastVisualLabel;
+
     private Sampler sampler;
     private DesktopAudioOutput samplerAudioOutput;
     private Label samplerStatusLabel;
@@ -156,7 +172,7 @@ public class App extends Application {
         };
         String[] wfNames = {
                 "Sine", "Square", "Triangle", "Sawtooth",
-                "Pulse", "Noise", "Organ", "Sampler (WAV)"
+                "Pulse", "Noise", "Organ", "Sampler (WAV / Fourier)"
         };
         for (int w = 0; w < waveforms.length; w++) {
             RadioButton rb = new RadioButton(wfNames[w]);
@@ -198,6 +214,19 @@ public class App extends Application {
             this.openSamplerWizard();
         });
 
+        Button fourierShortcutBtn = new Button("FOURIER ENGINE...");
+        fourierShortcutBtn.setStyle("-fx-background-color: #8250df; -fx-text-fill: white; -fx-font-weight: bold;");
+        vBox.getChildren().add(fourierShortcutBtn);
+        fourierShortcutBtn.setOnAction((actionEvent) -> {
+            if (this.accordion != null && this.fourierTitledPane != null) {
+                this.accordion.setExpandedPane(this.fourierTitledPane);
+            }
+        });
+
+        this.showSpectrumCheck = new CheckBox("Afficher Spectre FFT");
+        this.showSpectrumCheck.setOnAction(e -> refreshMainCanvas());
+        vBox.getChildren().add(this.showSpectrumCheck);
+
         Button clearSamplesBtn = new Button("CLEAR WAV SAMPLES");
         vBox.getChildren().add(clearSamplesBtn);
         clearSamplesBtn.setOnAction((actionEvent) -> {
@@ -206,7 +235,7 @@ public class App extends Application {
 
         this.samplerStatusLabel = new Label("Sampler: No WAV loaded");
         this.samplerStatusLabel.setWrapText(true);
-        this.samplerStatusLabel.setMaxWidth(200);
+        this.samplerStatusLabel.setMaxWidth(210);
         this.samplerStatusLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #333333;");
         vBox.getChildren().add(this.samplerStatusLabel);
 
@@ -225,15 +254,16 @@ public class App extends Application {
         bp.setBottom(pane1);
         bp2.setTop(bp);
         bp2.setCenter(canvas);
-        TitledPane[] titledPanes = new TitledPane[]{new TitledPane("Synth & WAV Sampler", bp2), null};
-        titledPanes[0].setOnKeyPressed((event) -> {
+
+        this.synthTitledPane = new TitledPane("Synth & WAV Sampler (Clavier)", bp2);
+        this.synthTitledPane.setOnKeyPressed((event) -> {
             for (int i1 = 0; i1 < this.buttons.length; ++i1) {
                 if (event.getCode().equals(keycode[i1])) {
                     this.playNote(this.buttons[i1]);
                 }
             }
         });
-        titledPanes[0].setOnKeyReleased((event) -> {
+        this.synthTitledPane.setOnKeyReleased((event) -> {
             for (int i2 = 0; i2 < this.buttons.length; ++i2) {
                 if (event.getCode().equals(keycode[i2])) {
                     this.stopNote(this.buttons[i2]);
@@ -241,17 +271,23 @@ public class App extends Application {
             }
         });
         bp2.setPadding(new Insets(20.0D, 20.0D, 20.0D, 20.0D));
-        titledPanes[1] = new TitledPane();
-        titledPanes[1].setText("Rhythm & Loops");
-        vBox = new VBox();
-        RythmPanel rythmPanel = new RythmPanel(titledPanes[1], this);
-        vBox.getChildren().addAll(new Node[]{rythmPanel});
-        vBox.getChildren().add(rythmPanel.getCanvasTimelineProgress());
-        titledPanes[1].setContent(vBox);
-        Accordion accordion = new Accordion();
-        accordion.getPanes().addAll(titledPanes);
-        scene.setRoot(accordion);
-        accordion.setExpandedPane(titledPanes[0]);
+
+        TitledPane rythmTitledPane = new TitledPane();
+        rythmTitledPane.setText("Rhythm & Loops");
+        VBox rythmBox = new VBox();
+        RythmPanel rythmPanel = new RythmPanel(rythmTitledPane, this);
+        rythmBox.getChildren().addAll(new Node[]{rythmPanel});
+        rythmBox.getChildren().add(rythmPanel.getCanvasTimelineProgress());
+        rythmTitledPane.setContent(rythmBox);
+
+        this.fourierPanel = new FourierPanel(this);
+        this.fourierTitledPane = new TitledPane("Empty3 Fourier Engine (Timbre & Phase Vocoder)", this.fourierPanel);
+
+        this.accordion = new Accordion();
+        this.accordion.getPanes().addAll(this.synthTitledPane, rythmTitledPane, this.fourierTitledPane);
+        scene.setRoot(this.accordion);
+        this.accordion.setExpandedPane(this.synthTitledPane);
+
         bp2.setBottom(this.volume = new Slider());
         this.volume.setMin(0.0D);
         this.volume.setMax(100.0D);
@@ -264,7 +300,7 @@ public class App extends Application {
             }
             System.out.println("Volume du player: " + this.player.getVolume());
         });
-        primaryStage.setTitle("MyLittleSynth 5.0");
+        primaryStage.setTitle("MyLittleSynth 5.0 — Empty3 Fourier Engine");
         primaryStage.setScene(scene);
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
@@ -293,6 +329,64 @@ public class App extends Application {
 
     public void applySamplerWizardResult(SamplerWizardDialog.WizardResult result) {
         if (result == null) return;
+
+        if (this.fourierPanel != null) {
+            this.fourierPanel.setBaseSample(result.getSampleData(), result.getWavFile().getName());
+        }
+
+        if (result.isChromaticRootMode() && result.isUsePhaseVocoder()) {
+            if (this.samplerStatusLabel != null) {
+                this.samplerStatusLabel.setText("Fourier Phase Vocoder: génération des zones...");
+            }
+            Task<SamplerInstrument> task = new Task<>() {
+                @Override
+                protected SamplerInstrument call() {
+                    List<Integer> anchors = FourierPanel.buildAnchorMidiNotes(result.getAssignedMidiNote(), true);
+                    AdsrSettings adsr = new AdsrSettings(
+                            result.getAttack(),
+                            result.getDecay(),
+                            result.getSustain(),
+                            result.getRelease()
+                    );
+                    return FourierEngine.buildInstrument(
+                            result.getWavFile().getName(),
+                            result.getSampleData(),
+                            anchors,
+                            result.isPreserveFormants(),
+                            0.0,
+                            1.0,
+                            16,
+                            adsr,
+                            result.getLoopRegion()
+                    );
+                }
+            };
+            task.setOnSucceeded(e -> {
+                SamplerInstrument inst = task.getValue();
+                float[] mono = FourierPanel.extractMono(result.getSampleData());
+                int win = mono.length >= 2048 ? 2048 : 512;
+                SpectralModel model = SignalAnalyzer.analyze(mono, result.getSampleData().getSampleRate(), win, win / 4);
+                this.rootSampleFileName = result.getWavFile().getName();
+                this.rootSampleMidi = result.getAssignedMidiNote();
+                applyFourierInstrument(
+                        inst,
+                        result.getSampleData(),
+                        model,
+                        result.getSummaryText() + " [Fourier Vocoder]",
+                        true
+                );
+            });
+            task.setOnFailed(e -> {
+                if (this.samplerStatusLabel != null) {
+                    this.samplerStatusLabel.setText("Erreur Phase Vocoder : " + task.getException().getMessage());
+                }
+            });
+            Thread t = new Thread(task, "Wizard-Fourier-Builder");
+            t.setDaemon(true);
+            t.start();
+            return;
+        }
+
         this.sampler.setAdsr(result.getAttack(), result.getDecay(), result.getSustain(), result.getRelease());
         this.sampler.setMasterVolume((float) ((this.volume != null ? this.volume.getValue() : 100.0D) / 100.0D));
 
@@ -313,6 +407,58 @@ public class App extends Application {
             this.assignedNoteFiles.put(result.getAssignedMidiNote(), result.getWavFile().getName());
         }
 
+        ensureSamplerAudioRunning();
+        activateSamplerMode(result.getSampleData(), null, result.getSummaryText(), false);
+    }
+
+    /**
+     * Installe un SamplerInstrument généré par l'Empty3 Fourier Engine
+     * et permet de le jouer directement avec le clavier de l'Accordéon 1.
+     */
+    public void applyFourierInstrument(
+            SamplerInstrument instrument,
+            SampleData previewSample,
+            SpectralModel spectrumModel,
+            String summaryText,
+            boolean focusAccordion1
+    ) {
+        if (instrument == null) return;
+        if (this.samplerAudioOutput != null && this.samplerAudioOutput.isRunning()) {
+            this.samplerAudioOutput.stop();
+        }
+        this.sampler = new Sampler(instrument, 44100);
+        this.sampler.setMasterVolume((float) ((this.volume != null ? this.volume.getValue() : 100.0D) / 100.0D));
+        this.samplerAudioOutput = new DesktopAudioOutput(this.sampler, 44100, 256);
+        this.samplerAudioOutput.start();
+
+        if (previewSample != null) {
+            this.rootSampleMidi = previewSample.getRootMidi();
+            this.rootSampleFileName = instrument.getName();
+        }
+
+        activateSamplerMode(previewSample, spectrumModel, summaryText, focusAccordion1);
+    }
+
+    /**
+     * Installe un SampleData transformé par Fourier en mode root/chromatique
+     * et retourne vers le clavier de l'Accordéon 1 si demandé.
+     */
+    public void applyTransformedRootSample(
+            SampleData sampleData,
+            SpectralModel spectrumModel,
+            String summaryText,
+            boolean focusAccordion1
+    ) {
+        if (sampleData == null) return;
+        this.sampler.setChromaticMode(true);
+        this.sampler.setRootSample(sampleData, this.sampler.getLoopRegion());
+        this.rootSampleMidi = sampleData.getRootMidi();
+        this.rootSampleFileName = summaryText;
+        ensureSamplerAudioRunning();
+        activateSamplerMode(sampleData, spectrumModel, summaryText, focusAccordion1);
+    }
+
+    private void ensureSamplerAudioRunning() {
         if (this.samplerAudioOutput != null && !this.samplerAudioOutput.isRunning()) {
             try {
                 this.samplerAudioOutput.start();
@@ -320,24 +466,57 @@ public class App extends Application {
                 ex.printStackTrace();
             }
         }
+    }
 
+    private void activateSamplerMode(
+            SampleData previewSample,
+            SpectralModel spectrumModel,
+            String summaryText,
+            boolean focusAccordion1
+    ) {
         if (this.samplerRadioButton != null) {
             this.samplerRadioButton.setSelected(true);
         }
         this.setForm(WaveForm.SAMPLER);
 
         if (this.samplerStatusLabel != null) {
-            this.samplerStatusLabel.setText("Sampler: " + result.getSummaryText());
+            this.samplerStatusLabel.setText("Sampler: " + summaryText);
         }
-        if (this.waveformCanvas != null) {
+
+        this.lastVisualSample = previewSample;
+        this.lastVisualSpectrum = spectrumModel;
+        this.lastVisualLabel = summaryText;
+        refreshMainCanvas();
+        this.updateKeyboardAssignmentBadges();
+
+        if (focusAccordion1 && this.accordion != null && this.synthTitledPane != null) {
+            this.accordion.setExpandedPane(this.synthTitledPane);
+            this.synthTitledPane.requestFocus();
+        }
+    }
+
+    private void refreshMainCanvas() {
+        if (this.waveformCanvas == null) return;
+        boolean showSpec = this.showSpectrumCheck != null && this.showSpectrumCheck.isSelected();
+        if (showSpec) {
+            if (this.lastVisualSpectrum == null && this.lastVisualSample != null) {
+                float[] mono = FourierPanel.extractMono(this.lastVisualSample);
+                int win = mono.length >= 2048 ? 2048 : 512;
+                this.lastVisualSpectrum = SignalAnalyzer.analyze(
+                        mono, this.lastVisualSample.getSampleRate(), win, win / 4
+                );
+            }
+            FourierPanel.drawSpectrum(this.waveformCanvas, this.lastVisualSpectrum, this.lastVisualLabel);
+        } else {
             SamplerWizardDialog.drawWaveform(
                     this.waveformCanvas,
-                    result.getSampleData(),
-                    result.getLoopRegion(),
-                    result.getSummaryText()
+                    this.lastVisualSample,
+                    this.sampler != null ? this.sampler.getLoopRegion() : null,
+                    this.lastVisualLabel != null
+                            ? this.lastVisualLabel
+                            : "Click 'WAV SAMPLER WIZARD...' to choose a WAV file & assign a note"
             );
         }
-        this.updateKeyboardAssignmentBadges();
     }
 
     public void clearSamplerAssignments() {
@@ -347,17 +526,16 @@ public class App extends Application {
         this.assignedNoteFiles.clear();
         this.rootSampleFileName = null;
         this.rootSampleMidi = -1;
+        this.lastVisualSample = null;
+        this.lastVisualSpectrum = null;
+        this.lastVisualLabel = null;
+        if (this.fourierPanel != null) {
+            this.fourierPanel.setBaseSample(null, null);
+        }
         if (this.samplerStatusLabel != null) {
             this.samplerStatusLabel.setText("Sampler: No WAV loaded");
         }
-        if (this.waveformCanvas != null) {
-            SamplerWizardDialog.drawWaveform(
-                    this.waveformCanvas,
-                    null,
-                    null,
-                    "Click 'WAV SAMPLER WIZARD...' to choose a WAV file & assign a note"
-            );
-        }
+        refreshMainCanvas();
         this.updateKeyboardAssignmentBadges();
     }
 
@@ -534,11 +712,9 @@ public class App extends Application {
                 + " | Octave: " + (int) this.slider.getValue() + " | Volume: " + this.player.getVolume());
 
         if (this.player.getForm() == WaveForm.SAMPLER && this.sampler != null && this.sampler.hasSampleForNote(midiNote)) {
-            if (this.samplerAudioOutput != null && !this.samplerAudioOutput.isRunning()) {
-                this.samplerAudioOutput.start();
-            }
+            ensureSamplerAudioRunning();
             SampleData activeSample = this.sampler.getSampleForNote(midiNote);
-            if (activeSample != null && this.waveformCanvas != null) {
+            if (activeSample != null && this.waveformCanvas != null && (this.showSpectrumCheck == null || !this.showSpectrumCheck.isSelected())) {
                 SamplerWizardDialog.drawWaveform(
                         this.waveformCanvas,
                         activeSample,

@@ -50,6 +50,8 @@ public class SamplerWizardDialog {
         private final float decay;
         private final float sustain;
         private final float release;
+        private final boolean usePhaseVocoder;
+        private final boolean preserveFormants;
 
         public WizardResult(
                 File wavFile,
@@ -62,6 +64,23 @@ public class SamplerWizardDialog {
                 float sustain,
                 float release
         ) {
+            this(wavFile, sampleData, assignedMidiNote, chromaticRootMode, loopRegion,
+                    attack, decay, sustain, release, false, false);
+        }
+
+        public WizardResult(
+                File wavFile,
+                SampleData sampleData,
+                int assignedMidiNote,
+                boolean chromaticRootMode,
+                LoopRegion loopRegion,
+                float attack,
+                float decay,
+                float sustain,
+                float release,
+                boolean usePhaseVocoder,
+                boolean preserveFormants
+        ) {
             this.wavFile = wavFile;
             this.sampleData = sampleData;
             this.assignedMidiNote = assignedMidiNote;
@@ -71,6 +90,16 @@ public class SamplerWizardDialog {
             this.decay = decay;
             this.sustain = sustain;
             this.release = release;
+            this.usePhaseVocoder = usePhaseVocoder;
+            this.preserveFormants = preserveFormants;
+        }
+
+        public boolean isUsePhaseVocoder() {
+            return usePhaseVocoder;
+        }
+
+        public boolean isPreserveFormants() {
+            return preserveFormants;
         }
 
         public File getWavFile() {
@@ -202,6 +231,8 @@ public class SamplerWizardDialog {
     private float decay = 0.15f;
     private float sustain = 0.75f;
     private float release = 0.25f;
+    private boolean usePhaseVocoder = false;
+    private boolean preserveFormants = false;
 
     private int currentStep = 0;
     private WizardResult wizardResult = null;
@@ -516,11 +547,21 @@ public class SamplerWizardDialog {
             }
         });
 
+        CheckBox vocoderCheck = new CheckBox("Phase Vocoder (Fourier Engine — transposition à durée constante)");
+        CheckBox formantsCheck = new CheckBox("Préserver les formants");
+        formantsCheck.setDisable(true);
+        vocoderCheck.setOnAction(e -> {
+            usePhaseVocoder = vocoderCheck.isSelected();
+            formantsCheck.setDisable(!usePhaseVocoder);
+        });
+        formantsCheck.setOnAction(e -> preserveFormants = formantsCheck.isSelected());
+
         VBox step3Pane = new VBox(10,
-                new Label("3. Configure sustain loop, ADSR envelope, and audition the assigned note:"),
+                new Label("3. Configure sustain loop, ADSR envelope, Fourier Phase Vocoder & preview:"),
                 loopCheck,
                 loopInfoLabel,
                 adsrGrid,
+                new HBox(12, vocoderCheck, formantsCheck),
                 previewBtn
         );
         step3Pane.setPadding(new Insets(10));
@@ -598,7 +639,9 @@ public class SamplerWizardDialog {
                     attack,
                     decay,
                     sustain,
-                    release
+                    release,
+                    usePhaseVocoder,
+                    preserveFormants
             );
             dialog.close();
         });
