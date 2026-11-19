@@ -14,7 +14,7 @@ plugins {
 
 def JAVA_VERSION = 21
 group = "one.empty3"
-version = "2026.11"
+version = "2026.11.19"
 def versionName = version
 
 
