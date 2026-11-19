@@ -9,6 +9,7 @@ plugins {
     id("org.jreleaser") version"1.24.0"
     id("org.sonatype.gradle.plugins.scan") version "3.1.3"
     id("org.jetbrains.kotlin.jvm") version("2.4.21")
+    id("org.jetbrains.kotlin.plugin.serialization") version("2.4.21")
 }
 
 def JAVA_VERSION = 21
@@ -122,8 +123,7 @@ dependencies {
     implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")
     implementation("org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0")
     implementation("eu.hansolo:tilesfx:21.0.9")
-//    implementation("com.github.almasb:fxgl:11.17")
-
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
     implementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.jdom:2.0.6.1_1")
     testImplementation("junit:junit:4.13.2")
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.9.0')
@@ -178,20 +178,24 @@ def load = properties
 task runNewAppGui(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = "one.empty3.apps.mylittlesynth.AppNew"
-    jvmArgs = [
-        '--module-path', classpath.asPath,
-        '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web,javafx.base'
-    ]
+    jvmArgumentProviders.add({
+        [
+            '--module-path', classpath.asPath,
+            '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web,javafx.base'
+        ]
+    } as CommandLineArgumentProvider)
     args "arg1", "arg2"
 }
 
 task runAppGui(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = "one.empty3.apps.mylittlesynth.App"
-    jvmArgs = [
-        '--module-path', classpath.asPath,
-        '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web,javafx.base'
-    ]
+    jvmArgumentProviders.add({
+        [
+            '--module-path', classpath.asPath,
+            '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web,javafx.base'
+        ]
+    } as CommandLineArgumentProvider)
     args "arg1", "arg2"
 }
 
@@ -290,12 +294,26 @@ publishing {
     }
 }
 
-tasks.named('compileKotlin').configure {
-    destinationDirectory.set(sourceSets.main.java.destinationDirectory)
+tasks.named('compileJava', JavaCompile).configure {
+    options.compilerArgumentProviders.add({
+        def kotlinClassesDir = tasks.named('compileKotlin').get().destinationDirectory.get().asFile.absolutePath
+        ['--patch-module', "one_empty3_apps_mylittlesynth=${kotlinClassesDir}"]
+    } as CommandLineArgumentProvider)
+    doLast {
+        copy {
+            from(tasks.named('compileKotlin').get().destinationDirectory)
+            into(destinationDirectory)
+        }
+    }
 }
 
-tasks.named('compileTestKotlin').configure {
-    destinationDirectory.set(sourceSets.test.java.destinationDirectory)
+tasks.named('compileKotlin').configure {
+    doLast {
+        copy {
+            from(destinationDirectory)
+            into(sourceSets.main.java.destinationDirectory)
+        }
+    }
 }
 
 tasks.configureEach { task ->

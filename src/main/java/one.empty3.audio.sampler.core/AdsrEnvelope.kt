@@ -6,6 +6,10 @@ class AdsrEnvelope @JvmOverloads constructor(
     var sustain: Float = 0.75f,
     var release: Float = 0.25f
 ) {
+    constructor(sampleRate: Int) : this() {
+        setSampleRate(sampleRate)
+    }
+
     enum class Stage {
         IDLE, ATTACK, DECAY, SUSTAIN, RELEASE
     }
@@ -101,7 +105,10 @@ class AdsrEnvelope @JvmOverloads constructor(
 
         return level
     }
-
+fun reset() {
+    level = 0f
+    stage = Stage.IDLE
+}
     val isActive: Boolean
         get() = stage != Stage.IDLE
 }

@@ -16,6 +16,8 @@ module one_empty3_apps_mylittlesynth {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires kotlin.stdlib;
+    requires kotlinx.serialization.core;
+    requires kotlinx.serialization.json;
 
     opens one.empty3.apps.mylittlesynth to javafx.fxml;
 
@@ -24,4 +26,5 @@ module one_empty3_apps_mylittlesynth {
     exports one.empty3.apps.mylittlesynth.microphone;
     exports one.empty3.apps.mylittlesynth.processor;
     exports one.empty3.audio.sampler.core;
+    exports one.empty3.audio.sampler.io;
 }
