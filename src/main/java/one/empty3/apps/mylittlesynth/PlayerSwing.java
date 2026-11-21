@@ -272,6 +272,22 @@ public class PlayerSwing extends Thread implements PropertyChangeListener {
         }
     }
 
+    public void stopNote(Note2 note) {
+        if (note == null) return;
+        if (note.getInstrument() >= 0 && synthRcvr != null) {
+            try {
+                int midiNote = Math.max(0, Math.min(127, note.getTone()));
+                ShortMessage offMsg = new ShortMessage();
+                offMsg.setMessage(ShortMessage.NOTE_OFF, channelIndex, midiNote, 0);
+                synthRcvr.send(offMsg, -1);
+            } catch (InvalidMidiDataException e) {
+                e.printStackTrace();
+            }
+        } else {
+            this.stopNote((Note) note);
+        }
+    }
+
     public void playNote(Note2 note) {
         new Thread(){
             @Override
@@ -280,10 +296,11 @@ public class PlayerSwing extends Thread implements PropertyChangeListener {
                     if(note.getInstrument()>=0)
                     {
                         try {
+                            int midiNote = Math.max(0, Math.min(127, note.getTone()));
                             ShortMessage myMsg = new ShortMessage();
                             // Play the note Middle C (60) moderately loud
                             // (velocity = 93)on channel 4 (zero-based).
-                            myMsg.setMessage(ShortMessage.NOTE_ON, channelIndex, note.getTone(), 93);
+                            myMsg.setMessage(ShortMessage.NOTE_ON, channelIndex, midiNote, 93);
                             Instrument instr;
                             if(note.getInstrument()!=lastInst) {
                                 synth.loadInstrument(instr = synth.getAvailableInstruments()[note.getInstrument()]);

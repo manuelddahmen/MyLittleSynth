@@ -31,11 +31,14 @@ public class PlayListRepeat extends ListView {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                if (timeline == null || loop < 0 || loop >= timeline.length || timeline[loop] == null || timeline[loop].models == null) return;
                 getItems().clear();
                 getItems().add(new Text("#playing"));
                 timeline[loop].models.forEach(model1 ->
                         {
-                            getItems().add("NoLoop : "+model1.noLoop+" ; NoPlaying : " + model1.noPlaying);
+                            if (model1 != null) {
+                                getItems().add("NoLoop : "+model1.noLoop+" ; NoPlaying : " + model1.noPlaying);
+                            }
                         }
                 );
             }

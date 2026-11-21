@@ -44,7 +44,10 @@ public class App extends Application {
     private Accordion accordion;
     private TitledPane synthTitledPane;
     private TitledPane fourierTitledPane;
+    private TitledPane midiGridTitledPane;
     private FourierPanel fourierPanel;
+    private MidiGridPanel midiGridPanel;
+    private Button recordButton;
     private Canvas waveformCanvas;
     private CheckBox showSpectrumCheck;
     private SampleData lastVisualSample;
@@ -81,6 +84,8 @@ public class App extends Application {
         this.setSoundProductionSystem(new SoundProductionSystem(60.0F));
         this.sampler = new Sampler(null, 44100, 16);
         this.samplerAudioOutput = new DesktopAudioOutput(this.sampler, 44100, 256);
+        this.samplerAudioOutput.setPcmListener((data, len) ->
+                this.getSoundProductionSystem().writeWaveBuffer(data, len));
 
         Parent root = new AnchorPane();
         root.minWidth(800.0D);
@@ -125,7 +130,6 @@ public class App extends Application {
         for (i = 0; i < this.buttons.length; ++i) {
             this.buttons[i] = new Button(notes[i]);
             this.buttons[i].setId("Button" + i);
-            this.buttons[i].arm();
             if (i < 8) {
                 if (notes[i].equals("--")) {
                     this.buttons[i].setStyle("-fx-background-color: transparent; -fx-text-fill: transparent; -fx-border-color: transparent;");
@@ -151,6 +155,9 @@ public class App extends Application {
                 this.playNote((Button) event.getSource());
             });
             this.buttons[i].setOnMouseReleased((event) -> {
+                this.stopNote((Button) event.getSource());
+            });
+            this.buttons[i].setOnMouseExited((event) -> {
                 this.stopNote((Button) event.getSource());
             });
             this.buttons[i].setOnTouchPressed((event) -> {
@@ -195,16 +202,21 @@ public class App extends Application {
         vBox.getChildren().add(new Label("Octave:"));
         vBox.getChildren().add(this.slider);
 
-        Button record = new Button("REC SAMPLE");
+        Button record = new Button("Record");
+        this.recordButton = record;
+        record.setStyle("-fx-font-weight: bold;");
         vBox.getChildren().add(record);
         record.setOnAction((actionEvent) -> {
-            this.player.toggleRecording();
+            this.toggleWavRecording();
         });
         Button stop = new Button("STOP REPEAT");
         vBox.getChildren().add(stop);
         stop.setOnAction((actionEvent) -> {
             this.player.setRecording(false);
             this.player.setPlayingBuffer(false);
+            if (this.getSoundProductionSystem().isRecording()) {
+                this.toggleWavRecording();
+            }
         });
 
         Button wavWizardBtn = new Button("WAV SAMPLER WIZARD...");
@@ -283,8 +295,11 @@ public class App extends Application {
         this.fourierPanel = new FourierPanel(this);
         this.fourierTitledPane = new TitledPane("Empty3 Fourier Engine (Timbre & Phase Vocoder)", this.fourierPanel);
 
+        this.midiGridPanel = new MidiGridPanel(this);
+        this.midiGridTitledPane = new TitledPane("MIDI Grid & Instruments (AppNew)", this.midiGridPanel);
+
         this.accordion = new Accordion();
-        this.accordion.getPanes().addAll(this.synthTitledPane, rythmTitledPane, this.fourierTitledPane);
+        this.accordion.getPanes().addAll(this.synthTitledPane, rythmTitledPane, this.fourierTitledPane, this.midiGridTitledPane);
         scene.setRoot(this.accordion);
         this.accordion.setExpandedPane(this.synthTitledPane);
 
@@ -300,23 +315,89 @@ public class App extends Application {
             }
             System.out.println("Volume du player: " + this.player.getVolume());
         });
+        this.player = new Player(this);
+        this.player.setRecording(false);
+        this.player.setVolume(100.0D);
+        this.player.start();
+
         primaryStage.setTitle("MyLittleSynth 5.0 — Empty3 Fourier Engine");
         primaryStage.setScene(scene);
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
             App.this.player.setPlaying(false);
+            if (App.this.midiGridPanel != null) {
+                App.this.midiGridPanel.close();
+            }
             if (App.this.samplerAudioOutput != null && App.this.samplerAudioOutput.isRunning()) {
                 App.this.samplerAudioOutput.stop();
             }
-            App.this.getSoundProductionSystem().write();
+            App.this.getSoundProductionSystem().stopRecordingAndWrite();
             App.this.getSoundProductionSystem().end();
             App.this.getSoundProductionSystem().setEnded(true);
             System.exit(0);
         });
-        this.player = new Player(this);
-        this.player.setRecording(false);
-        this.player.setVolume(100.0D);
-        this.player.start();
+    }
+
+    public void toggleWavRecording() {
+        if (!this.getSoundProductionSystem().isRecording()) {
+            this.getSoundProductionSystem().startRecording();
+            if (this.player != null) {
+                this.player.setRecording(true);
+            }
+            if (this.recordButton != null) {
+                this.recordButton.setText("■ Stop Record");
+                this.recordButton.setStyle("-fx-background-color: #cf222e; -fx-text-fill: white; -fx-font-weight: bold;");
+            }
+            String msg = "Enregistrement WAV en cours...";
+            if (this.samplerStatusLabel != null) {
+                this.samplerStatusLabel.setText(msg);
+            }
+            if (this.midiGridPanel != null) {
+                this.midiGridPanel.updateRecordingState(true, msg);
+            }
+        } else {
+            if (this.player != null) {
+                this.player.setRecording(false);
+            }
+            java.io.File saved = this.getSoundProductionSystem().stopRecordingAndWrite();
+            if (this.recordButton != null) {
+                this.recordButton.setText("Record");
+                this.recordButton.setStyle("-fx-font-weight: bold;");
+            }
+            String msg = saved != null
+                    ? "WAV enregistré : " + saved.getName()
+                    : "Enregistrement arrêté (aucun son capturé)";
+            if (this.samplerStatusLabel != null) {
+                this.samplerStatusLabel.setText(msg);
+            }
+            if (this.midiGridPanel != null) {
+                this.midiGridPanel.updateRecordingState(false, msg);
+            }
+        }
+    }
+
+    public void playExternalNote(int tone, int midiNote, String label) {
+        if (this.player == null) return;
+        if (this.player.getForm() == WaveForm.SAMPLER && this.sampler != null && this.sampler.hasSampleForNote(midiNote)) {
+            ensureSamplerAudioRunning();
+        }
+        Note note = (Note) this.noteMap.get(tone);
+        if (note == null) {
+            note = new Note(this.noteMap, this.minDurationSec, tone, this.player.getForm());
+            this.noteMap.put(tone, note);
+        }
+        note.setWaveform(this.player.getForm());
+        this.player.playNote(note);
+    }
+
+    public void stopExternalNote(int tone, int midiNote) {
+        if (this.sampler != null) {
+            this.sampler.noteOff(midiNote);
+        }
+        Note note = (Note) this.noteMap.get(tone);
+        if (note != null && this.player != null) {
+            this.player.stopNote(note);
+        }
     }
 
     public void openSamplerWizard() {
@@ -429,6 +510,8 @@ public class App extends Application {
         this.sampler = new Sampler(instrument, 44100);
         this.sampler.setMasterVolume((float) ((this.volume != null ? this.volume.getValue() : 100.0D) / 100.0D));
         this.samplerAudioOutput = new DesktopAudioOutput(this.sampler, 44100, 256);
+        this.samplerAudioOutput.setPcmListener((data, len) ->
+                this.getSoundProductionSystem().writeWaveBuffer(data, len));
         this.samplerAudioOutput.start();
 
         if (previewSample != null) {
@@ -700,14 +783,14 @@ public class App extends Application {
     }
 
     public void playNote(Button source) {
-        if (source == null || source.isDisabled()) return;
+        if (source == null || source.isDisabled() || this.player == null) return;
         if (this.activePressedButtons.contains(source)) {
             return;
         }
         this.activePressedButtons.add(source);
 
         int tone = this.getTone(source);
-        int midiNote = SoundProductionSystem.equivToMidi(tone);
+        int midiNote = Math.max(0, Math.min(127, SoundProductionSystem.equivToMidi(tone)));
         System.out.println("Tone: " + tone + " | MIDI: " + midiNote + " | Note: " + source.getText()
                 + " | Octave: " + (int) this.slider.getValue() + " | Volume: " + this.player.getVolume());
 
@@ -734,17 +817,21 @@ public class App extends Application {
     }
 
     public void stopNote(Button source) {
-        if (source == null) return;
-        this.activePressedButtons.remove(source);
+        if (source == null || this.player == null) return;
+        if (!this.activePressedButtons.remove(source)) {
+            return;
+        }
 
         int tone = this.getTone(source);
-        int midiNote = SoundProductionSystem.equivToMidi(tone);
+        int midiNote = Math.max(0, Math.min(127, SoundProductionSystem.equivToMidi(tone)));
         if (this.sampler != null) {
             this.sampler.noteOff(midiNote);
         }
         Note note = (Note) this.noteMap.get(tone);
         if (note != null) {
-            System.out.println((double) note.getTimer().getTotalTimeElapsedNanoSec() / 1.0E9D);
+            if (note.getTimer() != null) {
+                System.out.println((double) note.getTimer().getTotalTimeElapsedNanoSec() / 1.0E9D);
+            }
             this.player.stopNote(note);
             System.out.println("Key pressed: " + this.player.getCurrentNotes().size());
         }

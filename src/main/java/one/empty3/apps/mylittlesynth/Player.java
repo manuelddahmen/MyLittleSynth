@@ -237,42 +237,43 @@ public class Player extends Thread {
    }
 
    public void stopNote(Note note) {
+      if (note == null) return;
       List notes = this.getCurrentNotes();
       synchronized(notes) {
-         if (this.getCurrentNotes().contains(note)) {
+         if (notes.contains(note)) {
             note.stop();
             notes.remove(note);
             if (this.app != null && this.app.getSampler() != null) {
-               int midiNote = SoundProductionSystem.equivToMidi(note.getTone());
+               int midiNote = Math.max(0, Math.min(127, SoundProductionSystem.equivToMidi(note.getTone())));
                this.app.getSampler().noteOff(midiNote);
             }
-            if (this.isRecording()) {
+            if (this.isRecording() && this.timerRecording != null) {
                NoteState noteState = new NoteState(note, this.timerRecording.getTotalTimeElapsedNanoSec(), false);
                this.timerRecording.add(noteState);
             }
          }
-
       }
    }
 
    public void playNote(Note note) {
-      Platform.runLater(() -> {
-         if (!this.getCurrentNotes().contains(note)) {
+      if (note == null) return;
+      List notes = this.getCurrentNotes();
+      synchronized(notes) {
+         if (!notes.contains(note)) {
             note.setWaveform(this.getForm());
-            this.addNote(note);
+            notes.add(note);
             note.play();
             if (note.getWaveform() == WaveForm.SAMPLER && this.app != null && this.app.getSampler() != null) {
-               int midiNote = SoundProductionSystem.equivToMidi(note.getTone());
+               int midiNote = Math.max(0, Math.min(127, SoundProductionSystem.equivToMidi(note.getTone())));
                float vel = (float) Math.max(0.0D, Math.min(1.0D, this.volume / 100.0D));
                this.app.getSampler().noteOn(midiNote, vel);
             }
-            if (this.isRecording()) {
+            if (this.isRecording() && this.timerRecording != null) {
                NoteState noteState = new NoteState(note, this.timerRecording.getTotalTimeElapsedNanoSec(), true);
                this.timerRecording.add(noteState);
             }
          }
-
-      });
+      }
    }
 
    public boolean isRecording() {

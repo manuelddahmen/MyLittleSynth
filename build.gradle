@@ -88,20 +88,10 @@ sourceSets {
 
 repositories {
     mavenCentral()
-    google()
-    maven {
-        url = uri("https://www.jetbrains.com/intellij-repository/releases")
-    }
-    maven {
-        url = uri("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
-    }
-    flatDir {
-        dirs "${rootDir}/lib", "${rootDir}/lib0", "${rootDir}/javafx-sdk-19.0.2.1/lib"
-    }
 }
 javafx {
     version = "19.0.2.1"
-    modules = ["javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.media", "javafx.swing", "javafx.web", "javafx.base"]
+    modules = ["javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.media", "javafx.base"]
 }
 
 java {
@@ -117,22 +107,11 @@ application {
 }
 
 dependencies {
-    implementation("org.controlsfx:controlsfx:11.2.1")
-//    implementation("com.dlsc.formsfx:formsfx-core:11.6.0")
-    implementation("net.synedra:validatorfx:0.6.1")
-    implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")
-    implementation("org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0")
-    implementation("eu.hansolo:tilesfx:21.0.9")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
-    implementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.jdom:2.0.6.1_1")
-    testImplementation("junit:junit:4.13.2")
+
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.9.0')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.9.0')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher:1.9.0')
-    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
-    implementation("com.miglayout:miglayout-swing:11.0")
-    implementation("com.miglayout:miglayout-javafx:11.0")
-    implementation("com.miglayout:miglayout-core:11.0")
 }
 
 jlink {
@@ -181,7 +160,7 @@ task runNewAppGui(type: JavaExec) {
     jvmArgumentProviders.add({
         [
             '--module-path', classpath.asPath,
-            '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web,javafx.base'
+            '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.base'
         ]
     } as CommandLineArgumentProvider)
     args "arg1", "arg2"
@@ -193,7 +172,7 @@ task runAppGui(type: JavaExec) {
     jvmArgumentProviders.add({
         [
             '--module-path', classpath.asPath,
-            '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web,javafx.base'
+            '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.media,javafx.base'
         ]
     } as CommandLineArgumentProvider)
     args "arg1", "arg2"
@@ -268,24 +247,8 @@ publishing {
 }
 
 
-        test {
+test {
     useJUnitPlatform()
-
-    // Ne pas échouer s'il n'y a pas de tests
-    // onlyIf {
-    //     project.hasProperty('runTests')
-    //  }
-
-    // Exclude xmlsec from test classpath: it's a named module that requires
-    // jakarta.xml.bind at boot layer init but is not used in any test code
-    classpath = classpath.filter { !it.name.contains('xmlsec') }
-
-    // Allow JUnit to instantiate test classes in one.empty3 package via reflection and prevent IllegalAccessError across packages
-    jvmArgs '--add-opens=empty3_library_mp/one.empty3=ALL-UNNAMED,org.junit.platform.commons',
-            '--add-opens=empty3_library_mp/one.empty3.testagentcode=ALL-UNNAMED,org.junit.platform.commons',
-            '--add-opens=empty3_library_mp/one.empty3.library1.tree=ALL-UNNAMED,org.junit.platform.commons',
-            '--add-opens=empty3_library_mp/one.empty3.library=ALL-UNNAMED,org.junit.platform.commons',
-            '--add-opens=empty3_library_mp/one.empty3.library1.shader=ALL-UNNAMED,org.junit.platform.commons'
 
     testLogging {
         events "passed", "skipped", "failed"
@@ -314,6 +277,16 @@ tasks.named('compileKotlin').configure {
             into(sourceSets.main.java.destinationDirectory)
         }
     }
+}
+
+tasks.named('javadoc', Javadoc).configure {
+    dependsOn(tasks.named('compileKotlin'))
+    doFirst {
+        def kotlinClassesDir = tasks.named('compileKotlin').get().destinationDirectory.get().asFile.absolutePath
+        options.addStringOption('-patch-module', "one_empty3_apps_mylittlesynth=${kotlinClassesDir}")
+    }
+    options.encoding = 'UTF-8'
+    failOnError = false
 }
 
 tasks.configureEach { task ->

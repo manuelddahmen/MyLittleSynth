@@ -9,6 +9,13 @@ class DesktopAudioOutput @JvmOverloads constructor(
     private val blockFrames: Int = 256
 ) : AudioOutput {
 
+    fun interface PcmOutputListener {
+        fun onPcmBuffer(data: ByteArray, length: Int)
+    }
+
+    @Volatile
+    var pcmListener: PcmOutputListener? = null
+
     private var running = false
     private var worker: Thread? = null
     private var line: SourceDataLine? = null
@@ -59,6 +66,7 @@ class DesktopAudioOutput @JvmOverloads constructor(
                 }
 
                 audioLine.write(pcm, 0, pcm.size)
+                pcmListener?.onPcmBuffer(pcm, pcm.size)
             }
         }.apply {
             name = "Empty3-Sampler-Audio"

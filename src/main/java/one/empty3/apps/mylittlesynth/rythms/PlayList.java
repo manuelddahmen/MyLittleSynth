@@ -27,11 +27,14 @@ public class PlayList extends ListView {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                if (timeline == null || timeline.models == null) return;
                 getItems().clear();
                 getItems().add(new Text("position/name"));
                 timeline.models.forEach(model1 ->
                         {
-                            getItems().add(new Text(model1.wave.getName()+"/"+model1.timeOnTimeline));
+                            if (model1 != null && model1.wave != null) {
+                                getItems().add(new Text(model1.wave.getName()+"/"+model1.timeOnTimeline));
+                            }
                         }
                 );
             }

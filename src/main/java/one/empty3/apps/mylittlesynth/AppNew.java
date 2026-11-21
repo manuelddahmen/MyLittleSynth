@@ -10,16 +10,14 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import javax.swing.*;
-import net.miginfocom.swing.MigLayout;
 
 /**
  * @author Manuel Dahmen
  */
-public class AppNew extends JFrame implements PropertyChangeListener{
+public class AppNew extends JFrame implements PropertyChangeListener {
     private final PlayerSwing playerSwing;
     private KeyContainer keyContainer;
     private Rec recordind = new Rec();
-
 
     public AppNew() {
         initComponents();
@@ -32,15 +30,14 @@ public class AppNew extends JFrame implements PropertyChangeListener{
         keyContainer1.getPropertyChangeSupport().addPropertyChangeListener(this);
     }
 
-
-    public static void main(String [] arfs)
-    {
+    public static void main(String[] arfs) {
         AppNew appNew = new AppNew();
         appNew.setVisible(true);
     }
 
     private void initComponents() {
-        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        // JFormDesigner - Component initialization - DO NOT MODIFY
+        // //GEN-BEGIN:initComponents
         // Generated using JFormDesigner non-commercial license
         ResourceBundle bundle = ResourceBundle.getBundle("one.empty3.apps.mylittlesynth.bundle");
         tabbedPane1 = new JTabbedPane();
@@ -49,62 +46,48 @@ public class AppNew extends JFrame implements PropertyChangeListener{
         keyContainer1 = new KeyContainer(this);
         instrumentChooser1 = new InstrumentChooser(this);
 
-        //======== this ========
+        // ======== this ========
         var contentPane = getContentPane();
-        contentPane.setLayout(new MigLayout(
-            "hidemode 3",
-            // columns
-            "[fill]" +
-            "[fill]" +
-            "[fill]",
-            // rows
-            "[]" +
-            "[]" +
-            "[]"));
+        contentPane.setLayout(new BorderLayout());
 
-        //======== tabbedPane1 ========
+        // ======== tabbedPane1 ========
         {
 
-            //======== panel1 ========
+            // ======== panel1 ========
             {
-                panel1.setLayout(new MigLayout(
-                    "hidemode 3",
-                    // columns
-                    "[fill]" +
-                    "[fill]" +
-                    "[fill]",
-                    // rows
-                    "[]" +
-                    "[]" +
-                    "[]"));
+                panel1.setLayout(new BorderLayout());
 
-                //======== splitPane1 ========
+                // ======== splitPane1 ========
                 {
                     splitPane1.setLeftComponent(keyContainer1);
 
-                    //---- instrumentChooser1 ----
+                    // ---- instrumentChooser1 ----
                     instrumentChooser1.setMaximumSize(new Dimension(100, 400));
                     splitPane1.setRightComponent(instrumentChooser1);
                 }
-                panel1.add(splitPane1, "cell 0 1");
+                panel1.add(splitPane1, BorderLayout.CENTER);
             }
             tabbedPane1.addTab(bundle.getString("AppNew.panel1.tab.title"), panel1);
         }
-        contentPane.add(tabbedPane1, "cell 0 1");
+        contentPane.add(tabbedPane1, BorderLayout.CENTER);
 
         initComponentsI18n();
 
         pack();
         setLocationRelativeTo(getOwner());
-        // JFormDesigner - End of component initialization  //GEN-END:initComponents
+        // JFormDesigner - End of component initialization //GEN-END:initComponents
     }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if(evt.getNewValue()!=null)
-        {
+        if (evt.getNewValue() instanceof Note2) {
             Note2 newValue = (Note2) evt.getNewValue();
-            playerSwing.playNote(newValue);
-            recordind.addNote(newValue);
+            if ("stopNote".equals(evt.getPropertyName())) {
+                playerSwing.stopNote(newValue);
+            } else {
+                playerSwing.playNote(newValue);
+                recordind.addNote(newValue);
+            }
         }
     }
 
@@ -115,20 +98,22 @@ public class AppNew extends JFrame implements PropertyChangeListener{
     public InstrumentChooser getListInstruments() {
         return instrumentChooser1;
     }
+
     private void initComponentsI18n() {
-        // JFormDesigner - Component i18n initialization - DO NOT MODIFY  //GEN-BEGIN:initI18n
+        // JFormDesigner - Component i18n initialization - DO NOT MODIFY
+        // //GEN-BEGIN:initI18n
         // Generated using JFormDesigner non-commercial license
         ResourceBundle bundle = ResourceBundle.getBundle("one.empty3.apps.mylittlesynth.bundle");
         tabbedPane1.setTitleAt(0, bundle.getString("AppNew.panel1.tab.title"));
-        // JFormDesigner - End of component i18n initialization  //GEN-END:initI18n
+        // JFormDesigner - End of component i18n initialization //GEN-END:initI18n
     }
 
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    // JFormDesigner - Variables declaration - DO NOT MODIFY //GEN-BEGIN:variables
     // Generated using JFormDesigner non-commercial license
     private JTabbedPane tabbedPane1;
     private JPanel panel1;
     private JSplitPane splitPane1;
     private KeyContainer keyContainer1;
     private InstrumentChooser instrumentChooser1;
-    // JFormDesigner - End of variables declaration  //GEN-END:variables
+    // JFormDesigner - End of variables declaration //GEN-END:variables
 }

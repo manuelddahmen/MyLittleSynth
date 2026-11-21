@@ -1,7 +1,5 @@
 package one.empty3.apps.mylittlesynth;
 
-import net.miginfocom.swing.MigLayout;
-
 import java.awt.*;
 import java.beans.*;
 import javax.sound.midi.Instrument;
@@ -67,13 +65,7 @@ public class InstrumentChooser extends JPanel {
         table1 = new JTable();
 
         //======== this ========
-        setLayout(new MigLayout(
-            "fill,hidemode 3",
-            // columns
-            "[fill]",
-            // rows
-            "[]" +
-            "[]"));
+        setLayout(new BorderLayout());
 
         //======== scrollPane1 ========
         {
@@ -83,7 +75,7 @@ public class InstrumentChooser extends JPanel {
             table1.addPropertyChangeListener(e -> table1PropertyChange(e));
             scrollPane1.setViewportView(table1);
         }
-        add(scrollPane1, "cell 0 1,dock center");
+        add(scrollPane1, BorderLayout.CENTER);
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 

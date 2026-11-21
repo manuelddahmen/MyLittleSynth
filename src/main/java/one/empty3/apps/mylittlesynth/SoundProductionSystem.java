@@ -1,6 +1,7 @@
 package one.empty3.apps.mylittlesynth;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -17,6 +18,9 @@ public class SoundProductionSystem {
    private ByteArrayInputStream audioInputStreamWave;
    private OutputStream newOutWavFile;
    private boolean ended;
+   private volatile boolean recording = false;
+   private final ByteArrayOutputStream recordedStream = new ByteArrayOutputStream();
+   private File lastSavedWavFile;
    private File outWavFile;
    private AudioFormat af;
    byte[] buffer;
@@ -78,34 +82,66 @@ public class SoundProductionSystem {
       return new File("outputWave-" + System.nanoTime() + "record.wav");
    }
 
-   public void writeWaveBuffer(byte[] data) {
-      int j = 0;
-      /*
-
-      for(int i = this.buffLen; i < this.buffLen + data.length; ++i) {
-         this.buffer[i] = data[j++];
-      }
-
-      this.buffLen += 4;
-      if (this.buffLen >= 31752000 || this.isEnded()) {
-         this.write();
-      }
-*/
+   public synchronized void startRecording() {
+      this.recordedStream.reset();
+      this.outWavFile = this.getOutWavFile();
+      this.recording = true;
+      System.out.println("WAV Recording started -> " + this.outWavFile.getName());
    }
 
-   public void write() {
-      try {
-         byte[] buf2 = new byte[this.buffLen];
-         ByteArrayInputStream bais = new ByteArrayInputStream(this.buffer);
-         this.audioInputStream = new AudioInputStream(bais, this.af, (long)(this.buffLen / 4));
-         AudioSystem.write(this.audioInputStream, Type.WAVE, this.outWavFile);
-         this.audioInputStream.close();
+   public boolean isRecording() {
+      return this.recording;
+   }
+
+   public File getLastSavedWavFile() {
+      return this.lastSavedWavFile;
+   }
+
+   public synchronized File stopRecordingAndWrite() {
+      this.recording = false;
+      return this.write();
+   }
+
+   public synchronized void writeWaveBuffer(byte[] data) {
+      if (data == null || data.length == 0) {
+         return;
+      }
+      writeWaveBuffer(data, data.length);
+   }
+
+   public synchronized void writeWaveBuffer(byte[] data, int length) {
+      if (!this.recording || data == null || length <= 0) {
+         return;
+      }
+      int safeLen = Math.min(length, data.length);
+      this.recordedStream.write(data, 0, safeLen);
+      this.buffLen = this.recordedStream.size();
+      if (this.buffLen >= this.BUFFMAXLENGTH || this.isEnded()) {
+         this.write();
+      }
+   }
+
+   public synchronized File write() {
+      byte[] recordedBytes = this.recordedStream.toByteArray();
+      if (recordedBytes.length == 0) {
+         return null;
+      }
+      File target = this.outWavFile != null ? this.outWavFile : this.getOutWavFile();
+      try (ByteArrayInputStream bais = new ByteArrayInputStream(recordedBytes);
+           AudioInputStream ais = new AudioInputStream(bais, this.af, recordedBytes.length / 4L)) {
+         this.audioInputStream = ais;
+         AudioSystem.write(ais, Type.WAVE, target);
+         this.lastSavedWavFile = target;
+         System.out.println("Saved WAV recording: " + target.getAbsolutePath() + " (" + recordedBytes.length + " bytes)");
       } catch (IOException var3) {
          var3.printStackTrace();
+         return null;
       }
 
+      this.recordedStream.reset();
       this.buffLen = 0;
       this.outWavFile = this.getOutWavFile();
+      return target;
    }
 
    public SoundProductionSystem() {

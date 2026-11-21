@@ -1,12 +1,12 @@
 package one.empty3.apps.mylittlesynth;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 import javax.swing.*;
-import net.miginfocom.swing.MigLayout;
 import one.empty3.apps.mylittlesynth.processor.WaveForm;
 
 /**
@@ -51,61 +51,57 @@ public class KeyContainer extends JPanel {
                         button1.setText("Oct:"+j);
                     } else {
                         button1.setText(note(i)+":"+j);
-                        button1.addActionListener(new AbstractAction() {
+                        final Note2[] activeNoteRef = new Note2[1];
+                        button1.addMouseListener(new MouseAdapter() {
                             @Override
-                            public void actionPerformed(ActionEvent e) {
-                                String []  s = ((JButton)e.getSource()).getText().split(":");
-                                int tone = SoundProductionSystem.equiv(s[0]+s[1]);
-                                System.out.println("Note: "+s[0]+"\nOctave:"+s[1]+"\nTone:"+tone);
-                                playNote(tone);
+                            public void mousePressed(MouseEvent e) {
+                                if (activeNoteRef[0] != null) return;
+                                String[] s = ((JButton) e.getSource()).getText().split(":");
+                                int tone = SoundProductionSystem.equiv(s[0] + s[1]);
+                                System.out.println("Note: " + s[0] + "\nOctave:" + s[1] + "\nTone:" + tone);
+                                activeNoteRef[0] = playNote(tone);
+                            }
+
+                            @Override
+                            public void mouseReleased(MouseEvent e) {
+                                if (activeNoteRef[0] != null) {
+                                    stopNote(activeNoteRef[0]);
+                                    activeNoteRef[0] = null;
+                                }
+                            }
+
+                            @Override
+                            public void mouseExited(MouseEvent e) {
+                                if (activeNoteRef[0] != null) {
+                                    stopNote(activeNoteRef[0]);
+                                    activeNoteRef[0] = null;
+                                }
                             }
                         });
                     }
-                    add(button1, "cell " + i + " " + j);
+                    add(button1);
                 }
         }
     }
 
-    private void playNote(int tone) {
+    private Note2 playNote(int tone) {
         Note2 note = new Note2(tone,  appNew.getListInstruments().getSelectedInstrumentIndex());
         propertyChangeSupport.firePropertyChange("playNote", lastNote, note);
         lastNote = note;
-        //player.playNote(note);
+        return note;
+    }
+
+    private void stopNote(Note2 note) {
+        if (note != null) {
+            propertyChangeSupport.firePropertyChange("stopNote", null, note);
+        }
     }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner non-commercial license
         //======== this ========
-        setLayout(new MigLayout(
-            "fill",
-            // columns
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]" +
-            "[fill]",
-            // rows
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]"));
+        setLayout(new GridLayout(12, 13, 2, 2));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
